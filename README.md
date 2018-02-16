@@ -23,7 +23,7 @@ You can write html without having to escape it as a string
 Every scope has a buffer for text output, wheneven an expression outputs a value it is converted to a string and added to the buffer.
 This allows you easily output HTML or text without having to store it in a javascript variable for return.
 
-## Include and Import
+## Include and import
 You can include another javascript file. This runs the code in the file and returns the value.
 
 ```javascript
