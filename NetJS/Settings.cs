@@ -7,13 +7,13 @@ using System.Web;
 namespace NetJS {
     public class Settings {
 
-        public string Root;
+        public string Root { get; }
 
-        public string TemplateFolder = "src/";
-        public string Entry = "main.js";
-        public string Config = "config.json";
-        public string Connections = "connections.json";
-        public string Log = "log.txt";
+        public string TemplateFolder { get; } = "src/";
+        public string Entry { get; } = "main.js";
+        public string Config { get; } = "config.json";
+        public string Connections { get; } = "connections.json";
+        public string Log { get; } = "log.txt";
 
         public Settings(string root) {
             Root = root;

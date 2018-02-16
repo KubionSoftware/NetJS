@@ -186,8 +186,20 @@ namespace NetJS.Javascript {
             void clearBuffer(Token.Group type, bool force = false) {
                 if (buffer.Length > 0 || force) {
                     if (type == Token.Group.Operator && !Tokens.IsValidOperator(buffer)) {
-                        foreach (var c in buffer) {
-                            tokens.Add(new Token(c.ToString(), type));
+                        for(var start = 0; start < buffer.Length;) {
+                            var found = false;
+
+                            for(var end = buffer.Length - 1; end > start; end--) {
+                                var sub = buffer.Substring(start, end - start);
+                                if (Tokens.IsValidOperator(sub)) {
+                                    tokens.Add(new Token(sub, type));
+                                    start = end + 1;
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if (!found) throw new SyntaxError($"Cannot parse operator '{buffer}'");
                         }
                     } else {
                         tokens.Add(new Token(buffer, type));
