@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "jsdoc",
+            "request": "launch",
+            "name": "Launch Program",
+			"program": "ws://localhost:53192"
+        }
+    ]
+}
