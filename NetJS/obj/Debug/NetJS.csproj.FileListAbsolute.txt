@@ -16,9 +16,6 @@ C:\sync\source\c#\JSDoc\JSDoc\bin\Fast.pdb
 C:\sync\source\c#\JSDoc\JSDoc\obj\Debug\NetJS.csproj.CoreCompileInputs.cache
 C:\sync\source\c#\JSDoc\JSDoc\obj\Debug\JSDoc.dll
 C:\sync\source\c#\JSDoc\JSDoc\obj\Debug\JSDoc.pdb
-C:\sync\source\c#\NetJS\NetJS\bin\JSDoc.dll.config
-C:\sync\source\c#\NetJS\NetJS\bin\JSDoc.dll
-C:\sync\source\c#\NetJS\NetJS\bin\JSDoc.pdb
 C:\sync\source\c#\NetJS\NetJS\bin\Fast.dll
 C:\sync\source\c#\NetJS\NetJS\bin\XDocServices.dll
 C:\sync\source\c#\NetJS\NetJS\bin\XHTMLMerge.dll
@@ -33,5 +30,8 @@ C:\sync\source\c#\NetJS\NetJS\bin\NLog.dll
 C:\sync\source\c#\NetJS\NetJS\bin\Fast.pdb
 C:\sync\source\c#\NetJS\NetJS\obj\Debug\NetJS.csprojResolveAssemblyReference.cache
 C:\sync\source\c#\NetJS\NetJS\obj\Debug\NetJS.csproj.CoreCompileInputs.cache
-C:\sync\source\c#\NetJS\NetJS\obj\Debug\JSDoc.dll
-C:\sync\source\c#\NetJS\NetJS\obj\Debug\JSDoc.pdb
+C:\sync\source\c#\netjs\NetJS\bin\NetJS.dll.config
+C:\sync\source\c#\netjs\NetJS\bin\NetJS.dll
+C:\sync\source\c#\netjs\NetJS\bin\NetJS.pdb
+C:\sync\source\c#\netjs\NetJS\obj\Debug\NetJS.dll
+C:\sync\source\c#\netjs\NetJS\obj\Debug\NetJS.pdb
