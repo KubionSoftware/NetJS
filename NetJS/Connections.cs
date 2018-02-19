@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
 using Util;
 
 namespace NetJS {
@@ -82,9 +80,15 @@ namespace NetJS {
             lock (_connections) {
                 if (_connections.ContainsKey(name)) {
                     var connection = _connections[name];
-                    if (connection is SQLConnection) {
-                        var sqlConnection = ((SQLConnection)connection).Connection;
-                        return sqlConnection;
+                    if (connection is SQLConnection sqlConnection) {
+                        if(sqlConnection.Connection.State != System.Data.ConnectionState.Open) {
+                            try {
+                                sqlConnection.Connection.Open();
+                            } catch {
+                                // TODO: log error
+                            }
+                        }
+                        return sqlConnection.Connection;
                     }
                 }
             }
@@ -97,8 +101,8 @@ namespace NetJS {
             lock (_connections) {
                 if (_connections.ContainsKey(name)) {
                     var connection = _connections[name];
-                    if (connection is HTTPConnection) {
-                        var url = ((HTTPConnection)connection).Url;
+                    if (connection is HTTPConnection httpConnection) {
+                        var url = httpConnection.Url;
                         return url;
                     }
                 }

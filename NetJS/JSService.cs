@@ -59,8 +59,8 @@ namespace NetJS {
                     new Javascript.Scope(application.Global.Scope, null, session, svCache)
                 );
 
-                if (result is Javascript.String) {
-                    return ((Javascript.String)result).Value;
+                if (result is Javascript.String s) {
+                    return s.Value;
                 }
             } catch (Javascript.Error e) {
                 return e.Message + "<br>" + string.Join("<br>", e.StackTrace.Select(loc => Debug.GetFileName(loc.FileId) + " (" + loc.LineNr + ")"));
@@ -90,7 +90,19 @@ namespace NetJS {
             var arguments = Tool.Construct("Object", application.Global.Scope);
             arguments.Set("request", Tool.CreateRequest(context, path, application.Global.Scope));
 
+            var response = Tool.Construct("Object", application.Global.Scope);
+            response.Set("contentType", new Javascript.String("text/html"));
+            response.Set("statusCode", new Javascript.Number(200));
+            arguments.Set("response", response);
+
             var responseString = RunTemplate(application.Settings.Entry, arguments, ref application, ref session, ref svCache);
+
+            try {
+                context.Response.ContentType = response.Get<Javascript.String>("contentType").Value;
+                context.Response.StatusCode = (int)response.Get<Javascript.Number>("statusCode").Value;
+            }catch(Exception) {
+                // TODO: log error
+            }
 
             context.Response.AppendHeader("Access-Control-Allow-Origin", "*");
             context.Response.AppendHeader("Access-Control-Allow-Headers", "X-Requested-With");

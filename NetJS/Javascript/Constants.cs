@@ -106,8 +106,7 @@ namespace NetJS.Javascript {
 
             if (keys.Contains("length")) {
                 var length = dict["length"];
-                if(length is Number) {
-                    var lengthNumber = (Number)length;
+                if(length is Number lengthNumber) {
                     if (keys.Length == lengthNumber.Value + 1) {
                         var list = new List<Expression>();
                         var success = true;
@@ -172,12 +171,12 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Add(Constant other, Scope scope) {
-            if (other is String) {
-                return new String(Value + ((String)other).Value);
-            } else if (other is Number) {
-                return new String(Value + ((Number)other).Value);
-            } else if (other is Boolean) {
-                return new String(Value + (((Boolean)other).Value ? Tokens.True : Tokens.False));
+            if (other is String s) {
+                return new String(Value + s.Value);
+            } else if (other is Number n) {
+                return new String(Value + n.Value);
+            } else if (other is Boolean b) {
+                return new String(Value + (b.Value ? Tokens.True : Tokens.False));
             } else if (other is Undefined || other is Null) {
                 return this;
             }
@@ -186,28 +185,27 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Equals(Constant other, Scope scope) {
-            if(other is String) {
-                return new Boolean(Value == ((String)other).Value);
-            } else if(other is Number) {
-                return new Boolean(Value == ((Number)other).Value.ToString());
-            } else if(other is Boolean) {
-                return new Boolean(Value == (((Boolean)other).Value ? "1" : "0"));
+            if(other is String s) {
+                return new Boolean(Value == s.Value);
+            } else if(other is Number n) {
+                return new Boolean(Value == n.Value.ToString());
+            } else if(other is Boolean b) {
+                return new Boolean(Value == (b.Value ? "1" : "0"));
             }
 
             return new Boolean(false);
         }
 
         public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is String) {
-                return new Boolean(Value == ((String)other).Value);
+            if (other is String s) {
+                return new Boolean(Value == s.Value);
             }
 
             return new Boolean(false);
         }
 
         public override Constant In(Constant other, Scope scope) {
-            if(other is Object) {
-                var obj = (Object)other;
+            if(other is Object obj) {
                 return new Boolean(obj.Get(Value) is Undefined ? false : true);
             }
 
@@ -243,102 +241,101 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Add(Constant other, Scope scope) {
-            if(other is Number) {
-                return new Number(Value + ((Number)other).Value);
-            } else if (other is String) {
-                return new String(Value + ((String)other).Value);
+            if(other is Number n) {
+                return new Number(Value + n.Value);
+            } else if (other is String s) {
+                return new String(Value + s.Value);
             }
 
             return base.Add(other, scope);
         }
 
         public override Constant Substract(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number(Value - ((Number)other).Value);
+            if (other is Number n) {
+                return new Number(Value - n.Value);
             }
 
             return base.Substract(other, scope);
         }
 
         public override Constant Multiply(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number(Value * ((Number)other).Value);
+            if (other is Number n) {
+                return new Number(Value * n.Value);
             }
 
             return base.Multiply(other, scope);
         }
 
         public override Constant Divide(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number(Value / ((Number)other).Value);
+            if (other is Number n) {
+                return new Number(Value / n.Value);
             }
 
             return base.Divide(other, scope);
         }
 
         public override Constant Remainder(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number(Value % ((Number)other).Value);
+            if (other is Number n) {
+                return new Number(Value % n.Value);
             }
 
             return base.Divide(other, scope);
         }
 
         public override Constant Equals(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Boolean(Value == ((Number)other).Value);
-            } else if (other is String) {
-                return new Boolean(Value.ToString() == ((String)other).Value);
-            } else if (other is Boolean) {
-                return new Boolean(Value == (((Boolean)other).Value ? 1 : 0));
+            if (other is Number n) {
+                return new Boolean(Value == n.Value);
+            } else if (other is String s) {
+                return new Boolean(Value.ToString() == s.Value);
+            } else if (other is Boolean b) {
+                return new Boolean(Value == (b.Value ? 1 : 0));
             }
 
             return new Boolean(false);
         }
 
         public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Boolean(Value == ((Number)other).Value);
+            if (other is Number n) {
+                return new Boolean(Value == n.Value);
             }
 
             return new Boolean(false);
         }
 
         public override Constant LessThan(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Boolean(Value < ((Number)other).Value);
+            if (other is Number n) {
+                return new Boolean(Value < n.Value);
             }
 
             return base.LessThan(other, scope);
         }
 
         public override Constant LessThanEquals(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Boolean(Value <= ((Number)other).Value);
+            if (other is Number n) {
+                return new Boolean(Value <= n.Value);
             }
 
             return base.LessThanEquals(other, scope);
         }
 
         public override Constant GreaterThan(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Boolean(Value > ((Number)other).Value);
+            if (other is Number n) {
+                return new Boolean(Value > n.Value);
             }
 
             return base.GreaterThan(other, scope);
         }
 
         public override Constant GreaterThanEquals(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Boolean(Value >= ((Number)other).Value);
+            if (other is Number n) {
+                return new Boolean(Value >= n.Value);
             }
 
             return base.GreaterThanEquals(other, scope);
         }
 
         public override Constant In(Constant other, Scope scope) {
-            if (other is Object) {
-                var obj = (Object)other;
+            if (other is Object obj) {
                 return new Boolean(obj.Get(Value.ToString()) is Undefined ? false : true);
             }
 
@@ -350,40 +347,40 @@ namespace NetJS.Javascript {
         }
 
         public override Constant BitwiseAnd(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number((int)Value & (int)((Number)other).Value);
+            if (other is Number n) {
+                return new Number((int)Value & (int)n.Value);
             }
 
             return base.BitwiseAnd(other, scope);
         }
 
         public override Constant BitwiseOr(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number((int)Value | (int)((Number)other).Value);
+            if (other is Number n) {
+                return new Number((int)Value | (int)n.Value);
             }
 
             return base.BitwiseOr(other, scope);
         }
 
         public override Constant BitwiseXor(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number((int)Value ^ (int)((Number)other).Value);
+            if (other is Number n) {
+                return new Number((int)Value ^ (int)n.Value);
             }
 
             return base.BitwiseXor(other, scope);
         }
 
         public override Constant LeftShift(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number((int)Value << (int)((Number)other).Value);
+            if (other is Number n) {
+                return new Number((int)Value << (int)n.Value);
             }
 
             return base.LeftShift(other, scope);
         }
 
         public override Constant RightShift(Constant other, Scope scope) {
-            if (other is Number) {
-                return new Number((int)Value >> (int)((Number)other).Value);
+            if (other is Number n) {
+                return new Number((int)Value >> (int)n.Value);
             }
 
             return base.RightShift(other, scope);
@@ -438,44 +435,44 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Add(Constant other, Scope scope) {
-            if(other is String) {
-                return new String((Value ? Tokens.True : Tokens.False) + ((String)other).Value);
+            if(other is String s) {
+                return new String((Value ? Tokens.True : Tokens.False) + s.Value);
             }
 
             return base.Add(other, scope);
         }
 
         public override Constant Equals(Constant other, Scope scope) {
-            if(other is Boolean) {
-                return new Boolean(Value == ((Boolean)other).Value);
-            } else if (other is Number) {
-                return new Boolean((Value ? 1 : 0) == ((Number)other).Value);
-            } else if (other is String) {
-                return new Boolean((Value ? "1" : "0") == ((String)other).Value);
+            if(other is Boolean b) {
+                return new Boolean(Value == b.Value);
+            } else if (other is Number n) {
+                return new Boolean((Value ? 1 : 0) == n.Value);
+            } else if (other is String s) {
+                return new Boolean((Value ? "1" : "0") == s.Value);
             }
 
             return new Boolean(false);
         }
 
         public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is Boolean) {
-                return new Boolean(Value == ((Boolean)other).Value);
+            if (other is Boolean b) {
+                return new Boolean(Value == b.Value);
             }
 
             return new Boolean(false);
         }
 
         public override Constant LogicalAnd(Constant other, Scope scope) {
-            if (other is Boolean) {
-                return new Boolean(Value && ((Boolean)other).Value);
+            if (other is Boolean b) {
+                return new Boolean(Value && b.Value);
             }
 
             return base.LogicalAnd(other, scope);
         }
 
         public override Constant LogicalOr(Constant other, Scope scope) {
-            if (other is Boolean) {
-                return new Boolean(Value || ((Boolean)other).Value);
+            if (other is Boolean b) {
+                return new Boolean(Value || b.Value);
             }
 
             return base.LogicalOr(other, scope);
@@ -522,8 +519,8 @@ namespace NetJS.Javascript {
         }
 
         public override Constant GetProperty(Constant key, Scope scope) {
-            if (key is Number) {
-                return Get((int)((Number)key).Value);
+            if (key is Number n) {
+                return Get((int)n.Value);
             }
 
             var keyString = key.ToString();
@@ -541,8 +538,8 @@ namespace NetJS.Javascript {
         }
 
         public override void SetProperty(Constant key, Constant value, Scope scope) {
-            if (key is Number) {
-                var index = (int)((Number)key).Value;
+            if (key is Number n) {
+                var index = (int)n.Value;
                 if (index >= 0 && index < List.Count) {
                     List[index] = value;
                 }
@@ -705,6 +702,18 @@ namespace NetJS.Javascript {
             //return other;
         }
 
+        public override Constant Delete(Scope scope) {
+            var _this = GetThis(scope);
+            var property = Parts[Parts.Count - 1];
+
+            if (_this is Object obj) {
+                obj.Remove(property.ToString());
+                return Static.True;
+            }
+
+            return Static.False;
+        }
+
         public override void Uneval(StringBuilder builder, int depth) {
             for(var i = 0; i < Parts.Count; i++) {
                 if (i > 0) builder.Append(".");
@@ -730,10 +739,10 @@ namespace NetJS.Javascript {
         public string GetString(Scope scope) {
             var constant = GetValue(scope);
 
-            if (constant is String) {
-                return ((String)constant).Value;
-            } else if (constant is Number) {
-                return ((Number)constant).Value.ToString();
+            if (constant is String s) {
+                return s.Value;
+            } else if (constant is Number n) {
+                return n.Value.ToString();
             }
 
             return "";
@@ -742,8 +751,6 @@ namespace NetJS.Javascript {
         public virtual T As<T>() where T : Constant {
             return (T)this;
         }
-
-        public abstract string ToDebugString();
 
         public virtual Constant GetProperty(Constant key, Scope scope) {
             throw new ReferenceError($"Cannot access property '{key}' of {ToDebugString()}");
@@ -823,7 +830,6 @@ namespace NetJS.Javascript {
         }
 
         public virtual Constant Delete(Scope scope) {
-            // TODO: delete properties of objects
             return new Boolean(false);
         }
 
@@ -900,7 +906,9 @@ namespace NetJS.Javascript {
         }
 
         public virtual Constant Comma(Constant other, Scope scope) {
-            throw OperatorException("comma", this, other);
+            /*  The comma operator evaluates each of its operands (from left to right) 
+                and returns the value of the last operand. [see MDN] */
+            return other;
         }
 
         public virtual Constant PostfixIncrement(Scope scope) {

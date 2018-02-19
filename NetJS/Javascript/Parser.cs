@@ -150,7 +150,9 @@ namespace NetJS.Javascript {
             Debug.RemoveNodes(_fileId);
 #endif
 
-            return ParseStatements();
+            var result = ParseStatements();
+            result = Optimizer.Optimize(result);
+            return result;
         }
 
         public Block ParseStatements(int maxStatements = -1) {
@@ -162,7 +164,18 @@ namespace NetJS.Javascript {
                 if (token.Type == Token.Group.WhiteSpace || (token.Type != Token.Group.String && token.Content == Tokens.ExpressionEnd)) {
                     _index++;
                 } else if (token.Type == Token.Group.Html) {
-                    list.Nodes.Add(new Html(token.Content));
+                    var html = new Html(token.Content);
+
+                    if (list.Nodes.Count > 0) {
+                        var last = list.Nodes[list.Nodes.Count - 1];
+                        if (last is Html lastHtml) {
+                            lastHtml.Combine(html);
+                            _index++;
+                            continue;
+                        }
+                    }
+
+                    list.Nodes.Add(html);
                     _index++;
                 } else if (token.Type != Token.Group.String && (token.Content == Tokens.BlockClose || token.Content == Tokens.Case || token.Content == Tokens.ConditionalSeperator || token.Content == Tokens.Default)) {
                     break;
@@ -273,8 +286,8 @@ namespace NetJS.Javascript {
                     Skip(Tokens.Assign);
                     expression = ParseExpression();
 
-                    if(expression is FunctionBlueprint) {
-                        ((FunctionBlueprint)expression).Name = variable.Name;
+                    if(expression is FunctionBlueprint function) {
+                        function.Name = variable.Name;
                     }
                 }
 
@@ -315,12 +328,8 @@ namespace NetJS.Javascript {
             void found(Expression expression) {
                 if (left == null) {
                     left = expression;
-                } else if (left is Operator) {
-                    var leftOperation = (Operator)left;
-
-                    if (expression is Operator) {
-                        var expressionOperation = (Operator)expression;
-
+                } else if (left is Operator leftOperation) {
+                    if (expression is Operator expressionOperation) {
                         if (expressionOperation.Precedence > leftOperation.Precedence) {
                             // Go down
                             if (expressionOperation.AcceptsLeft && !expressionOperation.HasLeft) {
@@ -363,14 +372,15 @@ namespace NetJS.Javascript {
                             left = new Addition() { Left = left, Right = expression };
                         }
                     }
-                } else if (left is StringBlueprint) {
-                    if (expression is StringBlueprint) {
-                        ((StringBlueprint)left).Combine((StringBlueprint)expression);
-                    } else if (expression is Operator) {
-                        var op = (Operator)expression;
+                } else if (left is StringBlueprint leftString) {
+                    if (expression is StringBlueprint expressionString) {
+                        leftString.Combine(expressionString);
+                    } else if (expression is Operator op) {
                         if(op.AcceptsLeft && !op.HasLeft) {
                             op.SetLeft(left);
                             left = op;
+                        } else {
+                            throw new SyntaxError($"Cannot parse string and '{op.GetType()}'");
                         }
                     } else {
                         var addition = new Addition();
@@ -378,11 +388,12 @@ namespace NetJS.Javascript {
                         addition.Right = expression;
                         left = addition;
                     }
-                } else if (expression is Operator) {
-                    var op = (Operator)expression;
+                } else if (expression is Operator op) {
                     if (op.AcceptsLeft) {
                         op.SetLeft(left);
                         left = op;
+                    } else {
+                        throw new SyntaxError($"Operator '{op.GetType()}' doesn't accept a left-hand argument");
                     }
                 }
 
@@ -493,8 +504,8 @@ namespace NetJS.Javascript {
                             if (expression == null && Peek() == Tokens.ArrowFunction) {
                                 found(ParseArrowFunction(new ParameterList()));
                             } else {
-                                if (expression is Operator) {
-                                    ((Operator)expression).Precedence = GroupPrecedence;
+                                if (expression is Operator expressionOperation) {
+                                    expressionOperation.Precedence = GroupPrecedence;
                                 }
                                 found(expression);
                             }
@@ -686,7 +697,7 @@ namespace NetJS.Javascript {
                 result = new Addition() { Left = result, Right = parts[i] };
             }
 
-            if (result is Operator) ((Operator)result).Precedence = GroupPrecedence;
+            if (result is Operator op) op.Precedence = GroupPrecedence;
             return result;
         }
 

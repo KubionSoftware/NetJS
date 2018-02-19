@@ -126,7 +126,7 @@ namespace NetJS.Javascript {
         public string Name { get; set; }
         public string Type { get; }
         public ParameterList Parameters { get; }
-        public Block Body { get; }
+        public Block Body { get; set; }
 
         public FunctionBlueprint(string name, string type, ParameterList parameters, Block body) {
             Name = name;
@@ -148,7 +148,7 @@ namespace NetJS.Javascript {
         }
     }
 
-    abstract public class Blueprint : Constant {
+    abstract public class Blueprint : Expression {
 
         public abstract Constant Instantiate(Scope scope);
 

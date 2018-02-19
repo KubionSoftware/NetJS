@@ -59,10 +59,11 @@ namespace NetJS {
             RegisterClass(typeof(Internal.Math));
 
             RegisterClass(typeof(External.HTTP));
-            RegisterClass(typeof(External.DB));
+            RegisterClass(typeof(External.SQL));
             RegisterClass(typeof(External.IO));
             RegisterClass(typeof(External.Log));
             RegisterClass(typeof(External.Session));
+            RegisterClass(typeof(External.XDoc));
 
             RegisterFunctions(typeof(Internal.Functions));
         }

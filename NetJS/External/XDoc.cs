@@ -28,7 +28,7 @@ namespace NetJS.External {
                     parameters.Add(key, param.Get(key).ToString());
                 }
             }
-
+            
             var result = scope.Application.XDocService.RunTemplate(context, name.Value, parameters, ref appCache, ref svCache);
 
             if (context != null && context.Application != null) context.Application["AppCache"] = appCache;

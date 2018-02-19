@@ -15,7 +15,6 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Execute(Scope scope, bool getValue = true) {
-            // TODO: error if left not variable or path or access
             var left = Left.Execute(scope, false);
             var right = Right.Execute(scope, !IsDot);
 
@@ -35,43 +34,44 @@ namespace NetJS.Javascript {
                 builder.Append(Tokens.ArrayClose);
             }
         }
+
+        public override string ToDebugString() {
+            return "access";
+        }
     }
 
     public class Call : BinaryOperator {
         public Call() : base(16) { }
-
-        public Constant ExecuteCall(Constant left, Constant right, Constant _this, Scope scope) {
-            return left.Call(right, _this, scope);
-        }
 
         public override Constant Execute(Scope scope, bool getValue = true) {
             Constant _this = Static.Undefined;
 
             var left = Left.Execute(scope, false);
 
-            if (left is Path) {
-                _this = ((Path)left).GetThis(scope);
+            if (left is Path path) {
+                _this = path.GetThis(scope);
+            }
+            
+            left = left.Execute(scope);
+            if (left is Constructor constructor) {
+                _this = new Object(constructor.Function.Get<Object>("prototype"));
             }
 
-            if(left != null) {
-                left = left.Execute(scope);
-
-                if (left is Constructor) {
-                    var constructor = (Constructor)left;
-                    _this = new Object(constructor.Function.Get<Object>("prototype"));
-                }
+            if (Right is ArgumentList arguments) {
+                return left.Call(arguments, _this, scope);
             } else {
-                left = Static.Undefined;
+                // TODO: better error message
+                throw new SyntaxError("Must call with arguments");
             }
-
-            var right = Right == null ? null : Right.Execute(scope);
-
-            return ExecuteCall(left, right, _this, scope);
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
             Left.Uneval(builder, depth);
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "call";
         }
     }
 
@@ -86,6 +86,10 @@ namespace NetJS.Javascript {
             builder.Append(Tokens.New + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "new";
+        }
     }
 
     public class PostfixIncrement : UnaryLeftOperator {
@@ -98,6 +102,10 @@ namespace NetJS.Javascript {
         public override void Uneval(StringBuilder builder, int depth) {
             Left.Uneval(builder, depth);
             builder.Append(Tokens.Increment);
+        }
+
+        public override string ToDebugString() {
+            return "postfix increment";
         }
     }
 
@@ -112,6 +120,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(Tokens.Decrement);
         }
+
+        public override string ToDebugString() {
+            return "postfix decrement";
+        }
     }
 
     public class LogicalNot : UnaryRightOperator {
@@ -124,6 +136,10 @@ namespace NetJS.Javascript {
         public override void Uneval(StringBuilder builder, int depth) {
             builder.Append(Tokens.LogicalNot);
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "logical not";
         }
     }
 
@@ -138,6 +154,10 @@ namespace NetJS.Javascript {
             builder.Append(Tokens.BitwiseNot);
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "bitwise not";
+        }
     }
 
     public class Negation : UnaryRightOperator {
@@ -151,9 +171,11 @@ namespace NetJS.Javascript {
             builder.Append(Tokens.Substract);
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "negation";
+        }
     }
-
-
 
     public class PrefixIncrement : UnaryRightOperator {
         public PrefixIncrement() : base(14) { }
@@ -165,6 +187,10 @@ namespace NetJS.Javascript {
         public override void Uneval(StringBuilder builder, int depth) {
             builder.Append(Tokens.Increment);
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "prefix increment";
         }
     }
 
@@ -179,6 +205,10 @@ namespace NetJS.Javascript {
             builder.Append(Tokens.Decrement);
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "prefix decrement";
+        }
     }
 
     public class TypeOf : UnaryRightOperator {
@@ -191,6 +221,10 @@ namespace NetJS.Javascript {
         public override void Uneval(StringBuilder builder, int depth) {
             builder.Append(Tokens.TypeOf + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "typeof";
         }
     }
 
@@ -205,6 +239,10 @@ namespace NetJS.Javascript {
             builder.Append(Tokens.Void + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "void";
+        }
     }
 
     public class Delete : UnaryRightOperator {
@@ -217,6 +255,10 @@ namespace NetJS.Javascript {
         public override void Uneval(StringBuilder builder, int depth) {
             builder.Append(Tokens.Delete + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "delete";
         }
     }
 
@@ -232,6 +274,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.Multiply + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "multiplication";
+        }
     }
 
     public class Division : BinaryOperator {
@@ -245,6 +291,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.Divide + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "division";
         }
     }
 
@@ -260,6 +310,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.Remainder + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "remainder";
+        }
     }
 
     public class Addition : BinaryOperator {
@@ -273,6 +327,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.Add + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "addition";
         }
     }
 
@@ -288,6 +346,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.Substract + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "substraction";
+        }
     }
 
     public class LeftShift : BinaryOperator {
@@ -301,6 +363,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.LeftShift + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "left shift";
         }
     }
 
@@ -316,6 +382,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.RightShift + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "right shift";
+        }
     }
 
     public class LessThan : BinaryOperator {
@@ -329,6 +399,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.LessThan + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "less than";
         }
     }
 
@@ -344,6 +418,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.LessThanEquals + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "less than equals";
+        }
     }
 
     public class GreaterThan : BinaryOperator {
@@ -357,6 +435,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.GreaterThan + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "greater than";
         }
     }
 
@@ -372,6 +454,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.GreaterThanEquals + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "greater than equals";
+        }
     }
 
     public class In : BinaryOperator {
@@ -385,6 +471,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.In + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "in";
         }
     }
 
@@ -400,6 +490,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.Equals + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "equals";
+        }
     }
 
     public class NotEquals : BinaryOperator {
@@ -413,6 +507,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.NotEquals + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "not equals";
         }
     }
 
@@ -428,6 +526,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.StrictEquals + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "strict equals";
+        }
     }
 
     public class StrictNotEquals : BinaryOperator {
@@ -441,6 +543,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.StrictNotEquals + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "strict not equals";
         }
     }
 
@@ -456,6 +562,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.BitwiseAnd + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "bitwise and";
+        }
     }
 
     public class BitwiseXor : BinaryOperator {
@@ -469,6 +579,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.BitwiseXor + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "bitwise xor";
         }
     }
 
@@ -484,6 +598,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.BitwiseOr + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "bitwise or";
+        }
     }
 
     public class LogicalAnd : BinaryOperator {
@@ -498,6 +616,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.LogicalAnd + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "logical and";
+        }
     }
 
     public class LogicalOr : BinaryOperator {
@@ -511,6 +633,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(" " + Tokens.LogicalOr + " ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "logical or";
         }
     }
 
@@ -554,6 +680,10 @@ namespace NetJS.Javascript {
                 list.Arguments[1].Uneval(builder, depth);
             }
         }
+
+        public override string ToDebugString() {
+            return "conditional";
+        }
     }
 
     public class Assignment : BinaryOperator {
@@ -575,6 +705,10 @@ namespace NetJS.Javascript {
             builder.Append(" " + Tokens.Assign + " ");
             Right.Uneval(builder, depth);
         }
+
+        public override string ToDebugString() {
+            return "assigment";
+        }
     }
 
     public class Comma : BinaryOperator {
@@ -588,6 +722,10 @@ namespace NetJS.Javascript {
             Left.Uneval(builder, depth);
             builder.Append(", ");
             Right.Uneval(builder, depth);
+        }
+
+        public override string ToDebugString() {
+            return "comma";
         }
     }
 
@@ -605,7 +743,7 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Execute(Scope scope, bool getValue = true) {
-            var left = Left == null ? Static.Undefined : Left.Execute(scope);
+            var left = Left.Execute(scope);
             return Execute(left, scope);
         }
 
@@ -628,7 +766,7 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Execute(Scope scope, bool getValue = true) {
-            var right = Right == null ? Static.Undefined : Right.Execute(scope);
+            var right = Right.Execute(scope);
             return Execute(right, scope);
         }
 
@@ -661,8 +799,8 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Execute(Scope scope, bool getValue = true) {
-            var left = Left == null ? Static.Undefined : Left.Execute(scope);
-            var right = Right == null ? Static.Undefined : Right.Execute(scope);
+            var left = Left.Execute(scope);
+            var right = Right.Execute(scope);
             return Execute(left, right, scope);
         }
 

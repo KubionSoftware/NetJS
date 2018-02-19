@@ -12,7 +12,7 @@ namespace NetJS {
         public External.Config Config { get; }
         public Settings Settings { get; }
 
-        public XDocServices.XDocService4 XDocService { get; }
+        public XDocServices.XDocService XDocService { get; }
 
         public JSApplication(string rootDir = null) {
             if (rootDir == null) {
@@ -28,7 +28,7 @@ namespace NetJS {
             Connections = new Connections(Watch, Settings);
             Config = new External.Config(Watch, Global.Scope, Settings);
 
-            XDocService = new XDocServices.XDocService4();
+            XDocService = new XDocServices.XDocService();
         }
     }
 }

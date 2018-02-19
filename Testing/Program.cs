@@ -24,7 +24,7 @@ namespace Testing {
                 Console.Error.WriteLine(e);
             }
 
-            if (value is NetJS.Javascript.Boolean && ((NetJS.Javascript.Boolean)value).Value) {
+            if (value is NetJS.Javascript.Boolean b && b.Value) {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Test successful - " + message);
                 Program.NumSuccess++;
@@ -46,7 +46,7 @@ namespace Testing {
 
         static void Main(string[] args) {
             var service = new JSService();
-            var application = new JSApplication("../../../JSDoc/test/");
+            var application = new JSApplication("../../../NetJS/test/");
 
             application.Global.RegisterFunctions(typeof(TestFunctions));
 

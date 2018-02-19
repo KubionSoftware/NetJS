@@ -1,24 +1,18 @@
-﻿using NetJS.Javascript;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace NetJS.External {
+﻿namespace NetJS.External {
     class HTTP {
 
-        public static Constant get(Constant _this, Constant[] arguments, Scope scope) {
+        public static Javascript.Constant get(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
             var url = ((Javascript.String)arguments[0]).Value;
             return new Javascript.String(Util.HTTP.Get(url));
         }
 
-        public static Constant post(Constant _this, Constant[] arguments, Scope scope) {
+        public static Javascript.Constant post(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
             var url = ((Javascript.String)arguments[0]).Value;
             var content = ((Javascript.String)arguments[1]).Value;
             return new Javascript.String(Util.HTTP.Post(url, content));
         }
 
-        public static Constant execute(Constant _this, Constant[] arguments, Scope scope) {
+        public static Javascript.Constant execute(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
             var connectionName = ((Javascript.String)arguments[0]).Value;
             var url = scope.Application.Connections.GetHttpUrl(connectionName);
 

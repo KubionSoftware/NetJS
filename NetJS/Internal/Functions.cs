@@ -10,31 +10,31 @@ namespace NetJS.Internal {
     class Functions {
 
         public static Constant parseInt(Constant _this, Constant[] arguments, Scope scope) {
-            if (arguments[0] is Javascript.String) {
+            if (arguments[0] is Javascript.String s) {
                 int intResult;
-                if(int.TryParse(((Javascript.String)arguments[0]).Value, out intResult)) {
+                if(int.TryParse(s.Value, out intResult)) {
                     return new Javascript.Number(intResult);
                 }
 
                 double floatResult;
-                if (double.TryParse(((Javascript.String)arguments[0]).Value, out floatResult)) {
+                if (double.TryParse(s.Value, out floatResult)) {
                     return new Javascript.Number((int)floatResult);
                 }
-            } else if (arguments[0] is Javascript.Number) {
-                return new Javascript.Number((int)((Javascript.Number)arguments[0]).Value);
+            } else if (arguments[0] is Javascript.Number n) {
+                return new Javascript.Number((int)n.Value);
             }
 
             return Static.NaN;
         }
 
         public static Constant parseFloat(Constant _this, Constant[] arguments, Scope scope) {
-            if (arguments[0] is Javascript.String) {
+            if (arguments[0] is Javascript.String s) {
                 double result;
-                if (double.TryParse(((Javascript.String)arguments[0]).Value, out result)) {
+                if (double.TryParse(s.Value, out result)) {
                     return new Javascript.Number(result);
                 }
-            } else if (arguments[0] is Javascript.Number) {
-                return new Javascript.Number(((Javascript.Number)arguments[0]).Value);
+            } else if (arguments[0] is Javascript.Number n) {
+                return new Javascript.Number(n.Value);
             }
 
             return Static.NaN;
@@ -87,7 +87,7 @@ namespace NetJS.Internal {
         }
 
         public static Constant include(Constant _this, Constant[] arguments, Scope scope) {
-            var name = Tool.GetArgument<Javascript.String>(arguments, 0, "IO.include");
+            var name = Tool.GetArgument<Javascript.String>(arguments, 0, "include");
             if (!name.Value.EndsWith(".js")) {
                 name.Value += ".js";
             }
@@ -106,13 +106,22 @@ namespace NetJS.Internal {
         }
 
         public static Constant import(Constant _this, Constant[] arguments, Scope scope) {
-            var name = Tool.GetArgument<Javascript.String>(arguments, 0, "IO.import");
+            var name = Tool.GetArgument<Javascript.String>(arguments, 0, "import");
             if (!name.Value.EndsWith(".js")) {
                 name.Value += ".js";
             }
 
             var node = scope.Application.Global.GetFile(name.Value, scope.Application);
             return node.Execute(scope).Constant;
+        }
+
+        public static Constant redirect(Constant _this, Constant[] arguments, Scope scope) {
+            var url = Tool.GetArgument<Javascript.String>(arguments, 0, "redirect");
+            var context = HttpContext.Current;
+            if (context != null) {
+                context.Response.Redirect(url.Value);
+            }
+            return Static.Undefined;
         }
     }
 }

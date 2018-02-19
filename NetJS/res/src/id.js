@@ -10,7 +10,7 @@ var generate = function(length){
 };
 
 var start = new Date();
-for(var i = 0; i < 100; i++){
-	<div>generate(64)</div>
+for(var i = 0; i < 1000; i++){
+	void generate(128)
 }
 new Date().getTime() - start.getTime();

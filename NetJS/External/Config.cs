@@ -1,13 +1,7 @@
-﻿using NetJS.Javascript;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace NetJS.External {
+﻿namespace NetJS.External {
     public class Config {
 
-        public Config(Watch watch, Scope scope, Settings settings) {
+        public Config(Watch watch, Javascript.Scope scope, Settings settings) {
             var file = settings.Root + settings.Config;
 
             Load(file, scope);
@@ -16,11 +10,11 @@ namespace NetJS.External {
             });
         }
 
-        public void Load(string file, Scope scope) {
+        public void Load(string file, Javascript.Scope scope) {
             if (System.IO.File.Exists(file)) {
                 var content = System.IO.File.ReadAllText(file);
 
-                var config = Internal.JSON.parse(Static.Undefined, new[] { new Javascript.String(content) }, scope);
+                var config = Internal.JSON.parse(Javascript.Static.Undefined, new[] { new Javascript.String(content) }, scope);
                 scope.SetVariable("Config", config);
             } else {
                 scope.SetVariable("Config", Tool.Construct("Object", scope));

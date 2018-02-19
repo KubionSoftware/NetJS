@@ -6,7 +6,7 @@ using System.Linq;
 using System.Web;
 
 namespace NetJS.External {
-    class DB {
+    class SQL {
 
         public static Constant get(Constant _this, Constant[] arguments, Scope scope) {
             var connectionName = ((Javascript.String)arguments[0]).Value;
@@ -115,9 +115,7 @@ namespace NetJS.External {
             if (query.StartsWith("SELECT")) {
                 var rows = Util.SQL.Get(connection, query, new SqlParameter[] { });
 
-                var result = Tool.Construct("Object", scope);
-
-                var rowsArray = new Javascript.Array();
+                var result = new Javascript.Array();
                 
                 foreach(var row in rows) {
                     var rowObject = Tool.Construct("Object", scope);
@@ -137,10 +135,8 @@ namespace NetJS.External {
                         }
                     }
 
-                    rowsArray.List.Add(rowObject);
+                    result.List.Add(rowObject);
                 }
-
-                result.Set("result", rowsArray);
 
                 return result;
             } else {

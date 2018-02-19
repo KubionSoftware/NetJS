@@ -11,15 +11,16 @@ namespace NetJS.Javascript {
             var output = new StringBuilder();
 
             foreach (var node in Nodes) {
-                try {
-                    if (node is Statement) {
 #if DEBUG
-                        if (Debug.BreakpointNodes.Contains(node.Id)) {
-                            Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
-                        }
+                if (Debug.BreakpointNodes.Contains(node.Id)) {
+                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                }
 #endif
 
-                        var result = ((Statement)node).Execute(scope);
+                try {
+                    if (node is Statement statement) {
+                        var result = statement.Execute(scope);
+                        if (result.Type == Scope.ResultType.None) continue;
 
                         if (result.Type == Scope.ResultType.Return || result.Type == Scope.ResultType.Break || result.Type == Scope.ResultType.Throw || result.Type == Scope.ResultType.Continue) {
                             if (result.Constant == null && output.Length > 0) {
@@ -31,12 +32,12 @@ namespace NetJS.Javascript {
                             var str = result.Constant.GetString(scope);
                             if (str != null && str.Length > 0) output.Append(str);
                         }
-                    } else if (node is Expression) {
-                        var result = ((Expression)node).Execute(scope);
+                    } else if (node is Expression expression) {
+                        var result = expression.Execute(scope);
                         var str = result.GetString(scope);
                         if (str != null && str.Length > 0) output.Append(str);
-                    } else if (node is Html) {
-                        output.Append(((Html)node).ToString(scope));
+                    } else if (node is Html html) {
+                        output.Append(html.ToString(scope));
                     }
                 } catch (Error e) {
 #if DEBUG
@@ -128,13 +129,13 @@ namespace NetJS.Javascript {
         }
     }
 
-    public abstract class Loopscope {
+    public abstract class LoopExecution {
 
         private const int MaxLoops = 10000;
 
         public Block Body;
 
-        public Loopscope(Block body) {
+        public LoopExecution(Block body) {
             Body = body;
         }
 
@@ -190,11 +191,11 @@ namespace NetJS.Javascript {
         public Expression Action;
         public Block Body;
 
-        class Forscope : Loopscope {
+        class ForExecution : LoopExecution {
 
             private For _forNode;
 
-            public Forscope(For forNode) : base(forNode.Body) {
+            public ForExecution(For forNode) : base(forNode.Body) {
                 _forNode = forNode;
             }
 
@@ -213,7 +214,7 @@ namespace NetJS.Javascript {
         }
 
         public override Scope.Result Execute(Scope parent) {
-            return new Forscope(this).Execute(this, parent);
+            return new ForExecution(this).Execute(this, parent);
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
@@ -236,13 +237,13 @@ namespace NetJS.Javascript {
         public Expression Collection;
         public Block Body;
 
-        class ForOfscope : Loopscope {
+        class ForOfExecution : LoopExecution {
 
             private ForOf _forOfNode;
             private Array _array;
             private int _index;
 
-            public ForOfscope(ForOf forOfNode) : base(forOfNode.Body) {
+            public ForOfExecution(ForOf forOfNode) : base(forOfNode.Body) {
                 _forOfNode = forOfNode;
             }
 
@@ -268,7 +269,7 @@ namespace NetJS.Javascript {
         }
 
         public override Scope.Result Execute(Scope parent) {
-            return new ForOfscope(this).Execute(this, parent);
+            return new ForOfExecution(this).Execute(this, parent);
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
@@ -289,14 +290,14 @@ namespace NetJS.Javascript {
         public Expression Collection;
         public Block Body;
 
-        class ForInscope : Loopscope {
+        class ForInExecution : LoopExecution {
 
             private ForIn _forInNode;
             private Object _obj;
             private string[] _keys;
             private int _index;
 
-            public ForInscope(ForIn forInNode) : base(forInNode.Body) {
+            public ForInExecution(ForIn forInNode) : base(forInNode.Body) {
                 _forInNode = forInNode;
             }
 
@@ -323,7 +324,7 @@ namespace NetJS.Javascript {
         }
 
         public override Scope.Result Execute(Scope parent) {
-            return new ForInscope(this).Execute(this, parent);
+            return new ForInExecution(this).Execute(this, parent);
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
@@ -343,11 +344,11 @@ namespace NetJS.Javascript {
         public Expression Check;
         public Block Body;
 
-        class Whilescope : Loopscope {
+        class WhileExecution : LoopExecution {
 
             private While _whileNode;
 
-            public Whilescope(While whileNode) : base(whileNode.Body) {
+            public WhileExecution(While whileNode) : base(whileNode.Body) {
                 _whileNode = whileNode;
             }
 
@@ -363,7 +364,7 @@ namespace NetJS.Javascript {
         }
 
         public override Scope.Result Execute(Scope parent) {
-            return new Whilescope(this).Execute(this, parent);
+            return new WhileExecution(this).Execute(this, parent);
         }
 
         public override void Uneval(StringBuilder builder, int depth) {

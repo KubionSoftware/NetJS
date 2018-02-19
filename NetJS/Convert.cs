@@ -6,27 +6,26 @@ namespace NetJS {
     static class Convert {
 
         public static Constant JsonToValue(object value, Scope scope) {
-            if (value is Dictionary<string, object>) {
-                return JsonToObject((Dictionary<string, object>)value, scope);
-            } else if (value is List<object>) {
+            if (value is Dictionary<string, object> dict) {
+                return JsonToObject(dict, scope);
+            } else if (value is List<object> list) {
                 var array = new Javascript.Array();
-
-                List<object> list = (List<object>)value;
+                
                 for (int i = 0; i < list.Count; i++) {
                     array.List.Add(JsonToValue(list[i], scope));
                 }
 
                 return array;
-            } else if (value is string) {
-                return new Javascript.String((string)value);
-            } else if (value is double) {
-                return new Javascript.Number((double)value);
-            } else if (value is long) {
-                return new Javascript.Number((long)value);
-            } else if (value is int) {
-                return new Javascript.Number((int)value);
-            } else if (value is bool) {
-                return new Javascript.Boolean((bool)value);
+            } else if (value is string s) {
+                return new Javascript.String(s);
+            } else if (value is double d) {
+                return new Javascript.Number(d);
+            } else if (value is long l) {
+                return new Javascript.Number(l);
+            } else if (value is int i) {
+                return new Javascript.Number(i);
+            } else if (value is bool b) {
+                return new Javascript.Boolean(b);
             }
 
             return Static.Undefined;
@@ -41,23 +40,21 @@ namespace NetJS {
         }
 
         public static object ValueToJson(Constant value, Scope scope) {
-            if (value is Javascript.String) {
-                return ((Javascript.String)value).Value;
-            } else if (value is Javascript.Number) {
-                return ((Javascript.Number)value).Value;
-            } else if (value is Javascript.Boolean) {
-                return ((Javascript.Boolean)value).Value;
+            if (value is Javascript.String s) {
+                return s.Value;
+            } else if (value is Javascript.Number n) {
+                return n.Value;
+            } else if (value is Javascript.Boolean b) {
+                return b.Value;
             } else if (value is Javascript.Function) {
                 return "f () {}";
-            } else if (value is Javascript.Array) {
-                var array = (Javascript.Array)value;
+            } else if (value is Javascript.Array array) {
                 var list = new List<object>();
                 for (var i = 0; i < array.List.Count; i++) {
                     list.Add(ValueToJson(array.List[i], scope));
                 }
                 return list;
-            } else if (value is Javascript.Object) {
-                var obj = (Javascript.Object)value;
+            } else if (value is Javascript.Object obj) {
                 return ObjectToJson(obj, scope);
             }
 

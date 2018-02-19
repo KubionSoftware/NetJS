@@ -55,7 +55,6 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
@@ -65,11 +64,11 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="XDocServices, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Users\Bouke\Documents\xdoc_bin\XDocServices.dll</HintPath>
+      <HintPath>lib\XDocServices.dll</HintPath>
     </Reference>
     <Reference Include="XHTMLMerge, Version=4.2.0.0, Culture=neutral, PublicKeyToken=96f0604bb54aad79, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Users\Bouke\Documents\xdoc_bin\XHTMLMerge.dll</HintPath>
+      <HintPath>lib\XHTMLMerge.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -92,7 +91,7 @@
     <Compile Include="Internal\Boolean.cs" />
     <Compile Include="External\Config.cs" />
     <Compile Include="Internal\Date.cs" />
-    <Compile Include="External\DB.cs" />
+    <Compile Include="External\SQL.cs" />
     <Compile Include="Internal\Function.cs" />
     <Compile Include="Internal\Functions.cs" />
     <Compile Include="External\HTTP.cs" />
@@ -110,6 +109,8 @@
     <Compile Include="Internal\RegExp.cs" />
     <Compile Include="Internal\String.cs" />
     <Compile Include="Javascript\Constants.cs" />
+    <Compile Include="Javascript\Html.cs" />
+    <Compile Include="Javascript\Optimizer.cs" />
     <Compile Include="Javascript\Scope.cs" />
     <Compile Include="Javascript\Functions.cs" />
     <Compile Include="Javascript\Lexer.cs" />

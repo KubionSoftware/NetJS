@@ -6,24 +6,19 @@ namespace NetJS.Javascript {
         public static Null Null = new Null();
         public static NaN NaN = new NaN();
         public static Infinity Infinity = new Infinity();
+
+        public static Boolean True = new Boolean(true);
+        public static Boolean False = new Boolean(false);
     }
 
     public class Undefined : Constant {
 
         public override Constant Equals(Constant other, Scope scope) {
-            if (other is Undefined || other is Null) {
-                return new Boolean(true);
-            }
-
-            return new Boolean(false);
+            return other is Undefined || other is Null ? Static.True : Static.False;
         }
 
         public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is Undefined) {
-                return new Boolean(true);
-            }
-
-            return new Boolean(false);
+            return other is Undefined ? Static.True : Static.False;
         }
 
         public override Constant Add(Constant other, Scope scope) {
@@ -50,19 +45,11 @@ namespace NetJS.Javascript {
     public class Null : Constant {
 
         public override Constant Equals(Constant other, Scope scope) {
-            if (other is Undefined || other is Null) {
-                return new Boolean(true);
-            }
-
-            return new Boolean(false);
+            return other is Null || other is Undefined ? Static.True : Static.False;
         }
 
         public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is Null) {
-                return new Boolean(true);
-            }
-
-            return new Boolean(false);
+            return other is Null ? Static.True : Static.False;
         }
 
         public override string ToString() {
@@ -89,19 +76,11 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Equals(Constant other, Scope scope) {
-            if (other is NaN) {
-                return new Boolean(true);
-            }
-
-            return new Boolean(false);
+            return other is NaN ? Static.True : Static.False;
         }
 
         public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is NaN) {
-                return new Boolean(true);
-            }
-
-            return new Boolean(false);
+            return other is NaN ? Static.True : Static.False;
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
@@ -120,19 +99,11 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Equals(Constant other, Scope scope) {
-            if (other is Infinity) {
-                return new Boolean(true);
-            }
-
-            return new Boolean(false);
+            return other is Infinity ? Static.True : Static.False;
         }
 
         public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is Infinity) {
-                return new Boolean(true);
-            }
-
-            return new Boolean(false);
+            return other is Infinity ? Static.True : Static.False;
         }
 
         public override void Uneval(StringBuilder builder, int depth) {

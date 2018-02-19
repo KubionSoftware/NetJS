@@ -1,10 +1,6 @@
 {
-	"SourceData": {
+	"Data": {
 		"type": "sql",
-		"connectionString": "user id=sa;password=Kubi0nSQL!;server=10.200.200.9;database=IRIS4Dev;connection timeout=30"
-	},
-	"REST": {
-		"type": "http",
-		"url": "http://10.200.200.9/iris4dev_rest/"
+		"connectionString": "Server=technistuff.nl;Database=Pool;User Id=sa;Password=tEst1ng"
 	}
 }

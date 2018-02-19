@@ -10,7 +10,6 @@ namespace NetJS.Javascript {
         }
 
         public override Constant Call(Constant other, Constant _this, Scope scope) {
-
             if (other is ArgumentList) {
                 var argumentList = (ArgumentList)other;
                 var arguments = new Constant[argumentList.Arguments.Count];
@@ -20,7 +19,7 @@ namespace NetJS.Javascript {
                     arguments[i] = value;
                 }
 
-                return Function(_this, arguments, Scope);
+                return Function(_this, arguments, new Scope(Scope, this, scope.Session, scope.SVCache));
             }
 
             return base.Call(other, _this, scope);
@@ -67,7 +66,7 @@ namespace NetJS.Javascript {
         public override Constant Call(Constant other, Constant _this, Scope scope) {
             if (other is ArgumentList) {
                 var argumentList = (ArgumentList)other;
-                var functionScope = new Scope(Scope, this);
+                var functionScope = new Scope(Scope, this, scope.Session, scope.SVCache);
 
                 functionScope.SetVariable("this", _this);
 

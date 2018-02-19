@@ -17,8 +17,8 @@ namespace NetJS {
 
             var result = node.Execute(scope);
 
-            if(result is Javascript.String) {
-                return ((Javascript.String)result).Value;
+            if(result is Javascript.String s) {
+                return s.Value;
             }
 
             return "";

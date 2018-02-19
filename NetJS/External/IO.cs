@@ -1,23 +1,19 @@
-﻿using NetJS.Javascript;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System;
 
 namespace NetJS.External {
     public class IO {
 
-        public static Constant write(Constant _this, Constant[] arguments, Scope scope) {
+        public static Javascript.Constant write(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
             var name = Tool.GetArgument<Javascript.String>(arguments, 0, "IO.write");
             var content = Tool.GetArgument<Javascript.String>(arguments, 1, "IO.write");
 
             // TODO: handle errors
             System.IO.File.WriteAllText(scope.Application.Settings.Root + name.Value, content.Value);
 
-            return Static.Undefined;
+            return Javascript.Static.Undefined;
         }
 
-        public static Constant read(Constant _this, Constant[] arguments, Scope scope) {
+        public static Javascript.Constant read(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
             var name = Tool.GetArgument<Javascript.String>(arguments, 0, "IO.read");
 
             // TODO: determine return when error
@@ -28,12 +24,12 @@ namespace NetJS.External {
             }
         }
 
-        public static Constant delete(Constant _this, Constant[] arguments, Scope scope) {
+        public static Javascript.Constant delete(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
             var name = Tool.GetArgument<Javascript.String>(arguments, 0, "IO.delete");
 
             // TODO: handle errors
             System.IO.File.Delete(scope.Application.Settings.Root + name.Value);
-            return Static.Undefined;
+            return Javascript.Static.Undefined;
         }
     }
 }
