@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NetJS.Javascript;
+using NetJS.Core.Javascript;
+using NetJS.Core;
 using System.Diagnostics;
 using NetJS;
 
@@ -15,8 +16,8 @@ namespace Testing {
             string message = "Could not read message";
 
             try {
-                var function = Tool.GetArgument<NetJS.Javascript.InternalFunction>(arguments, 0, "assert");
-                message = Tool.GetArgument<NetJS.Javascript.String>(arguments, 1, "assert").Value;
+                var function = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.InternalFunction>(arguments, 0, "assert");
+                message = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.String>(arguments, 1, "assert").Value;
 
                 value = function.Call(new ArgumentList() { Arguments = new List<Expression>() }, null, scope);
             } catch (Exception e) {
@@ -24,7 +25,7 @@ namespace Testing {
                 Console.Error.WriteLine(e);
             }
 
-            if (value is NetJS.Javascript.Boolean b && b.Value) {
+            if (value is NetJS.Core.Javascript.Boolean b && b.Value) {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Test successful - " + message);
                 Program.NumSuccess++;
@@ -35,7 +36,28 @@ namespace Testing {
                 Program.NumFailed++;
             }
 
-            return NetJS.Javascript.Static.Undefined;
+            return NetJS.Core.Javascript.Static.Undefined;
+        }
+
+        public static Constant time(Constant _this, Constant[] arguments, Scope scope) {
+            string message = "Could not read message";
+
+            try {
+                var function = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.InternalFunction>(arguments, 0, "assert");
+                message = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.String>(arguments, 1, "assert").Value;
+
+                var watch = new Stopwatch();
+                watch.Start();
+                function.Call(new ArgumentList() { Arguments = new List<Expression>() }, null, scope);
+                watch.Stop();
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"{message} took {watch.ElapsedMilliseconds}ms");
+            } catch (Exception e) {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Error.WriteLine(e);
+            }
+
+            return NetJS.Core.Javascript.Static.Undefined;
         }
     }
 
@@ -45,35 +67,43 @@ namespace Testing {
         public static int NumSuccess = 0;
 
         static void Main(string[] args) {
-            var service = new JSService();
-            var application = new JSApplication("../../../NetJS/test/");
+            try {
+                var service = new JSService();
+                var application = new JSApplication("../../../NetJS/test/");
 
-            application.Global.RegisterFunctions(typeof(TestFunctions));
+                application.Engine.RegisterFunctions(typeof(TestFunctions));
 
-            while (true) {
-                NumFailed = 0;
-                NumSuccess = 0;
+                while (true) {
+                    NumFailed = 0;
+                    NumSuccess = 0;
 
-                var watch = new Stopwatch();
-                watch.Start();
+                    var watch = new Stopwatch();
+                    watch.Start();
 
-                var session = new JSSession();
-                var output = service.RunTemplate("main.js", "{}", ref application, ref session);
+                    var session = new JSSession();
+                    var output = service.RunTemplate("main.js", "{}", ref application, ref session);
 
-                watch.Stop();
+                    watch.Stop();
 
-                Console.ForegroundColor = NumFailed == 0 ? ConsoleColor.Green : ConsoleColor.Red;
-                Console.WriteLine($"Completed test with {NumFailed} failures and {NumSuccess} successes");
+                    Console.ForegroundColor = NumFailed == 0 ? ConsoleColor.Green : ConsoleColor.Red;
+                    Console.WriteLine($"Completed test with {NumFailed} failures and {NumSuccess} successes");
 
-                Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = ConsoleColor.White;
 
-                Console.WriteLine("Output: ");
-                Console.WriteLine(output);
+                    Console.WriteLine("Output: ");
+                    Console.WriteLine(output);
 
-                Console.WriteLine("Time: " + watch.ElapsedMilliseconds + "ms");
+                    Console.WriteLine("Time: " + watch.ElapsedMilliseconds + "ms");
 
-                Console.ReadLine();
+                    Console.ReadLine();
+                }
+            } catch(Exception e) {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error in NetJS: ");
+                Console.WriteLine(e);
             }
+
+            Console.ReadLine();
         }
     }
 }

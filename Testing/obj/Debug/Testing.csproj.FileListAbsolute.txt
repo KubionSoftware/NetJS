@@ -31,10 +31,8 @@ C:\sync\source\c#\netjs\Testing\bin\Debug\XDataSource.dll
 C:\sync\source\c#\netjs\Testing\bin\Debug\XDocuments.dll
 C:\sync\source\c#\netjs\Testing\bin\Debug\IXDocuments.dll
 C:\sync\source\c#\netjs\Testing\bin\Debug\KubionData.dll
-C:\sync\source\c#\netjs\Testing\bin\Debug\Microsoft.IdentityModel.dll
 C:\sync\source\c#\netjs\Testing\bin\Debug\XDocumentsWebControls.dll
 C:\sync\source\c#\netjs\Testing\bin\Debug\Newtonsoft.Json.dll
-C:\sync\source\c#\netjs\Testing\bin\Debug\NLog.dll
 C:\sync\source\c#\netjs\Testing\bin\Debug\NetJS.pdb
 C:\sync\source\c#\netjs\Testing\bin\Debug\NetJS.dll.config
 C:\sync\source\c#\netjs\Testing\bin\Debug\Fast.pdb
@@ -42,3 +40,5 @@ C:\sync\source\c#\netjs\Testing\obj\Debug\Testing.csprojResolveAssemblyReference
 C:\sync\source\c#\netjs\Testing\obj\Debug\Testing.csproj.CoreCompileInputs.cache
 C:\sync\source\c#\netjs\Testing\obj\Debug\Testing.exe
 C:\sync\source\c#\netjs\Testing\obj\Debug\Testing.pdb
+C:\sync\source\c#\NetJS\Testing\bin\Debug\Core.dll
+C:\sync\source\c#\NetJS\Testing\bin\Debug\Core.pdb

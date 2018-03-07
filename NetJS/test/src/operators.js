@@ -156,3 +156,10 @@ assert(() => !("y" in obj), "Property not in Object");
 
 assert(() => (true ? "yes" : "no") == "yes", "Conditional true");
 assert(() => (false ? "yes": "no") == "no", "Conditional false");
+
+// Call + Access
+var getObject = function(){
+	return {x: 3};
+};
+assert(() => getObject().x == 3, "Call + Access dot");
+assert(() => getObject()["x"] == 3, "Call + Access brackets");

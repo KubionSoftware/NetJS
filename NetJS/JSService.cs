@@ -1,17 +1,53 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
+using NetJS.Core.Javascript;
+using NetJS.Core.Internal;
+using NetJS.Core;
 
 namespace NetJS { 
     public class JSService {
 
         public JSService() {
 
+        }
+
+        public static string[] GetPath(HttpRequest request) {
+            return request.Url.PathAndQuery.Split('?')[0].Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public static Core.Javascript.Object CreateRequest(HttpContext context, string[] path, Scope scope) {
+            var request = Core.Tool.Construct("Object", scope);
+            request.Set("path", Core.Tool.ToArray(path, scope));
+
+            var form = Core.Tool.Construct("Object", scope);
+            for (var i = 0; i < context.Request.Form.Count; i++) {
+                var key = context.Request.Form.GetKey(i);
+                var value = context.Request.Form.Get(i);
+                form.Set(key, new Core.Javascript.String(value));
+            }
+            request.Set("form", form);
+
+            var parameters = Core.Tool.Construct("Object", scope);
+            var query = HttpUtility.ParseQueryString(context.Request.Url.Query);
+            for (var i = 0; i < query.Count; i++) {
+                var key = query.GetKey(i);
+                if (key == null) continue;
+
+                var value = query.Get(i);
+                parameters.Set(key, new Core.Javascript.String(value));
+            }
+            request.Set("params", parameters);
+
+            var content = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding).ReadToEnd();
+            request.Set("content", new Core.Javascript.String(content));
+
+            request.Set("method", new Core.Javascript.String(context.Request.HttpMethod));
+            request.Set("url", new Core.Javascript.String(context.Request.RawUrl));
+            request.Set("scheme", new Core.Javascript.String(context.Request.Url.Scheme));
+
+            return request;
         }
 
         public string RunTemplate(string template) {
@@ -39,31 +75,37 @@ namespace NetJS {
         }
 
         public string RunTemplate(string template, string data, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
-            var arguments = Internal.JSON.parse(null, new[] { new Javascript.String(data) }, application.Global.Scope);
-            if (arguments is Javascript.Object) {
-                return RunTemplate(template, (Javascript.Object)arguments, ref application, ref session, ref svCache);
+            var arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.Scope);
+            if (arguments is Core.Javascript.Object a) {
+                return RunTemplate(template, a, ref application, ref session, ref svCache);
             }
             return "invalid arguments (must be valid json)";
         }
 
-        public string RunTemplate(string template, Javascript.Object arguments, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
+        // Every template is executed via this function
+        public string RunTemplate(string template, Core.Javascript.Object arguments, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
             try {
                 if (arguments == null) {
-                    arguments = Tool.Construct("Object", application.Global.Scope);
+                    arguments = Core.Tool.Construct("Object", application.Engine.Scope);
                 }
+
+                var scope = new Scope(application.Engine.Scope, null, ScopeType.Session);
+                scope.SetVariable("__application__", new Foreign(application));
+                scope.SetVariable("__session__", new Foreign(session));
+                scope.SetVariable("__svCache__", new Foreign(svCache));
 
                 // TODO: better way to forward session
-                var result = Internal.Functions.include(
-                    Javascript.Static.Undefined,
-                    new Javascript.Constant[] { new Javascript.String(template), arguments },
-                    new Javascript.Scope(application.Global.Scope, null, session, svCache)
+                var result = External.Functions.include(
+                    Static.Undefined,
+                    new Constant[] { new Core.Javascript.String(template), arguments },
+                    scope
                 );
 
-                if (result is Javascript.String s) {
+                if (result is Core.Javascript.String s) {
                     return s.Value;
                 }
-            } catch (Javascript.Error e) {
-                return e.Message + "<br>" + string.Join("<br>", e.StackTrace.Select(loc => Debug.GetFileName(loc.FileId) + " (" + loc.LineNr + ")"));
+            } catch (Error e) {
+                return e.Message + "\n" + string.Join("\n", e.StackTrace.Select(loc => Debug.GetFileName(loc.FileId) + " (" + loc.LineNr + ")"));
             } catch (Exception e) {
                 return "System error - " + e.ToString();
             }
@@ -71,7 +113,7 @@ namespace NetJS {
             return "";
         }
 
-        public string RunTemplate(string template, Javascript.Object arguments, ref JSApplication application) {
+        public string RunTemplate(string template, Core.Javascript.Object arguments, ref JSApplication application) {
             if(application == null) {
                 application = new JSApplication();
             }
@@ -85,21 +127,21 @@ namespace NetJS {
         public void ProcessRequest(HttpContext context, JSApplication application, JSSession session) {
             XHTMLMerge.SVCache svCache = null;
 
-            var path = Tool.GetPath(context.Request);
+            var path = GetPath(context.Request);
 
-            var arguments = Tool.Construct("Object", application.Global.Scope);
-            arguments.Set("request", Tool.CreateRequest(context, path, application.Global.Scope));
+            var arguments = Core.Tool.Construct("Object", application.Engine.Scope);
+            arguments.Set("request", CreateRequest(context, path, application.Engine.Scope));
 
-            var response = Tool.Construct("Object", application.Global.Scope);
-            response.Set("contentType", new Javascript.String("text/html"));
-            response.Set("statusCode", new Javascript.Number(200));
+            var response = Core.Tool.Construct("Object", application.Engine.Scope);
+            response.Set("contentType", new Core.Javascript.String("text/html"));
+            response.Set("statusCode", new Core.Javascript.Number(200));
             arguments.Set("response", response);
 
             var responseString = RunTemplate(application.Settings.Entry, arguments, ref application, ref session, ref svCache);
 
             try {
-                context.Response.ContentType = response.Get<Javascript.String>("contentType").Value;
-                context.Response.StatusCode = (int)response.Get<Javascript.Number>("statusCode").Value;
+                context.Response.ContentType = response.Get<Core.Javascript.String>("contentType").Value;
+                context.Response.StatusCode = (int)response.Get<Core.Javascript.Number>("statusCode").Value;
             }catch(Exception) {
                 // TODO: log error
             }
@@ -118,7 +160,7 @@ namespace NetJS {
             JSSession session = null;
 
             if (context.Application != null) application = (JSApplication)context.Application["JSApplication"];
-            if (application == null) application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory + "res/");
+            if (application == null) application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory);
 
             if (context.Session != null) session = (JSSession)context.Session["JSSession"];
             if (session == null) session = new JSSession();
@@ -132,7 +174,7 @@ namespace NetJS {
         public void Handle(HttpContext context) {
             JSApplication application = null;
             if (context.Application != null) application = (JSApplication)context.Application["JSApplication"];
-            if (application == null) application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory + "res/");
+            if (application == null) application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory);
 
             var mainTemplate = application.Settings.Root + application.Settings.TemplateFolder + application.Settings.Entry;
 

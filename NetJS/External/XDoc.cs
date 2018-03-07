@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using System.Web;
+using NetJS.Core.Javascript;
 
 namespace NetJS.External {
     public class XDoc {
 
-        public static Javascript.Constant include(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
-            var name = Tool.GetArgument<Javascript.String>(arguments, 0, "XDoc.include");
+        public static Constant include(Constant _this, Constant[] arguments, Scope scope) {
+            var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.include");
 
             var context = HttpContext.Current;
 
@@ -23,40 +21,46 @@ namespace NetJS.External {
 
             var parameters = new Hashtable();
             if (arguments.Length > 1) {
-                var param = (Javascript.Object)arguments[1];
+                var param = (Core.Javascript.Object)arguments[1];
                 foreach (var key in param.GetKeys()) {
                     parameters.Add(key, param.Get(key).ToString());
                 }
             }
-            
-            var result = scope.Application.XDocService.RunTemplate(context, name.Value, parameters, ref appCache, ref svCache);
+
+            var application = Tool.GetFromScope<JSApplication>(scope, "__application__");
+            if (application == null) throw new InternalError("No application");
+            var result = application.XDocService.RunTemplate(context, name.Value, parameters, ref appCache, ref svCache);
 
             if (context != null && context.Application != null) context.Application["AppCache"] = appCache;
             if (context != null && context.Session != null) context.Session["SVCache"] = svCache;
 
-            return new Javascript.String(result);
+            return new Core.Javascript.String(result);
         }
 
-        public static Javascript.Constant get(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
-            var key = Tool.GetArgument<Javascript.String>(arguments, 0, "XDoc.get").Value;
-            var context = Tool.GetArgument<Javascript.String>(arguments, 1, "XDoc.get").Value;
-            var id = Tool.GetArgument<Javascript.String>(arguments, 2, "XDoc.get").Value;
+        public static Constant get(Constant _this, Constant[] arguments, Scope scope) {
+            var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.get").Value;
+            var context = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "XDoc.get").Value;
+            var id = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 2, "XDoc.get").Value;
 
-            var value = scope.SVCache == null ? "" : scope.SVCache.GetSV(key, context + "_" + id, "");
+            var svCache = Tool.GetFromScope<XHTMLMerge.SVCache>(scope, "__svCache__");
+            if (svCache == null) throw new InternalError("No svCache");
+            var value = svCache == null ? "" : svCache.GetSV(key, context + "_" + id, "");
 
-            if (value.Length == 0) return Javascript.Static.Undefined;
-            return new Javascript.String(value);
+            if (value.Length == 0) return Core.Javascript.Static.Undefined;
+            return new Core.Javascript.String(value);
         }
 
-        public static Javascript.Constant set(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
-            var key = Tool.GetArgument<Javascript.String>(arguments, 0, "XDoc.get").Value;
-            var context = Tool.GetArgument<Javascript.String>(arguments, 1, "XDoc.get").Value;
-            var id = Tool.GetArgument<Javascript.String>(arguments, 2, "XDoc.get").Value;
-            var value = Tool.GetArgument(arguments, 3, "Session.set");
+        public static Constant set(Constant _this, Constant[] arguments, Scope scope) {
+            var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.get").Value;
+            var context = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "XDoc.get").Value;
+            var id = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 2, "XDoc.get").Value;
+            var value = Core.Tool.GetArgument(arguments, 3, "Session.set");
 
-            if (scope.SVCache != null) scope.SVCache.SetSV(key, context + "_" + id, value.ToString());
+            var svCache = Tool.GetFromScope<XHTMLMerge.SVCache>(scope, "__svCache__");
+            if (svCache == null) throw new InternalError("No svCache");
+            if (svCache != null) svCache.SetSV(key, context + "_" + id, value.ToString());
 
-            return Javascript.Static.Undefined;
+            return Static.Undefined;
         }
     }
 }

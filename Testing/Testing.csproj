@@ -50,6 +50,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{641457c2-a76b-47d8-af78-eb9e19df9d03}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NetJS\NetJS.csproj">
       <Project>{8b369af1-16d5-4e55-91d9-8afceb021414}</Project>
       <Name>NetJS</Name>

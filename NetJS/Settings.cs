@@ -16,13 +16,15 @@ namespace NetJS {
         public string Log { get; } = "log.txt";
 
         public Settings(string root) {
-            Root = root;
-
+            Root = GetValue("JSFiles", root);
             TemplateFolder = GetValue("JSTemplates", TemplateFolder);
             Entry = GetValue("JSEntry", Entry);
             Config = GetValue("JSConfig", Config);
             Connections = GetValue("JSConnections", Connections);
             Log = GetValue("JSLog", Log);
+
+            if (!Root.EndsWith("/")) Root += "/";
+            if (!TemplateFolder.EndsWith("/")) TemplateFolder += "/";
         }
 
         public static string GetValue(string key, string def) {

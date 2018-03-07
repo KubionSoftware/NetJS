@@ -1,12 +1,11 @@
-﻿using NetJS.Javascript;
-using System;
-using System.Linq;
+﻿using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.SessionState;
 using System.Web.WebSockets;
+using NetJS.Core;
 
 namespace NetJS {
     internal class WebHandler : IHttpHandler, IRequiresSessionState {

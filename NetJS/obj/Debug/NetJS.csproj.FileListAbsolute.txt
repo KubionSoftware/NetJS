@@ -20,12 +20,9 @@ C:\sync\source\c#\NetJS\NetJS\bin\XDataSource.dll
 C:\sync\source\c#\NetJS\NetJS\bin\XDocuments.dll
 C:\sync\source\c#\NetJS\NetJS\bin\IXDocuments.dll
 C:\sync\source\c#\NetJS\NetJS\bin\KubionData.dll
-C:\sync\source\c#\NetJS\NetJS\bin\Microsoft.IdentityModel.dll
 C:\sync\source\c#\NetJS\NetJS\bin\XDocumentsWebControls.dll
 C:\sync\source\c#\NetJS\NetJS\bin\Newtonsoft.Json.dll
-C:\sync\source\c#\NetJS\NetJS\bin\NLog.dll
 C:\sync\source\c#\NetJS\NetJS\bin\Fast.pdb
-C:\sync\source\c#\NetJS\NetJS\obj\Debug\NetJS.csprojResolveAssemblyReference.cache
 C:\sync\source\c#\NetJS\NetJS\obj\Debug\NetJS.csproj.CoreCompileInputs.cache
 C:\sync\source\c#\netjs\NetJS\bin\NetJS.dll.config
 C:\sync\source\c#\netjs\NetJS\bin\NetJS.dll
@@ -35,3 +32,6 @@ C:\sync\source\c#\netjs\NetJS\obj\Debug\NetJS.pdb
 C:\sync\source\c#\NetJS\NetJS\bin\Fast.dll
 C:\sync\source\c#\NetJS\NetJS\bin\XDocServices.dll
 C:\sync\source\c#\NetJS\NetJS\bin\XHTMLMerge.dll
+C:\sync\source\c#\NetJS\NetJS\obj\Debug\NetJS.csprojResolveAssemblyReference.cache
+C:\sync\source\c#\NetJS\NetJS\bin\Core.dll
+C:\sync\source\c#\NetJS\NetJS\bin\Core.pdb

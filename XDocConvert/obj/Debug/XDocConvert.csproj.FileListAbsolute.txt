@@ -18,3 +18,6 @@ C:\sync\source\c#\JSDoc\XDocConvert\bin\Debug\Microsoft.IdentityModel.dll
 C:\sync\source\c#\JSDoc\XDocConvert\bin\Debug\XDocumentsWebControls.dll
 C:\sync\source\c#\JSDoc\XDocConvert\bin\Debug\Newtonsoft.Json.dll
 C:\sync\source\c#\JSDoc\XDocConvert\bin\Debug\NLog.dll
+C:\sync\source\c#\NetJS\XDocConvert\obj\Debug\XDocConvert.csprojResolveAssemblyReference.cache
+C:\sync\source\c#\NetJS\XDocConvert\obj\Debug\XDocConvert.csproj.CoreCompileInputs.cache
+C:\sync\source\c#\NetJS\XDocConvert\obj\Debug\XDocConvert.exe

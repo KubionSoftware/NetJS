@@ -1,26 +1,31 @@
-﻿namespace NetJS.External {
+﻿using NetJS.Core.Javascript;
+
+namespace NetJS.External {
     class HTTP {
 
-        public static Javascript.Constant get(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
-            var url = ((Javascript.String)arguments[0]).Value;
-            return new Javascript.String(Util.HTTP.Get(url));
+        public static Constant get(Constant _this, Constant[] arguments, Scope scope) {
+            var url = ((Core.Javascript.String)arguments[0]).Value;
+            return new Core.Javascript.String(Util.HTTP.Get(url));
         }
 
-        public static Javascript.Constant post(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
-            var url = ((Javascript.String)arguments[0]).Value;
-            var content = ((Javascript.String)arguments[1]).Value;
-            return new Javascript.String(Util.HTTP.Post(url, content));
+        public static Constant post(Constant _this, Constant[] arguments, Scope scope) {
+            var url = ((Core.Javascript.String)arguments[0]).Value;
+            var content = ((Core.Javascript.String)arguments[1]).Value;
+            return new Core.Javascript.String(Util.HTTP.Post(url, content));
         }
 
-        public static Javascript.Constant execute(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
-            var connectionName = ((Javascript.String)arguments[0]).Value;
-            var url = scope.Application.Connections.GetHttpUrl(connectionName);
+        public static Constant execute(Constant _this, Constant[] arguments, Scope scope) {
+            var connectionName = ((Core.Javascript.String)arguments[0]).Value;
 
-            var query = ((Javascript.String)arguments[1]).Value;
+            var application = Tool.GetFromScope<JSApplication>(scope, "__application__");
+            if (application == null) throw new InternalError("No application");
+            var url = application.Connections.GetHttpUrl(connectionName);
 
-            var result = new Javascript.String(Util.HTTP.Get(url + query));
+            var query = ((Core.Javascript.String)arguments[1]).Value;
+
+            var result = new Core.Javascript.String(Util.HTTP.Get(url + query));
             try {
-                var json = Internal.JSON.parse(_this, new[] { result }, scope);
+                var json = Core.Internal.JSON.parse(_this, new[] { result }, scope);
                 return json;
             } catch {
                 return result;

@@ -84,7 +84,7 @@ assert(() => numbers.find(n => n > 4) == 5, "Array.find");
 assert(() => numbers.findIndex(n => n > 4) == 1, "Array.findIndex");
 
 assert(() => numbers.includes(5) == true, "Array.includes true");
-assert(() => numbers.includes(6) == false, "Array.includes false")
+assert(() => numbers.includes(6) == false, "Array.includes false");
 
 numbers.reverse();
 assert(() => numbers[0] == 2 && numbers[1] == 5 && numbers[2] == 3, "Array.reverse odd length");

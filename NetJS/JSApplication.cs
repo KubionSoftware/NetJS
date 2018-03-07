@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using NetJS.Core;
 
 namespace NetJS {
     public class JSApplication {
 
-        public Global Global { get; }
+        public Cache Cache { get; }
         public Watch Watch { get; }
         public Connections Connections { get; }
         public External.Config Config { get; }
         public Settings Settings { get; }
+
+        public Engine Engine { get; }
 
         public XDocServices.XDocService XDocService { get; }
 
@@ -22,11 +22,20 @@ namespace NetJS {
             Settings = new Settings(rootDir);
 
             Watch = new Watch();
-            Global = new Global(this);
-            Global.Init();
+            Cache = new Cache();
+
+            Engine = new Engine();
+            Engine.Init();
+            Engine.RegisterClass(typeof(External.HTTP));
+            Engine.RegisterClass(typeof(External.SQL));
+            Engine.RegisterClass(typeof(External.IO));
+            Engine.RegisterClass(typeof(External.Log));
+            Engine.RegisterClass(typeof(External.Session));
+            Engine.RegisterClass(typeof(External.XDoc));
+            Engine.RegisterFunctions(typeof(External.Functions));
 
             Connections = new Connections(Watch, Settings);
-            Config = new External.Config(Watch, Global.Scope, Settings);
+            Config = new External.Config(Watch, Engine.Scope, Settings);
 
             XDocService = new XDocServices.XDocService();
         }

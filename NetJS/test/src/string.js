@@ -3,7 +3,7 @@ var s;
 s = "abc";
 assert(() => s.length == 3, "String.length");
 
-assert(() => "abc".charAt(1) == "b", "String.charAt")
+assert(() => "abc".charAt(1) == "b", "String.charAt");
 assert(() => "abc".charCodeAt(1) == 98, "String.charCodeAt");
 
 s = "abc hoi def";
