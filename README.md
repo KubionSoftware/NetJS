@@ -84,12 +84,14 @@ var postResponse = HTTP.post("example.com", JSON.stringify(data));
 
 You should now have the following structure
 
-Project  
-├── bin  
-│   ├── ...  
-├── src  
-│   ├── main.js  
-├── web.config  
+```
+   .
+   ├── bin
+   │   └── ...
+   ├── src
+   │   └── main.js
+   └── web.config
+```
 
 - Create a new application in IIS with the location set to your project folder.
 - Set the security rights for your project folder to allow the IIS users.
