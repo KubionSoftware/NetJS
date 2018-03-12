@@ -1,6 +1,0 @@
-C:\sync\source\c#\netjs\Fast\bin\Debug\Fast.dll
-C:\sync\source\c#\netjs\Fast\bin\Debug\Fast.pdb
-C:\sync\source\c#\netjs\Fast\obj\Debug\Fast.csproj.CoreCompileInputs.cache
-C:\sync\source\c#\netjs\Fast\obj\Debug\Fast.dll
-C:\sync\source\c#\netjs\Fast\obj\Debug\Fast.pdb
-C:\sync\source\c#\NetJS\Fast\obj\Debug\Fast.csprojResolveAssemblyReference.cache

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Util;
 
 namespace NetJS.Core.Javascript {
@@ -152,7 +153,13 @@ namespace NetJS.Core.Javascript {
             return true;
         }
 
-        public IEnumerable<string> Variables { get { return _variables.Keys; } }
+        public IEnumerable<string> Variables {
+            get {
+                var variables = _variables.Keys.ToList();
+                if (Parent != null) variables.AddRange(Parent.Variables);
+                return variables;
+            }
+        }
 
         public bool DeclareVariable(string variable, Constant value, bool create = true) {
             _variables.Set(variable, value);

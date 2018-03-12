@@ -31,10 +31,29 @@ namespace NetJS.Core.Internal {
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
+            return new Javascript.String(toDateString(_this, arguments, scope).ToString() + " " + toTimeString(_this, arguments, scope).ToString());
+        }
+
+        public static Constant toISOString(Constant _this, Constant[] arguments, Scope scope) {
+            var date = (Javascript.Date)_this;
+            return new Javascript.String(date.Value.ToUniversalTime().ToString("o"));
+        }
+
+        public static Constant toDateString(Constant _this, Constant[] arguments, Scope scope) {
+            var date = (Javascript.Date)_this;
+            return new Javascript.String(date.Value.ToString("ddd MMM dd yyyy"));
+        }
+
+        public static Constant toTimeString(Constant _this, Constant[] arguments, Scope scope) {
             var date = (Javascript.Date)_this;
             var timeZoneName = TimeZoneInfo.Local.StandardName;
             var timeZoneTime = date.Value.ToString("zzz").Replace(":", "");
-            return new Javascript.String(date.Value.ToString("ddd MMM dd yyyy HH:mm:ss") + " GMT" + timeZoneTime + " (" + timeZoneName + ")");
+            return new Javascript.String(date.Value.ToString("HH:mm:ss") + " GMT" + timeZoneTime + " (" + timeZoneName + ")");
+        }
+
+        public static Constant toUTCString(Constant _this, Constant[] arguments, Scope scope) {
+            var date = (Javascript.Date)_this;
+            return new Javascript.String(date.Value.ToString("ddd MMM dd yyyy HH:mm:ss") + " GMT");
         }
 
         public static Constant getFullYear(Constant _this, Constant[] arguments, Scope scope) {

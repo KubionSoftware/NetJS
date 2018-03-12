@@ -1,2 +1,4 @@
 ui*/
 .vs/
+bin/
+obj/
