@@ -75,6 +75,24 @@ var getResponse = HTTP.get("example.com");
 var postResponse = HTTP.post("example.com", JSON.stringify(data));
 ```
 
+## SQL
+The SQL object allows access to an SQL database. To use this you must define the connection in a file named 'connections.json' in the root of the project. An example:
+
+```json
+{
+	"Data": {
+		"type": "sql",
+		"connectionString": "Server=example.com;Database=ExampleName;User Id=sa;Password=test"
+	}
+}
+```
+
+You can then use the SQL object to execute statements with that connection. If the statement starts with 'SELECT' it will return the data as an array with objects.
+
+```javascript
+var rows = SQL.execute("Data", "SELECT * FROM Table");
+```
+
 ## Installation
 - Create a new folder for your project.
 - Copy the binaries from the release folder and place them in a new folder called 'bin'.
