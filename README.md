@@ -121,24 +121,9 @@ var rows = SQL.execute("Data", "SELECT * FROM Table");
 <a name="installation"/>
 
 ## Installation
-- Create a new folder for your project.
-- Copy the binaries from the release folder and place them in a new folder called 'bin'.
-- Create a folder called 'src' on the same level as the bin folder.
-- Copy the web.config file from the release folder and place it in your project folder.
-- Create a new file 'main.js' in your src folder
-
-You should now have the following structure
-
-```
-   .
-   ├── bin
-   │   └── ...
-   ├── src
-   │   └── main.js
-   └── web.config
-```
-
-- Create a new application in IIS with the location set to your project folder.
-- Set the security rights for your project folder to allow the IIS users.
+- Copy the release folder and place it somewhere on your computer
+- Rename the release folder to the name of your project
+- Create a new application in IIS with the location set to your project folder
+- Set the security rights for your project folder to allow the IIS user
 
 You should now have a running application. The entry point is the main.js file.
