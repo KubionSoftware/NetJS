@@ -57,7 +57,7 @@ namespace NetJS.Core {
 
             for (var i = 0; i < parts.Length; i++) {
                 if(insidePath.Length > 0) {
-                    insidePath += System.IO.Path.DirectorySeparatorChar + parts[i];
+                    insidePath += "/" + parts[i];
                 } else if(parts[i] == "src") {
                     insidePath += parts[i];
                 }

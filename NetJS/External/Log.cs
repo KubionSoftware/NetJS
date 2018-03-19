@@ -1,4 +1,5 @@
 ﻿using NetJS.Core.Javascript;
+using System;
 
 namespace NetJS.External {
     public class Log {
@@ -13,7 +14,8 @@ namespace NetJS.External {
             var file = application.Settings.Root + application.Settings.Log;
 
             try {
-                System.IO.File.AppendAllText(file, message + "\n");
+                var info = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss:fff");
+                System.IO.File.AppendAllText(file, info + " - " + message + "\n");
             } catch { }
 
             return Static.Undefined;

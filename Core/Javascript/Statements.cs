@@ -9,10 +9,24 @@ namespace NetJS.Core.Javascript {
 
         public override Result Execute(Scope scope) {
             var output = new StringBuilder();
+            var depth = scope.Depth();
 
             foreach (var node in Nodes) {
                 if (Debug.BreakpointNodes.Contains(node.Id)) {
+                    Debug.SteppingLevel = scope.Depth();
                     Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                } else if (Debug.SteppingInto && depth > Debug.SteppingLevel) {
+                    Debug.SteppingLevel++;
+                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                    Debug.SteppingInto = false;
+                } else if (Debug.SteppingOut && depth < Debug.SteppingLevel) {
+                    Debug.SteppingLevel--;
+                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                    Debug.SteppingOut = false;
+                } else if (Debug.SteppingOver && depth <= Debug.SteppingLevel) {
+                    Debug.SteppingLevel = depth;
+                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                    Debug.SteppingOver = false;
                 }
 
                 try {
@@ -38,6 +52,7 @@ namespace NetJS.Core.Javascript {
                         output.Append(html.ToString(scope));
                     }
                 } catch (Error e) {
+                    Debug.SteppingLevel = scope.Depth();
                     var location = Debug.GetNodeLocation(node.Id);
                     Debug.Break("stopOnException", scope.GetStackTrace(location), scope.GetScopes());
 

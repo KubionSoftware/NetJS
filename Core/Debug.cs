@@ -56,6 +56,11 @@ namespace NetJS.Core {
 
         private static int LastId = 0;
 
+        public static bool SteppingInto = false;
+        public static bool SteppingOut = false;
+        public static bool SteppingOver = false;
+        public static int SteppingLevel = -1;
+
         public static int GetFileId(string path) {
             var normalized = Tool.NormalizePath(path);
 
@@ -186,6 +191,7 @@ namespace NetJS.Core {
 
         public static void RemoveSocket(WebSocket socket) {
             Sockets.Remove(socket);
+            Continue();
         }
 
         public static void Break(string eventName, List<Frame> frames, List<Scope> scopes) {
@@ -252,6 +258,12 @@ namespace NetJS.Core {
                     RemoveBreakpoints(fileId);
                 } else if (command == "continue") {
                     Continue();
+                } else if (command == "stepInto") {
+                    StepInto();
+                } else if (command == "stepOver") {
+                    StepOver();
+                } else if (command == "stepOut") {
+                    StepOut();
                 }
             } catch (Exception) {
                 // TODO: log error
@@ -259,6 +271,21 @@ namespace NetJS.Core {
         }
 
         public static void Continue() {
+            BreakHandle.Set();
+        }
+
+        public static void StepInto() {
+            SteppingInto = true;
+            BreakHandle.Set();
+        }
+
+        public static void StepOver() {
+            SteppingOver = true;
+            BreakHandle.Set();
+        }
+
+        public static void StepOut() {
+            SteppingOut = true;
             BreakHandle.Set();
         }
 
