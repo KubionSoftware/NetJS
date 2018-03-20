@@ -165,5 +165,9 @@ namespace NetJS.Core.Javascript {
             _variables.Set(variable, value);
             return true;
         }
+
+        public int Depth() {
+            return Parent != null ? Parent.Depth() + 1 : 0;
+        }
     }
 }
