@@ -271,6 +271,7 @@ namespace NetJS.Core {
         }
 
         public static void Continue() {
+            SteppingLevel = -1;
             BreakHandle.Set();
         }
 

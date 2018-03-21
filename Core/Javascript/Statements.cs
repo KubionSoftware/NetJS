@@ -17,16 +17,16 @@ namespace NetJS.Core.Javascript {
                     Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 } else if (Debug.SteppingInto && depth > Debug.SteppingLevel) {
                     Debug.SteppingLevel++;
-                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                     Debug.SteppingInto = false;
+                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 } else if (Debug.SteppingOut && depth < Debug.SteppingLevel) {
                     Debug.SteppingLevel--;
-                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                     Debug.SteppingOut = false;
+                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 } else if (Debug.SteppingOver && depth <= Debug.SteppingLevel) {
                     Debug.SteppingLevel = depth;
-                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                     Debug.SteppingOver = false;
+                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 }
 
                 try {

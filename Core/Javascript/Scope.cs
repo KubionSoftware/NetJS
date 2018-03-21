@@ -100,6 +100,9 @@ namespace NetJS.Core.Javascript {
         public Debug.Scope GetScope(int index) {
             var localVariables = new Json();
             foreach (var key in _variables.Keys) {
+                // TODO: Remove this hack
+                if (key.StartsWith("__") && key.EndsWith("__")) continue;
+
                 var value = Convert.ValueToJson(_variables.Get(key), this);
                 localVariables.Value[key] = value;
             }
