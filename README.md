@@ -1,4 +1,4 @@
-# NetJS
+![NetJS](images/logo.png?raw=true "Title")
 
 NetJS is a javascript engine implemented in .NET
 It allows for backend development in javascript while still using the .NET framework and running your applications in IIS.
