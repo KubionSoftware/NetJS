@@ -32,12 +32,14 @@ namespace NetJS.Core {
             functionConstructor.Set("prototype", functionPrototype);
             functionPrototype.Set("constructor", functionConstructor);
 
-            //Scope.SetVariable("Object", objectConstructor);
+            Scope.SetVariable("Object", objectConstructor);
             _prototypes["Object"] = objectConstructor;
 
-            //Scope.SetVariable("Function", functionConstructor);
+            Scope.SetVariable("Function", functionConstructor);
             _prototypes["Function"] = functionConstructor;
 
+            RegisterType(typeof(Internal.Object));
+            RegisterType(typeof(Internal.Function));
             RegisterType(typeof(Internal.Array));
             RegisterType(typeof(Internal.Date));
             RegisterType(typeof(Internal.String));
