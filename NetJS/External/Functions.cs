@@ -2,8 +2,16 @@
 using NetJS.Core.Javascript;
 
 namespace NetJS.External {
+    /// <summary>Functions class contain functions that are injected directly into the engine.</summary>
     public class Functions {
-
+        
+        /// <summary>include  takes a file, runs the code in the file and returns the value.
+        /// If an object is given as second parameter, those variables will be set in the code before execution.
+        /// Default filetype is ".js".</summary>
+        /// <param name="file">The file to include</param>
+        /// <param name="variables">An object with variables to setup the file before execution</param>
+        /// <example><code lang="javascript">include("renderLayout.js", {loggedIn: true});</code></example>
+        /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant include(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "include");
             if (!name.Value.EndsWith(".js")) {
@@ -33,6 +41,13 @@ namespace NetJS.External {
             return node.Execute(templateScope).Constant;
         }
 
+        /// <summary>import takes a file and runs the code in the file with the current scope.
+        /// This way functions and variables can be imported.
+        /// Default filetype is ".js".</summary>
+        /// <param name="file">The file to import</param>
+        /// <example><code lang="javascript">import("date");
+        /// FormatDate(new Date());</code></example>
+        /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant import(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "import");
             if (!name.Value.EndsWith(".js")) {
@@ -47,6 +62,10 @@ namespace NetJS.External {
             return node.Execute(scope.Parent).Constant;
         }
 
+        
+        /// <summary>redirect takes an url and redirects a HttpResponse to the given url.</summary>
+        /// <param name="url">A url to redirect to</param>
+        /// <example><code lang="javascript">redirect("https://google.com/search?q=hello+world");</code></example>
         public static Constant redirect(Constant _this, Constant[] arguments, Scope scope) {
             var url = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "redirect");
             var context = HttpContext.Current;
