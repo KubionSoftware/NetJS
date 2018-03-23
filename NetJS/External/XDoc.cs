@@ -3,8 +3,13 @@ using System.Web;
 using NetJS.Core.Javascript;
 
 namespace NetJS.External {
+    /// <summary>A Compatibility class for XDoc, to ensure possibility of usage of XDoc with NetJS.</summary>
     public class XDoc {
-
+        /// <summary>XDoc.include includes other XDoc templates and returns the result.</summary>
+        /// <param name="name">Name of the included file</param>
+        /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
+        /// <returns>The result of executing the file.</returns>
+        /// <exception cref="InternalError">Thrown when no application has been found in the application scope.</exception>
         public static Constant include(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.include");
 
@@ -37,6 +42,12 @@ namespace NetJS.External {
             return new Core.Javascript.String(result);
         }
 
+        /// <summary>XDoc.get runs a svCache.GetSV with the given parameters.</summary>
+        /// <param name="key">Key for identification</param>
+        /// <param name="context">ContextName for sv</param>
+        /// <param name="id">ID needed for svCache.GetSV, can be the returnvalue</param>
+        /// <returns>The result of svCache.GetSV</returns>
+        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
         public static Constant get(Constant _this, Constant[] arguments, Scope scope) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.get").Value;
             var context = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "XDoc.get").Value;
@@ -50,6 +61,7 @@ namespace NetJS.External {
             return new Core.Javascript.String(value);
         }
 
+        
         public static Constant set(Constant _this, Constant[] arguments, Scope scope) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.get").Value;
             var context = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "XDoc.get").Value;

@@ -3,3 +3,4 @@ ui*/
 bin/
 !release/bin
 obj/
+.idea/
