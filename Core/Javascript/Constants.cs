@@ -528,6 +528,16 @@ namespace NetJS.Core.Javascript {
             }
         }
 
+        public Object ToObject(Scope scope) {
+            var obj = Tool.Construct("Object", scope);
+
+            for(var i = 0; i < List.Count; i++) {
+                obj.Set(i.ToString(), List[i]);
+            }
+
+            return obj;
+        }
+
         public Constant Get(int index) {
             if (index >= 0 && index < List.Count) {
                 return List[index];
