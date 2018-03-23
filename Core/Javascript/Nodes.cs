@@ -57,11 +57,13 @@ namespace NetJS.Core.Javascript {
 
     public abstract class Node {
 
+#if debug_enabled
         public int Id = -1;
 
         public void RegisterDebug(Debug.Location location) {
             Id = Debug.AddNode(location);
         }
+#endif
 
         public abstract void Uneval(StringBuilder builder, int depth);
         public static void NewLine(StringBuilder builder, int depth) {

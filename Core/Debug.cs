@@ -7,6 +7,7 @@ using System.Threading;
 using Util;
 
 namespace NetJS.Core {
+#if debug_enabled
     public class Debug {
 
         public struct Location {
@@ -303,4 +304,5 @@ namespace NetJS.Core {
             }
         }
     }
+#endif
 }

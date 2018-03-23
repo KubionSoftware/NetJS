@@ -4,14 +4,24 @@ using System.Collections.Generic;
 namespace NetJS.Core.Javascript {
 
     public class Error : Exception {
+#if debug_enabled
         public new List<Debug.Location> StackTrace;
+#endif
 
         public Error(string message) : base(message) {
+#if debug_enabled
             StackTrace = new List<Debug.Location>();
+#endif
         }
 
-        public void AddStackTrace(Debug.Location location) {
+        public void AddStackTrace(
+#if debug_enabled
+            Debug.Location location
+#endif
+        ) {
+#if debug_enabled
             StackTrace.Add(location);
+#endif
         }
     }
 

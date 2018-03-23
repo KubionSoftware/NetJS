@@ -70,6 +70,7 @@ namespace NetJS.Core.Javascript {
             }
         }
 
+#if debug_enabled
         public Debug.Frame GetFrame(int index, Debug.Location location) {
             return new Debug.Frame() {
                 Index = 1,
@@ -128,6 +129,7 @@ namespace NetJS.Core.Javascript {
 
             return scopes;
         }
+#endif
 
         public Constant GetVariable(string variable) {
             Constant value = null;

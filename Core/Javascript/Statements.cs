@@ -12,6 +12,7 @@ namespace NetJS.Core.Javascript {
             var depth = scope.Depth();
 
             foreach (var node in Nodes) {
+#if debug_enabled
                 if (Debug.BreakpointNodes.Contains(node.Id)) {
                     Debug.SteppingLevel = scope.Depth();
                     Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
@@ -28,6 +29,7 @@ namespace NetJS.Core.Javascript {
                     Debug.SteppingOver = false;
                     Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 }
+#endif
 
                 try {
                     if (node is Statement statement) {
@@ -52,11 +54,13 @@ namespace NetJS.Core.Javascript {
                         output.Append(html.ToString(scope));
                     }
                 } catch (Error e) {
+#if debug_enabled
                     Debug.SteppingLevel = scope.Depth();
                     var location = Debug.GetNodeLocation(node.Id);
                     Debug.Break("stopOnException", scope.GetStackTrace(location), scope.GetScopes());
 
                     e.AddStackTrace(location);
+#endif
 
                     // Rethrow the error so it keeps traveling up
                     throw;
@@ -183,7 +187,12 @@ namespace NetJS.Core.Javascript {
 
                     i++;
                     if (i >= MaxLoops) {
-                        throw new Exception(Debug.Message(node, "Maximum number of loops exceeded"));
+                        var message = "Maximum number of loops exceeded";
+#if debug_enabled
+                        throw new Exception(Debug.Message(node, message));
+#else
+                        throw new Exception(message);
+#endif
                     }
                 } else {
                     break;

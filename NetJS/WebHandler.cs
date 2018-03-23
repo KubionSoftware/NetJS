@@ -33,7 +33,10 @@ namespace NetJS {
 
         public async Task WebSocketRequestHandler(AspNetWebSocketContext context) {
             var socket = context.WebSocket;
+
+#if debug_enabled
             Debug.AddSocket(socket);
+#endif
 
             const int maxMessageSize = 1024;
 
@@ -44,11 +47,16 @@ namespace NetJS {
                 while (true) {
                     var content = await socket.ReceiveAsync(receiveBuffer, cancellationToken);
                     if (content.MessageType == System.Net.WebSockets.WebSocketMessageType.Close) {
+#if debug_enabled
                         Debug.RemoveSocket(socket);
+#endif
                         break;
                     } else {
                         var text = Encoding.UTF8.GetString(receiveBuffer.Array, 0, content.Count);
+
+#if debug_enabled
                         Debug.HandleMessage(text);
+#endif
                     }
                 }
             }
