@@ -342,6 +342,7 @@ namespace NetJS.Core.Javascript {
 
             public override bool Start(Scope scope) {
                 var objResult = _forInNode.Collection.Execute(scope);
+                if (objResult is Array array) objResult = array.ToObject(scope);
                 if (!(objResult is Object)) return false;
 
                 _obj = (Object)objResult;
