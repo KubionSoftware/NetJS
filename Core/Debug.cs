@@ -45,6 +45,9 @@ namespace NetJS.Core {
             }
         }
 
+        public const string StopOnBreakpoint = "stopOnBreakpoint";
+        public const string StopOnException = "stopOnException";
+
         private static Dictionary<string, int> Files = new Dictionary<string, int>();
 
         private static Dictionary<int, Dictionary<int, List<int>>> Nodes = new Dictionary<int, Dictionary<int, List<int>>>();
@@ -273,6 +276,7 @@ namespace NetJS.Core {
 
         public static void Continue() {
             SteppingLevel = -1;
+            SteppingInto = SteppingOver = SteppingOut = false;
             BreakHandle.Set();
         }
 

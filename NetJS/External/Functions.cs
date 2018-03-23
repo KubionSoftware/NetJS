@@ -22,7 +22,7 @@ namespace NetJS.External {
             if (application == null) throw new InternalError("No application");
             var node = application.Cache.GetFile(name.Value, application);
 
-            var templateScope = new Scope(application.Engine.Scope, node, ScopeType.Template);
+            var templateScope = new Scope(application.Engine.Scope, scope, node, ScopeType.Template);
 
             // TODO: THIS IS A MEGA-HACK, REMOVE AS SOON AS POSSIBLE!!!
             foreach (var key in scope.Variables) {
@@ -58,8 +58,8 @@ namespace NetJS.External {
             if (application == null) throw new InternalError("No application");
             var node = application.Cache.GetFile(name.Value, application);
 
-            if (scope.Parent == null) throw new InternalError("No scope to import code in");
-            return node.Execute(scope.Parent).Constant;
+            if (scope.ScopeParent == null) throw new InternalError("No scope to import code in");
+            return node.Execute(scope.ScopeParent).Constant;
         }
 
         

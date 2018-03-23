@@ -15,19 +15,19 @@ namespace NetJS.Core.Javascript {
 #if debug_enabled
                 if (Debug.BreakpointNodes.Contains(node.Id)) {
                     Debug.SteppingLevel = scope.Depth();
-                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                    Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 } else if (Debug.SteppingInto && depth > Debug.SteppingLevel) {
                     Debug.SteppingLevel++;
                     Debug.SteppingInto = false;
-                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                    Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 } else if (Debug.SteppingOut && depth < Debug.SteppingLevel) {
                     Debug.SteppingLevel--;
                     Debug.SteppingOut = false;
-                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                    Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 } else if (Debug.SteppingOver && depth <= Debug.SteppingLevel) {
                     Debug.SteppingLevel = depth;
                     Debug.SteppingOver = false;
-                    Debug.Break("stopOnBreakpoint", scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
+                    Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 }
 #endif
 
@@ -40,6 +40,12 @@ namespace NetJS.Core.Javascript {
                             if (result.Constant == null && output.Length > 0) {
                                 result.Constant = new String(output.ToString());
                             }
+
+#if debug_enabled
+                            if (Debug.SteppingOver && depth <= 1) {
+                                Debug.Continue();
+                            }
+#endif
 
                             return result;
                         } else {
@@ -57,7 +63,7 @@ namespace NetJS.Core.Javascript {
 #if debug_enabled
                     Debug.SteppingLevel = scope.Depth();
                     var location = Debug.GetNodeLocation(node.Id);
-                    Debug.Break("stopOnException", scope.GetStackTrace(location), scope.GetScopes());
+                    Debug.Break(Debug.StopOnException, scope.GetStackTrace(location), scope.GetScopes());
 
                     e.AddStackTrace(location);
 #endif
@@ -66,6 +72,12 @@ namespace NetJS.Core.Javascript {
                     throw;
                 }
             }
+
+#if debug_enabled
+            if (Debug.SteppingOver && depth <= 1) {
+                Debug.Continue();
+            }
+#endif
 
             if (output.Length > 0) {
                 return new Result(ResultType.String, new String(output.ToString()));
@@ -102,14 +114,16 @@ namespace NetJS.Core.Javascript {
         public List<IfBlock> Ifs = new List<IfBlock>();
         public Block Else;
 
-        public override Result Execute(Scope scope) {
+        public override Result Execute(Scope parent) {
             foreach (var ifNode in Ifs) {
-                if (ifNode.Check.IsTrue(scope)) {
+                if (ifNode.Check.IsTrue(parent)) {
+                    var scope = new Scope(parent, parent, this, ScopeType.Block);
                     return ifNode.Body.Execute(scope);
                 }
             }
 
             if (Else != null) {
+                var scope = new Scope(parent, parent, this, ScopeType.Block);
                 return Else.Execute(scope);
             }
 
@@ -159,7 +173,7 @@ namespace NetJS.Core.Javascript {
         public abstract bool After(Scope scope);
 
         public Result Execute(Node node, Scope parent) {
-            var scope = new Scope(parent, node, ScopeType.Block);
+            var scope = new Scope(parent, parent, node, ScopeType.Block);
             if (!Start(scope)) return new Result(ResultType.None);
 
             var output = new StringBuilder();

@@ -19,7 +19,7 @@ namespace NetJS.Core.Javascript {
                     arguments[i] = value;
                 }
 
-                var functionScope = new Scope(Scope, this, ScopeType.Function);
+                var functionScope = new Scope(Scope, scope, this, ScopeType.Function);
 
                 // TODO: THIS IS A MEGA-HACK, REMOVE AS SOON AS POSSIBLE!!!
                 foreach (var key in scope.Variables) {
@@ -75,7 +75,7 @@ namespace NetJS.Core.Javascript {
         public override Constant Call(Constant other, Constant _this, Scope scope) {
             if (other is ArgumentList) {
                 var argumentList = (ArgumentList)other;
-                var functionScope = new Scope(Scope, this, ScopeType.Function);
+                var functionScope = new Scope(Scope, scope, this, ScopeType.Function);
 
                 functionScope.SetVariable("this", _this);
 

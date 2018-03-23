@@ -89,7 +89,7 @@ namespace NetJS {
                     arguments = Core.Tool.Construct("Object", application.Engine.Scope);
                 }
 
-                var scope = new Scope(application.Engine.Scope, null, ScopeType.Session);
+                var scope = new Scope(application.Engine.Scope, null, null, ScopeType.Session);
                 scope.SetVariable("__application__", new Foreign(application));
                 scope.SetVariable("__session__", new Foreign(session));
                 scope.SetVariable("__svCache__", new Foreign(svCache));

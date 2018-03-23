@@ -41,7 +41,8 @@ namespace NetJS.Core.Javascript {
 
         private Fast.Dict<Constant> _variables;
 
-        public Scope Parent { get; }
+        public Scope ScopeParent { get; }
+        public Scope StackParent { get; }
         public Node EntryNode { get; }
 
         public Engine Engine { get; }
@@ -54,8 +55,9 @@ namespace NetJS.Core.Javascript {
             _variables = new Fast.Dict<Constant>();
         }
 
-        public Scope(Scope parent, Node entryNode, ScopeType type) : this(parent.Engine) {
-            Parent = parent;
+        public Scope(Scope scopeParent, Scope stackParent, Node entryNode, ScopeType type) : this(scopeParent.Engine) {
+            ScopeParent = scopeParent;
+            StackParent = stackParent;
             EntryNode = entryNode;
             Type = type;
         }
@@ -63,8 +65,8 @@ namespace NetJS.Core.Javascript {
         public Scope GetScope(ScopeType type) {
             if (Type == type) {
                 return this;
-            } else if (Parent != null) {
-                return Parent.GetScope(type);
+            } else if (ScopeParent != null) {
+                return ScopeParent.GetScope(type);
             } else {
                 throw new InternalError($"No scope found with type '{Type.ToString()}'");
             }
@@ -86,13 +88,13 @@ namespace NetJS.Core.Javascript {
 
             var scope = this;
             var index = 2;
-            while(scope.Parent != null && scope.EntryNode != null) {
+            while(scope.StackParent != null && scope.EntryNode != null) {
                 var entryLocation = Debug.GetNodeLocation(scope.EntryNode.Id);
 
-                frames.Add(Parent.GetFrame(index, entryLocation));
+                frames.Add(StackParent.GetFrame(index, entryLocation));
 
                 index++;
-                scope = scope.Parent;
+                scope = scope.StackParent;
             }
 
             return frames;
@@ -120,8 +122,8 @@ namespace NetJS.Core.Javascript {
 
             var scope = this;
             var index = 1;
-            while (scope.Parent != null) {
-                scope = scope.Parent;
+            while (scope.ScopeParent != null) {
+                scope = scope.ScopeParent;
                 index++;
 
                 scopes.Add(scope.GetScope(index));
@@ -137,8 +139,8 @@ namespace NetJS.Core.Javascript {
                 return value;
             }
 
-            if(Parent != null) {
-                return Parent.GetVariable(variable);
+            if(ScopeParent != null) {
+                return ScopeParent.GetVariable(variable);
             }
             
             return Static.Undefined;
@@ -146,8 +148,8 @@ namespace NetJS.Core.Javascript {
 
         public bool SetVariable(string variable, Constant value, bool create = true) {
             if (!_variables.ContainsKey(variable)) {
-                if (Parent != null) {
-                    var inParent = Parent.SetVariable(variable, value, false);
+                if (ScopeParent != null) {
+                    var inParent = ScopeParent.SetVariable(variable, value, false);
                     if (inParent) return true;
                 }
 
@@ -161,7 +163,7 @@ namespace NetJS.Core.Javascript {
         public IEnumerable<string> Variables {
             get {
                 var variables = _variables.Keys.ToList();
-                if (Parent != null) variables.AddRange(Parent.Variables);
+                if (ScopeParent != null) variables.AddRange(ScopeParent.Variables);
                 return variables;
             }
         }
@@ -172,7 +174,7 @@ namespace NetJS.Core.Javascript {
         }
 
         public int Depth() {
-            return Parent != null ? Parent.Depth() + 1 : 0;
+            return StackParent != null ? StackParent.Depth() + 1 : 0;
         }
     }
 }

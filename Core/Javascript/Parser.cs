@@ -172,6 +172,10 @@ namespace NetJS.Core.Javascript {
                         }
                     }
 
+#if debug_enabled
+                    html.RegisterDebug(GetLocation(_index));
+#endif
+
                     list.Nodes.Add(html);
                     _index++;
                 } else if (token.Type == Token.Group.Comment) {
@@ -935,13 +939,11 @@ namespace NetJS.Core.Javascript {
             var body = ParseBlock();
 
             var function = new FunctionBlueprint(name, type, parameters, body);
-
-            var list = new Block();
+            
             var declaration = new Declaration();
             declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(name), function));
-            list.Nodes.Add(declaration);
 
-            return list;
+            return declaration;
         }
 
         public Call ParseCall() {
