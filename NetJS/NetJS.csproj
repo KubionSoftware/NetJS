@@ -146,4 +146,13 @@
     <Exec Command="$(ProjectDir)docs\XMLtoMDLinux -output=$(SolutionDir)..\NetJS.wiki\documentation -input=NetJS.xml -logto=XMLtoMD.log" Condition="$(OS) == Unix"/>
     <Message Text="Wiki documentation updated" Importance="high"/>
   </Target>
+  <ItemGroup>
+    <ReleaseFiles Include="$(ProjectDir)bin\NetJS.dll;$(ProjectDir)bin\Core.dll;$(ProjectDir)bin\Fast.dll;$(ProjectDir)bin\IXDocuments.dll;
+    $(ProjectDir)bin\KubionData.dll;$(ProjectDir)bin\Newtonsoft.Json.dll;$(ProjectDir)bin\XDataSource.dll;$(ProjectDir)bin\XdocServices.dll;
+    $(ProjectDir)bin\XDocuments.dll;$(ProjectDir)bin\XDocumentsWebControls.dll;$(ProjectDir)bin\XHTMLMerge.dll" />
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$(ConfigurationName) == Release">
+    <Message Text="Moving bin folders to release" Importance="high" />
+    <Copy SourceFiles="@(ReleaseFiles)" DestinationFolder="$(SolutionDir)release\bin" />
+  </Target>
 </Project>
