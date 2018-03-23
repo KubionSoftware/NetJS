@@ -136,14 +136,14 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName) == Release $(ProjectDir)docs\XMLtoMD.exe -output=$(SolutionDir)..\NetJS.wiki\documentation</PostBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
+  <ItemGroup>
+    <Path Include="$(SolutionDir)..\NetJS.wiki" />
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$(ConfigurationName) == Release AND Exists(@(Path))">
+    <Message Text="Updating wiki documentation..." Importance="high"/>
+    <Exec Command="$(ProjectDir)docs\XMLtoMD.exe -output=$(SolutionDir)..\NetJS.wiki\documentation -input=NetJS.xml -logto=XMLtoMD.log" Condition="$(OS) == Windows_NT"/>
+    <Exec Command="$(ProjectDir)docs\XMLtoMDDarwin -output=$(SolutionDir)..\NetJS.wiki\documentation -input=NetJS.xml -logto=XMLtoMD.log" Condition="$(OS) == OSX"/>
+    <Exec Command="$(ProjectDir)docs\XMLtoMDLinux -output=$(SolutionDir)..\NetJS.wiki\documentation -input=NetJS.xml -logto=XMLtoMD.log" Condition="$(OS) == Unix"/>
+    <Message Text="Wiki documentation updated" Importance="high"/>
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
