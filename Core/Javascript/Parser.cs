@@ -123,15 +123,19 @@ namespace NetJS.Core.Javascript {
             };
         }
 
+#if debug_enabled
         public Debug.Location GetLocation(int index) {
             // TODO: throw error?
             if (index >= _tokens.Count) return new Debug.Location(_fileId, -1);
             var token = _tokens[index];
             return new Debug.Location(_fileId, token.Line);
         }
+#endif
 
         public Block Parse() {
+#if debug_enabled
             Debug.RemoveNodes(_fileId);
+#endif
 
             var result = ParseStatements();
             result = Optimizer.Optimize(result);
@@ -140,7 +144,11 @@ namespace NetJS.Core.Javascript {
 
         public Error CreateError(string s) {
             var error = new SyntaxError(s);
+
+#if debug_enabled
             error.AddStackTrace(GetLocation(_index));
+#endif
+
             return error;
         }
 
@@ -173,8 +181,10 @@ namespace NetJS.Core.Javascript {
                 } else if (_statements.ContainsKey(token.Content)) {
                     var startIndex = _index;
                     var node = _statements[token.Content]();
-                    
+
+#if debug_enabled
                     node.RegisterDebug(GetLocation(startIndex));
+#endif
 
                     list.Nodes.Add(node);
                 } else {
@@ -373,7 +383,9 @@ namespace NetJS.Core.Javascript {
                 throw CreateError("Expression is null");
             }
 
+#if debug_enabled
             expression.RegisterDebug(GetLocation(_index));
+#endif
         }
 
         public void CombineAssign(ref Expression left, Operator op) {
