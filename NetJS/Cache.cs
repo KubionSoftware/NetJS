@@ -8,7 +8,8 @@ namespace NetJS {
         private enum SourceType {
             None,
             Javascript,
-            XDoc
+            XDoc,
+            Other
         }
 
         private class SourceFile {
@@ -54,13 +55,18 @@ namespace NetJS {
                     Node = parser.Parse(),
                     Type = SourceType.Javascript
                 };
-            }
+            } else {
+                var fileId = Core.Debug.GetFileId(path);
+                File file = Parser.ParseFile(source, fileId);
 
-            return new SourceFile() {
-                LastModified = lastModified,
-                Node = new Block(),
-                Type = SourceType.None
-            };
+                return new SourceFile() {
+                    LastModified = lastModified,
+                    Node = new Block() {
+                        Nodes = new List<Node>() { file }
+                    },
+                    Type = SourceType.Other
+                };
+            }
         }
     }
 }

@@ -160,24 +160,6 @@ namespace NetJS.Core.Javascript {
 
                 if (token.Type == Token.Group.WhiteSpace || (token.Type != Token.Group.String && token.Content == Tokens.ExpressionEnd)) {
                     _index++;
-                } else if (token.Type == Token.Group.Html) {
-                    var html = new Html(token.Content);
-
-                    if (list.Nodes.Count > 0) {
-                        var last = list.Nodes[list.Nodes.Count - 1];
-                        if (last is Html lastHtml) {
-                            lastHtml.Combine(html);
-                            _index++;
-                            continue;
-                        }
-                    }
-
-#if debug_enabled
-                    html.RegisterDebug(GetLocation(_index));
-#endif
-
-                    list.Nodes.Add(html);
-                    _index++;
                 } else if (token.Type == Token.Group.Comment) {
                     _index++;
                 } else if (token.Type != Token.Group.String && (token.Content == Tokens.BlockClose || token.Content == Tokens.Case || token.Content == Tokens.ConditionalSeperator || token.Content == Tokens.Default)) {
@@ -415,7 +397,7 @@ namespace NetJS.Core.Javascript {
                     CombineExpression(ref left, new StringBlueprint(token.Content));
                     _index++;
                 } else if (token.Type == Token.Group.Template) {
-                    CombineExpression(ref left, ParseTemplate(token.Content));
+                    CombineExpression(ref left, ParseTemplate(token.Content, _fileId));
                     _index++;
                 } else if (token.Type == Token.Group.Number) {
                     CombineExpression(ref left, new NumberBlueprint(Double.Parse(token.Content)));
@@ -605,7 +587,25 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public Expression ParseTemplate(string template) {
+        public static File ParseFile(string template, int fileId) {
+            var expressions = ParseTemplateExpressions(template, fileId);
+            return new File(expressions);
+        }
+
+        public static Expression ParseTemplate(string template, int fileId) {
+            var expressions = ParseTemplateExpressions(template, fileId);
+            if (expressions.Count == 0) return new StringBlueprint("");
+
+            Expression result = expressions[0];
+            for (var i = 1; i < expressions.Count; i++) {
+                result = new Addition() { Left = result, Right = expressions[i] };
+            }
+
+            if (result is Operator op) op.Precedence = GroupPrecedence;
+            return result;
+        }
+
+        public static List<Expression> ParseTemplateExpressions(string template, int fileId) {
             var inExpression = false;
             var depth = 0;
             var buffer = "";
@@ -616,16 +616,20 @@ namespace NetJS.Core.Javascript {
                 var c = template[i];
 
                 if (inExpression) {
-                    if(c == '{') {
+                    if (c == '{') {
                         buffer += c;
                         depth++;
-                    }else if(c == '}') {
+                    } else if (c == '}') {
                         depth--;
-                        if(depth == 0) {
+                        if (depth == 0) {
                             if (buffer.Length > 0) {
-                                var tokens = Lexer.Lex(buffer, _fileId);
-                                var parser = new Parser(_fileId, tokens);
+                                var tokens = Lexer.Lex(buffer, fileId);
+                                var parser = new Parser(fileId, tokens);
                                 var expression = parser.ParseExpression();
+
+                                if (expression == null) {
+                                    throw parser.CreateError("Invalid expression in template string or include");
+                                }
 
                                 parts.Add(expression);
                                 buffer = "";
@@ -641,7 +645,7 @@ namespace NetJS.Core.Javascript {
                     inExpression = true;
                     i++;
                     depth = 1;
-                    if(buffer.Length > 0) {
+                    if (buffer.Length > 0) {
                         parts.Add(new StringBlueprint(buffer));
                         buffer = "";
                     }
@@ -655,15 +659,7 @@ namespace NetJS.Core.Javascript {
                 buffer = "";
             }
 
-            if (parts.Count == 0) return new StringBlueprint("");
-
-            Expression result = parts[0];
-            for(var i = 1; i < parts.Count; i++) {
-                result = new Addition() { Left = result, Right = parts[i] };
-            }
-
-            if (result is Operator op) op.Precedence = GroupPrecedence;
-            return result;
+            return parts;
         }
 
         public While ParseWhile() {

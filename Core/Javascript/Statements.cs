@@ -8,13 +8,12 @@ namespace NetJS.Core.Javascript {
         public IList<Node> Nodes = new List<Node>();
 
         public override Result Execute(Scope scope) {
-            var output = new StringBuilder();
-            var depth = scope.Depth();
+            var depth = scope.Depth;
 
             foreach (var node in Nodes) {
 #if debug_enabled
                 if (Debug.BreakpointNodes.Contains(node.Id)) {
-                    Debug.SteppingLevel = scope.Depth();
+                    Debug.SteppingLevel = scope.Depth;
                     Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
                 } else if (Debug.SteppingInto && depth > Debug.SteppingLevel) {
                     Debug.SteppingLevel++;
@@ -37,10 +36,6 @@ namespace NetJS.Core.Javascript {
                         if (result.Type == ResultType.None) continue;
 
                         if (result.Type == ResultType.Return || result.Type == ResultType.Break || result.Type == ResultType.Throw || result.Type == ResultType.Continue) {
-                            if (result.Constant == null && output.Length > 0) {
-                                result.Constant = new String(output.ToString());
-                            }
-
 #if debug_enabled
                             if (Debug.SteppingOver && depth <= 1) {
                                 Debug.Continue();
@@ -48,20 +43,13 @@ namespace NetJS.Core.Javascript {
 #endif
 
                             return result;
-                        } else {
-                            var str = result.Constant.GetString(scope);
-                            if (str != null && str.Length > 0) output.Append(str);
                         }
                     } else if (node is Expression expression) {
-                        var result = expression.Execute(scope);
-                        var str = result.GetString(scope);
-                        if (str != null && str.Length > 0) output.Append(str);
-                    } else if (node is Html html) {
-                        output.Append(html.ToString(scope));
+                        expression.Execute(scope);
                     }
                 } catch (Error e) {
 #if debug_enabled
-                    Debug.SteppingLevel = scope.Depth();
+                    Debug.SteppingLevel = scope.Depth;
                     var location = Debug.GetNodeLocation(node.Id);
                     Debug.Break(Debug.StopOnException, scope.GetStackTrace(location), scope.GetScopes());
 
@@ -79,11 +67,7 @@ namespace NetJS.Core.Javascript {
             }
 #endif
 
-            if (output.Length > 0) {
-                return new Result(ResultType.String, new String(output.ToString()));
-            } else {
-                return new Result(ResultType.None);
-            }
+            return new Result(ResultType.None);
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
@@ -93,7 +77,7 @@ namespace NetJS.Core.Javascript {
                 if (i > 0) NewLine(builder, depth);
                 node.Uneval(builder, depth);
 
-                if (!(node is If || node is For || node is ForOf || node is ForIn || node is While || node is Try || node is Html)) {
+                if (!(node is If || node is For || node is ForOf || node is ForIn || node is While || node is Try)) {
                     builder.Append(Tokens.ExpressionEnd);
                 }
             }
@@ -117,14 +101,16 @@ namespace NetJS.Core.Javascript {
         public override Result Execute(Scope parent) {
             foreach (var ifNode in Ifs) {
                 if (ifNode.Check.IsTrue(parent)) {
-                    var scope = new Scope(parent, parent, this, ScopeType.Block);
-                    return ifNode.Body.Execute(scope);
+                    var scope = new Scope(parent, parent, this, ScopeType.Block, parent.Buffer);
+                    var result = ifNode.Body.Execute(scope);
+                    return result;
                 }
             }
 
             if (Else != null) {
-                var scope = new Scope(parent, parent, this, ScopeType.Block);
-                return Else.Execute(scope);
+                var scope = new Scope(parent, parent, this, ScopeType.Block, parent.Buffer);
+                var result = Else.Execute(scope);
+                return result;
             }
 
             return new Result(ResultType.None, Static.Undefined);
@@ -160,7 +146,7 @@ namespace NetJS.Core.Javascript {
 
     public abstract class LoopExecution {
 
-        private const int MaxLoops = 100000000;
+        private const int MaxLoops = 1000;
 
         public Block Body;
 
@@ -173,10 +159,8 @@ namespace NetJS.Core.Javascript {
         public abstract bool After(Scope scope);
 
         public Result Execute(Node node, Scope parent) {
-            var scope = new Scope(parent, parent, node, ScopeType.Block);
+            var scope = new Scope(parent, parent, node, ScopeType.Block, parent.Buffer);
             if (!Start(scope)) return new Result(ResultType.None);
-
-            var output = new StringBuilder();
 
             var i = 0;
             while (true) {
@@ -184,15 +168,9 @@ namespace NetJS.Core.Javascript {
                     var result = Body.Execute(scope);
 
                     if (result.Type == ResultType.Break) {
-                        var str = result.Constant.GetString(scope);
-                        if (str != null) output.Append(str);
                         break;
                     } else if (result.Type == ResultType.Return || result.Type == ResultType.Throw) {
                         return result;
-                    } else if (result.Type != ResultType.None) {
-                        // continue, variable or html
-                        var str = result.Constant.GetString(scope);
-                        if (str != null) output.Append(str);
                     }
 
                     if (!After(scope)) {
@@ -213,11 +191,7 @@ namespace NetJS.Core.Javascript {
                 }
             }
 
-            if (output.Length > 0) {
-                return new Result(ResultType.String, new String(output.ToString()));
-            } else {
-                return new Result(ResultType.None);
-            }
+            return new Result(ResultType.None);
         }
     }
 
@@ -466,7 +440,7 @@ namespace NetJS.Core.Javascript {
         public Expression Expression;
 
         public override Result Execute(Scope scope) {
-            return new Result(ResultType.Return, Expression == null ? null : Expression.Execute(scope));
+            return new Result(ResultType.Return, Expression == null ? Static.Undefined : Expression.Execute(scope));
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
@@ -614,6 +588,31 @@ namespace NetJS.Core.Javascript {
                 builder.Append(" " + Tokens.Assign + " ");
                 declaration.Expression.Uneval(builder, depth);
             }
+        }
+    }
+
+    public class File : Statement {
+
+        private List<Expression> _expressions;
+
+        public File(List<Expression> expressions) {
+            _expressions = expressions;
+        }
+
+        public override Result Execute(Scope scope) {
+            foreach(var expression in _expressions) {
+                if (expression is String s) {
+                    scope.Buffer.Append(s);
+                } else {
+                    scope.Buffer.Append(expression.Execute(scope).ToString());
+                }
+            }
+
+            return new Result(ResultType.None);
+        }
+
+        public override void Uneval(StringBuilder builder, int depth) {
+            throw new NotImplementedException();
         }
     }
 }

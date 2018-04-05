@@ -59,16 +59,20 @@ namespace NetJS {
                 if (System.IO.File.Exists(file)) {
                     var content = System.IO.File.ReadAllText(file);
 
-                    var json = new Json(content);
-                    foreach (var key in json.Keys) {
-                        var connectionJson = json.Object(key);
-                        var type = connectionJson.String("type").ToLower();
+                    try {
+                        var json = new Json(content);
+                        foreach (var key in json.Keys) {
+                            var connectionJson = json.Object(key);
+                            var type = connectionJson.String("type").ToLower();
 
-                        if (type == "sql") {
-                            _connections[key] = new SQLConnection(connectionJson.String("connectionString"));
-                        } else if (type == "http") {
-                            _connections[key] = new HTTPConnection(connectionJson.String("url"));
+                            if (type == "sql") {
+                                _connections[key] = new SQLConnection(connectionJson.String("connectionString"));
+                            } else if (type == "http") {
+                                _connections[key] = new HTTPConnection(connectionJson.String("url"));
+                            }
                         }
+                    }catch(Exception e) {
+                        // TODO: log error
                     }
                 } else {
 

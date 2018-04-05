@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Util;
 
 namespace NetJS.Core.Javascript {
 
     public enum ResultType {
         None,
-        String,
+        Buffer,
         Return,
         Break,
         Continue,
@@ -39,6 +40,8 @@ namespace NetJS.Core.Javascript {
 
     public class Scope {
 
+        private const int MAX_DEPTH = 1000;
+
         private Fast.Dict<Constant> _variables;
 
         public Scope ScopeParent { get; }
@@ -49,13 +52,20 @@ namespace NetJS.Core.Javascript {
 
         public ScopeType Type;
 
-        public Scope(Engine engine) {
+        public StringBuilder Buffer { get; }
+
+        public Scope(Engine engine, StringBuilder buffer) {
             Engine = engine;
             Type = ScopeType.Engine;
             _variables = new Fast.Dict<Constant>();
+            Buffer = buffer;
+
+            if (Depth > 1000) {
+                throw new RangeError("Maximum call stack size exceeded");
+            }
         }
 
-        public Scope(Scope scopeParent, Scope stackParent, Node entryNode, ScopeType type) : this(scopeParent.Engine) {
+        public Scope(Scope scopeParent, Scope stackParent, Node entryNode, ScopeType type, StringBuilder buffer) : this(scopeParent.Engine, buffer) {
             ScopeParent = scopeParent;
             StackParent = stackParent;
             EntryNode = entryNode;
@@ -173,8 +183,14 @@ namespace NetJS.Core.Javascript {
             return true;
         }
 
-        public int Depth() {
-            return StackParent != null ? StackParent.Depth() + 1 : 0;
+        private int _depth = -1;
+        public int Depth {
+            get {
+                if (_depth != -1) return _depth;
+                var depth = StackParent != null ? StackParent.Depth + 1 : 0;
+                _depth = depth;
+                return depth;
+            }
         }
     }
 }

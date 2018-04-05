@@ -14,10 +14,6 @@ namespace NetJS.Core.Javascript {
         public const string ArrayClose = "]";
         public const string GroupOpen = "(";
         public const string GroupClose = ")";
-        public const string HtmlOpen = "<";
-        public const string HtmlClose = ">";
-        public const char InlineOpen = '#';
-        public const char InlineClose = '#';
         public const string RegexOpen = "/";
         public const string RegexClose = "/";
 
@@ -320,50 +316,36 @@ namespace NetJS.Core.Javascript {
                     } else if (IsStructure(c)) {
                         clearBuffer(Token.Group.Text);
                         tokens.Add(new Token(c.ToString(), Token.Group.Structure, line, character));
-                    } else {
-                        var htmlIndex = IsHtml(code, index);
-                        if (htmlIndex != -1) {
-                            clearBuffer(Token.Group.Text);
+                    } else if (c == '/' && index + 1 < code.Length && (code[index + 1] == '/' || code[index + 1] == '*')) {
+                        clearBuffer(Token.Group.Text);
 
-                            var html = code.Substring(index, htmlIndex - index + 1);
-                            tokens.Add(new Token(html, Token.Group.Html, line, character));
+                        inComment = true;
+                        commentStart = c.ToString() + code[index + 1];
+                        buffer = commentStart;
+                        index++;
+                    } else if (IsOperator(c)) {
+                        clearBuffer(Token.Group.Text);
 
-                            for (var h = 1; h < html.Length; h++) {
-                                incrementPosition(html[h]);
+                        if (c == '.') {
+                            var next = index + 1 < code.Length ? code[index + 1] : '\0';
+                            if (next >= '0' && next <= '9') {
+                                inNumber = true;
                             }
-
-                            index = htmlIndex;
-                        } else if (c == '/' && index + 1 < code.Length && (code[index + 1] == '/' || code[index + 1] == '*')) {
-                            clearBuffer(Token.Group.Text);
-
-                            inComment = true;
-                            commentStart = c.ToString() + code[index + 1];
-                            buffer = commentStart;
-                            index++;
-                        } else if (IsOperator(c)) {
-                            clearBuffer(Token.Group.Text);
-
-                            if (c == '.') {
-                                var next = index + 1 < code.Length ? code[index + 1] : '\0';
-                                if (next >= '0' && next <= '9') {
-                                    inNumber = true;
-                                }
-                            }
-
-                            if (!inNumber) {
-                                inOperator = true;
-                            }
-
-                            buffer += c;
-                        } else if (IsString(c)) {
-                            inString = true;
-                            stringStart = c;
-                        } else if (c >= '0' && c <= '9' && buffer.Length == 0) {
-                            inNumber = true;
-                            buffer += c;
-                        } else {
-                            buffer += c;
                         }
+
+                        if (!inNumber) {
+                            inOperator = true;
+                        }
+
+                        buffer += c;
+                    } else if (IsString(c)) {
+                        inString = true;
+                        stringStart = c;
+                    } else if (c >= '0' && c <= '9' && buffer.Length == 0) {
+                        inNumber = true;
+                        buffer += c;
+                    } else {
+                        buffer += c;
                     }
                 }
                 
@@ -381,51 +363,6 @@ namespace NetJS.Core.Javascript {
             }
 
             return tokens;
-        }
-
-        private static int IsHtml(string code, int index) {
-            if (code[index] != '<') return -1;
-            index++;
-
-            bool inString = false;
-            bool inCode = false;
-
-            char stringStart = '\0';
-
-            while (index < code.Length) {
-                char c = code[index];
-
-                if (inCode) {
-                    if(c == Tokens.InlineClose) {
-                        inCode = false;
-                    }
-                } else if (c == Tokens.InlineOpen) {
-                    inCode = true;
-                } else if (inString) {
-                    if(c == stringStart) {
-                        inString = false;
-                    }
-                } else if (IsString(c)) {
-                    stringStart = c;
-                    inString = true;
-                } else if (c == '>') {
-                    return index;
-                } else if(!IsValidHtml(c)) {
-                    return -1;
-                }
-
-                index++;
-            }
-
-            return -1;
-        }
-
-        private static bool IsValidHtml(char c) {
-            if (c >= 'a' && c <= 'z') return true;
-            if (c >= 'A' && c <= 'Z') return true;
-            if (c >= '0' && c <= '9') return true;
-            if (c == '-' || c == '_' || c == '/' || c == '=' || c == '!') return true;
-            return IsWhitespace(c);
         }
 
         private static bool IsWhitespace(char c) {

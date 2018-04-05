@@ -29,6 +29,10 @@ namespace NetJS {
             }
         }
 
+        public void Clear() {
+            _dict.Clear();
+        }
+
         public Dictionary<string, string> GetStrings() {
             return _dict.ToDictionary(pair => pair.Key, pair => pair.Value.ToString());
         }

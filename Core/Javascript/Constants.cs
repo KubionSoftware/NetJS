@@ -765,6 +765,10 @@ namespace NetJS.Core.Javascript {
             return this;
         }
 
+        public bool IsUndefined() {
+            return this is Undefined;
+        }
+
         public string GetString(Scope scope) {
             var constant = GetValue(scope);
 

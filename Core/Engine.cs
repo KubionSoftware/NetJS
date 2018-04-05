@@ -16,7 +16,7 @@ namespace NetJS.Core {
         }
 
         public Engine() {
-            Scope = new Javascript.Scope(this);
+            Scope = new Javascript.Scope(this, null);
         }
 
         public void Init() {
@@ -73,7 +73,7 @@ namespace NetJS.Core {
             var obj = Tool.Construct("Object", Scope);
 
             foreach (var method in methods) {
-                obj.Set(method.Name, GetFunction(method));
+                obj.Set(method.Name.Replace("@", ""), GetFunction(method));
             }
 
             new Javascript.Variable(type.Name).Assignment(obj, Scope);
@@ -89,7 +89,7 @@ namespace NetJS.Core {
             var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
             foreach (var method in methods) {
                 if (method.Name != "constructor") {
-                    prototype.Set(method.Name, GetFunction(method));
+                    prototype.Set(method.Name.Replace("@", ""), GetFunction(method));
                 }
             }
 
@@ -100,7 +100,7 @@ namespace NetJS.Core {
         public void RegisterFunctions(Type type) {
             var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
             foreach (var method in methods) {
-                Scope.SetVariable(method.Name, GetFunction(method));
+                Scope.SetVariable(method.Name.Replace("@", ""), GetFunction(method));
             }
         }
     }

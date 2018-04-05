@@ -3,7 +3,7 @@ using System.Web;
 
 namespace NetJS.External {
     /// <summary>Sessions are implemented using ASP.NET. You can use the session to store and retrieve values.</summary>
-    /// <remarks>This class can set, get and delete key-value pairs.
+    /// <remarks>This class can set, get and remove key-value pairs.
     /// Unlike SessionStorage in browsers, this session allows you to store all types of variables instread of only strings.</remarks>
     /// <example name="Functions implementation">Here you can see the functions of this class in action:
     /// <code lang="javascript">Sessions.set("key", "value");
@@ -44,16 +44,27 @@ namespace NetJS.External {
             return Static.Undefined;
         }
 
-        /// <summary>Sessions.delete takes a key and removes it from the session.</summary>
+        /// <summary>Sessions.remove takes a key and removes it from the session.</summary>
         /// <param name="key">The key to get a value from</param>
-        /// <example><code lang="javascript">Sessions.delete("userId");</code></example>
+        /// <example><code lang="javascript">Sessions.remove("userId");</code></example>
         /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
-        public static Constant delete(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant remove(Constant _this, Constant[] arguments, Scope scope) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Session.delete").Value;
 
             var session = Tool.GetFromScope<JSSession>(scope, "__session__");
             if (session == null) throw new InternalError("No session");
             if (session != null) session.Remove(key);
+
+            return Static.Undefined;
+        }
+
+        /// <summary>Sessions.clear removes all values from the session.</summary>
+        /// <example><code lang="javascript">Sessions.clear();</code></example>
+        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
+        public static Constant clear(Constant _this, Constant[] arguments, Scope scope) {
+            var session = Tool.GetFromScope<JSSession>(scope, "__session__");
+            if (session == null) throw new InternalError("No session");
+            if (session != null) session.Clear();
 
             return Static.Undefined;
         }

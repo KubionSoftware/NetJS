@@ -32,6 +32,8 @@ namespace NetJS {
             Engine.RegisterClass(typeof(External.Log));
             Engine.RegisterClass(typeof(External.Session));
             Engine.RegisterClass(typeof(External.XDoc));
+            Engine.RegisterClass(typeof(External.Base64));
+            Engine.RegisterClass(typeof(External.Buffer));
             Engine.RegisterFunctions(typeof(External.Functions));
 
             Connections = new Connections(Watch, Settings);
