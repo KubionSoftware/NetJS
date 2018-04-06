@@ -26,6 +26,35 @@ namespace NetJS.External {
     /// SQL.execute(db, query);</code></example>
     class SQL {
 
+        public static Constant escape(Constant _this, Constant[] arguments, Scope scope) {
+            var value = ((Core.Javascript.String)arguments[0]).Value;
+            return new Core.Javascript.String(Util.SQL.Escape(value));
+        }
+
+        public static Constant format(Constant _this, Constant[] arguments, Scope scope) {
+            var query = ((Core.Javascript.String)arguments[0]).Value;
+            var data = ((Core.Javascript.Object)arguments[1]);
+
+            foreach(var key in data.GetKeys()) {
+                var value = data.Get(key);
+                string stringValue = null;
+
+                if (value is Number n) {
+                    stringValue = n.ToString();
+                } else if (value is String s) {
+                    stringValue = "'" + Util.SQL.Escape(s.Value) + "'";
+                } else if (value is Null) {
+                    stringValue = "NULL";
+                } else {
+                    throw new Error("Invalid type in SQL.format, only strings and integers allowed");
+                }
+
+                query = query.Replace("{" + key + "}", stringValue);
+            }
+
+            return new Core.Javascript.String(query);
+        }
+
         /// <summary>SQL.execute takes a connectionName and a query, executes the query and returns the result if the query is a SELECT statement.</summary>
         /// <param name="connectionName">Name of a configured connection</param>
         /// <param name="query">The query to be executed</param>

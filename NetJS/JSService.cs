@@ -129,13 +129,16 @@ namespace NetJS {
 
             var path = GetPath(context.Request);
 
-            var arguments = Core.Tool.Construct("Object", application.Engine.Scope);
-            arguments.Set("request", CreateRequest(context, path, application.Engine.Scope));
+            var jsContext = Core.Tool.Construct("Object", application.Engine.Scope);
+            jsContext.Set("request", CreateRequest(context, path, application.Engine.Scope));
 
             var response = Core.Tool.Construct("Object", application.Engine.Scope);
             response.Set("contentType", new Core.Javascript.String("text/html"));
             response.Set("statusCode", new Core.Javascript.Number(200));
-            arguments.Set("response", response);
+            jsContext.Set("response", response);
+
+            var arguments = Core.Tool.Construct("Object", application.Engine.Scope);
+            arguments.Set("context", jsContext);
 
             var responseString = RunTemplate(application.Settings.Entry, arguments, ref application, ref session, ref svCache);
 

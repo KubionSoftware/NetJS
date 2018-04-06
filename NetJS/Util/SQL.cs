@@ -60,5 +60,9 @@ namespace Util {
         public static int ParseId(object id) {
             return (int)((long)id);
         }
+
+        public static string Escape(string value) {
+            return value.Replace("'", "''");
+        }
     }
 }
