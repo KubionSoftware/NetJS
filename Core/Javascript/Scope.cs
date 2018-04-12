@@ -6,30 +6,6 @@ using Util;
 
 namespace NetJS.Core.Javascript {
 
-    public enum ResultType {
-        None,
-        Buffer,
-        Return,
-        Break,
-        Continue,
-        Throw
-    }
-
-    public class Result {
-        public ResultType Type;
-        public Constant Constant;
-
-        public Result(ResultType type) {
-            Type = type;
-            Constant = Static.Undefined;
-        }
-
-        public Result(ResultType type, Constant constant) {
-            Type = type;
-            Constant = constant;
-        }
-    }
-
     public enum ScopeType {
         Engine,
         Session,
@@ -40,7 +16,7 @@ namespace NetJS.Core.Javascript {
 
     public class Scope {
 
-        private const int MAX_DEPTH = 1000;
+        private const int MAX_DEPTH = 100;
 
         private Fast.Dict<Constant> _variables;
 

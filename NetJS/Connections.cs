@@ -71,7 +71,7 @@ namespace NetJS {
                                 _connections[key] = new HTTPConnection(connectionJson.String("url"));
                             }
                         }
-                    }catch(Exception e) {
+                    }catch {
                         // TODO: log error
                     }
                 } else {

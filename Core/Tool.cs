@@ -59,9 +59,11 @@ namespace NetJS.Core {
                 if(insidePath.Length > 0) {
                     insidePath += "/" + parts[i];
                 } else if(parts[i] == "src") {
-                    insidePath += parts[i];
+                    insidePath = parts[i];
                 }
             }
+
+            if (insidePath.Length == 0) throw new Javascript.InternalError("Could not find src folder");
 
             return insidePath;
         }
@@ -69,14 +71,14 @@ namespace NetJS.Core {
         public static T GetArgument<T>(Javascript.Constant[] arguments, int index, string context, bool required = true) where T : Javascript.Constant {
             if (index >= arguments.Length) {
                 if (required) {
-                    throw new Exception($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+                    throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
                 } else {
                     return null;
                 }
             }
 
             var argument = arguments[index];
-            if (argument.GetType() != typeof(T)) throw new Exception($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+            if (argument.GetType() != typeof(T)) throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
 
             return (T)argument;
         }

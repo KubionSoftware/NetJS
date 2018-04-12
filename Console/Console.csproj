@@ -4,16 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4C352EE0-CC0C-419E-AD88-24FAF7CEE643}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NetJS</RootNamespace>
-    <AssemblyName>NetJS</AssemblyName>
+    <ProjectGuid>{CB8FE80E-06D7-4913-AD1F-5452087FC057}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Console</RootNamespace>
+    <AssemblyName>Console</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -21,8 +22,10 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,48 +36,24 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="XDocServices">
-      <HintPath>lib\XDocServices.dll</HintPath>
-    </Reference>
-    <Reference Include="XHTMLMerge">
-      <HintPath>lib\XHTMLMerge.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cache.cs" />
-    <Compile Include="Connections.cs" />
-    <Compile Include="External\Base64.cs" />
-    <Compile Include="External\Buffer.cs" />
-    <Compile Include="External\Config.cs" />
-    <Compile Include="External\Functions.cs" />
-    <Compile Include="External\HTTP.cs" />
-    <Compile Include="External\IO.cs" />
-    <Compile Include="External\Log.cs" />
-    <Compile Include="External\Session.cs" />
-    <Compile Include="External\SQL.cs" />
-    <Compile Include="External\XDoc.cs" />
-    <Compile Include="JSApplication.cs" />
-    <Compile Include="JSService.cs" />
-    <Compile Include="JSSession.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="Tool.cs" />
-    <Compile Include="Util\Base64.cs" />
-    <Compile Include="Util\HTTP.cs" />
-    <Compile Include="Util\SQL.cs" />
-    <Compile Include="Watch.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Project>{641457c2-a76b-47d8-af78-eb9e19df9d03}</Project>
-      <Name>Core</Name>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NetJS\NetJS.csproj">
+      <Project>{4c352ee0-cc0c-419e-ad88-24faf7cee643}</Project>
+      <Name>NetJS</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

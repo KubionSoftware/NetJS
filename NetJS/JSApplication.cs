@@ -1,5 +1,6 @@
 ﻿using System;
 using NetJS.Core;
+using System.Web;
 
 namespace NetJS {
     public class JSApplication {
@@ -40,6 +41,10 @@ namespace NetJS {
             Config = new External.Config(Watch, Engine.Scope, Settings);
 
             XDocService = new XDocServices.XDocService();
+        }
+
+        public void ProcessXDocRequest(HttpContext context) {
+            XDocService.ProcessRequest(context);
         }
     }
 }

@@ -7,17 +7,17 @@ using System.Web.SessionState;
 using System.Web.WebSockets;
 using NetJS.Core;
 
-namespace NetJS {
+namespace NetJS.Server {
     internal class WebHandler : IHttpHandler, IRequiresSessionState {
 
         public bool IsReusable => false;
 
-        private static JSService _service;
+        private static JSServer _server;
         private static bool _initialized;
 
         public void ProcessRequest(HttpContext context) {
             if (!_initialized) {
-                _service = new JSService();
+                _server = new JSServer();
                 _initialized = true;
             }
 
@@ -28,7 +28,7 @@ namespace NetJS {
                 return;
             }
             
-            _service.Handle(context);
+            _server.Handle(context);
         }
 
         public async Task WebSocketRequestHandler(AspNetWebSocketContext context) {

@@ -44,4 +44,8 @@ namespace NetJS.Core.Javascript {
     public class TypeError : Error {
         public TypeError(string message) : base("Type error - " + message) { }
     }
+
+    public class IOError : Error {
+        public IOError(string message) : base("IO error - " + message) { }
+    }
 }

@@ -42,8 +42,15 @@ namespace NetJS {
         }
 
         private SourceFile LoadFile(string path) {
-            var source = System.IO.File.ReadAllText(path);
-            var lastModified = System.IO.File.GetLastWriteTime(path);
+            string source;
+            DateTime lastModified;
+
+            try {
+                source = System.IO.File.ReadAllText(path);
+                lastModified = System.IO.File.GetLastWriteTime(path);
+            }catch(Exception e) {
+                throw new IOError($"Could not find file '{path}'");
+            }
 
             if (path.EndsWith(".js")) {
                 var fileId = Core.Debug.GetFileId(path);

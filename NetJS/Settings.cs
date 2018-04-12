@@ -7,32 +7,35 @@ using System.Web;
 namespace NetJS {
     public class Settings {
 
-        public string Root { get; }
+        public string Root { get; private set; }
 
-        public string TemplateFolder { get; } = "src/";
-        public string Entry { get; } = "main.js";
-        public string Config { get; } = "config.json";
-        public string Connections { get; } = "connections.json";
-        public string Log { get; } = "log.txt";
+        public string TemplateFolder { get; private set; } = "src/";
+        public string Entry { get; private set; } = "main.js";
+        public string Config { get; private set; } = "config.json";
+        public string Connections { get; private set; } = "connections.json";
+        public string Log { get; private set; } = "log.txt";
 
         public Settings(string root) {
-            Root = GetValue("JSFiles", root);
-            TemplateFolder = GetValue("JSTemplates", TemplateFolder);
-            Entry = GetValue("JSEntry", Entry);
-            Config = GetValue("JSConfig", Config);
-            Connections = GetValue("JSConnections", Connections);
-            Log = GetValue("JSLog", Log);
-
-            if (!Root.EndsWith("/")) Root += "/";
-            if (!TemplateFolder.EndsWith("/")) TemplateFolder += "/";
+            SetRoot(root);
         }
 
-        public static string GetValue(string key, string def) {
-            var value = ConfigurationManager.AppSettings[key];
-            if(value != null) {
-                return value.ToString();
-            }
-            return def;
+        public void Set(string key, string value) {
+            if (key == "JSFiles") SetRoot(value);
+            if (key == "JSTemplates") SetTemplateFolder(value);
+            if (key == "JSEntry") Entry = value;
+            if (key == "JSConfig") Config = value;
+            if (key == "JSConnections") Connections = value;
+            if (key == "JSLog") Log = value;
+        }
+
+        public void SetRoot(string root) {
+            if (!root.EndsWith("/")) root += "/";
+            Root = root;
+        }
+
+        public void SetTemplateFolder(string templateFolder) {
+            if (!templateFolder.EndsWith("/")) templateFolder += "/";
+            TemplateFolder = templateFolder;
         }
     }
 }
