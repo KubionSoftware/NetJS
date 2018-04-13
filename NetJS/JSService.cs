@@ -19,7 +19,8 @@ namespace NetJS {
                 var scope = new Scope(application.Engine.Scope, null, null, ScopeType.Session, new StringBuilder());
                 scope.SetVariable("__application__", new Foreign(application));
                 scope.SetVariable("__session__", new Foreign(session));
-                scope.SetVariable("__svCache__", new Foreign(svCache));
+
+                NetJS.External.XDoc.SetXDocInfo(new External.XDoc.XDocInfo() { AppCache = null, SVCache = svCache }, scope);
 
                 // TODO: better way to forward session
                 var result = External.Functions.include(
@@ -65,10 +66,14 @@ namespace NetJS {
         }
 
         public string RunTemplate(string template, string data, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
-            var arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.Scope);
-            if (arguments is Core.Javascript.Object a) {
-                return RunTemplate(template, a, ref application, ref session, ref svCache);
-            }
+            try {
+                Core.Javascript.Constant arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.Scope);
+
+                if (arguments is Core.Javascript.Object a) {
+                    return RunTemplate(template, a, ref application, ref session, ref svCache);
+                }
+            } catch { }
+            
             return "invalid arguments (must be valid json)";
         }
 

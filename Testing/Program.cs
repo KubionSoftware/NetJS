@@ -69,7 +69,7 @@ namespace Testing {
         static void Main(string[] args) {
             try {
                 var service = new JSService();
-                var application = new JSApplication("../../../NetJS/test/");
+                var application = new JSApplication("../../test/");
 
                 application.Engine.RegisterFunctions(typeof(TestFunctions));
 

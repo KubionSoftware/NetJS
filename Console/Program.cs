@@ -33,7 +33,7 @@ namespace NetJS.Console {
                     System.Console.WriteLine(e);
                 }
 
-                if (System.Console.ReadLine().ToLower() == "quit") Environment.Exit(0);
+                if (System.Console.ReadLine().ToLower() == "quit") return;
             }
         }
     }

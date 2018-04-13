@@ -1,16 +1,18 @@
-include("math");
-include("string");
-include("json");
-include("functions");
-include("loops");
-include("if");
-include("array");
-include("operators");
-include("html");
-include("global");
-include("typescript");
-include("regex");
-include("date");
+load("buffer");
+load("math");
+load("string");
+load("json");
+load("functions");
+load("loops");
+load("if");
+load("array");
+load("operators");
+load("html");
+load("global");
+load("typescript");
+load("regex");
+load("date");
+load("xdoc");
 
 /*
 time(() => {

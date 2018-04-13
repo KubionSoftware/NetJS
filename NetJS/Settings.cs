@@ -29,12 +29,12 @@ namespace NetJS {
         }
 
         public void SetRoot(string root) {
-            if (!root.EndsWith("/")) root += "/";
+            if (!root.EndsWith("/") && !root.EndsWith("\\")) root += "/";
             Root = root;
         }
 
         public void SetTemplateFolder(string templateFolder) {
-            if (!templateFolder.EndsWith("/")) templateFolder += "/";
+            if (!templateFolder.EndsWith("/") && !templateFolder.EndsWith("\\")) templateFolder += "/";
             TemplateFolder = templateFolder;
         }
     }

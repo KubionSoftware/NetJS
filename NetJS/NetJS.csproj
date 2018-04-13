@@ -63,6 +63,7 @@
     <Compile Include="JSApplication.cs" />
     <Compile Include="JSService.cs" />
     <Compile Include="JSSession.cs" />
+    <Compile Include="JSStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Tool.cs" />

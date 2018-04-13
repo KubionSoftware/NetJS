@@ -3,7 +3,7 @@ using NetJS.Core;
 using System.Web;
 
 namespace NetJS {
-    public class JSApplication {
+    public class JSApplication : JSStorage {
 
         public Cache Cache { get; }
         public Connections Connections { get; }

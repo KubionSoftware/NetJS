@@ -75,8 +75,18 @@ namespace NetJS.External {
         /// <example><code lang="javascript">out(JSON.stringify(data));</code></example>
         /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant @out(Constant _this, Constant[] arguments, Scope scope) {
-            var value = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "out");
-            scope.Buffer.Append(value.Value);
+            var value = Core.Tool.GetArgument(arguments, 0, "out");
+            scope.Buffer.Append(Core.Tool.ToString(value, scope));
+            return Static.Undefined;
+        }
+
+        /// <summary>outLine writes a string to the output buffer and appends a newline
+        /// <param name="value">The string to write</param>
+        /// <example><code lang="javascript">outLine(JSON.stringify(data));</code></example>
+        /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
+        public static Constant @outLine(Constant _this, Constant[] arguments, Scope scope) {
+            var value = Core.Tool.GetArgument(arguments, 0, "outLine");
+            scope.Buffer.Append(Core.Tool.ToString(value, scope) + "\n");
             return Static.Undefined;
         }
 
@@ -89,7 +99,9 @@ namespace NetJS.External {
         /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant import(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "import");
-            if (!name.Value.EndsWith(".js")) {
+
+            var parts = name.Value.Split('.');
+            if (parts.Length == 1) {
                 name.Value += ".js";
             }
 
