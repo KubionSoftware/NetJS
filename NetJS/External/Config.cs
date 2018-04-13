@@ -4,13 +4,10 @@ using NetJS.Core.Internal;
 namespace NetJS.External {
     public class Config {
 
-        public Config(Watch watch, Scope scope, Settings settings) {
+        public Config(Scope scope, Settings settings) {
             var file = settings.Root + settings.Config;
 
             Load(file, scope);
-            watch.Add(file, () => {
-                Load(file, scope);
-            });
         }
 
         public void Load(string file, Scope scope) {

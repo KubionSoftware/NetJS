@@ -6,7 +6,6 @@ namespace NetJS {
     public class JSApplication {
 
         public Cache Cache { get; }
-        public Watch Watch { get; }
         public Connections Connections { get; }
         public External.Config Config { get; }
         public Settings Settings { get; }
@@ -21,8 +20,7 @@ namespace NetJS {
             }
 
             Settings = new Settings(rootDir);
-
-            Watch = new Watch();
+            
             Cache = new Cache();
 
             Engine = new Engine();
@@ -37,8 +35,8 @@ namespace NetJS {
             Engine.RegisterClass(typeof(External.Buffer));
             Engine.RegisterFunctions(typeof(External.Functions));
 
-            Connections = new Connections(Watch, Settings);
-            Config = new External.Config(Watch, Engine.Scope, Settings);
+            Connections = new Connections(Settings);
+            Config = new External.Config(Engine.Scope, Settings);
 
             XDocService = new XDocServices.XDocService();
         }

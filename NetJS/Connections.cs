@@ -29,13 +29,10 @@ namespace NetJS {
 
         private Dictionary<string, Connection> _connections = new Dictionary<string, Connection>();
 
-        public Connections(Watch watch, Settings settings) {
+        public Connections(Settings settings) {
             var file = settings.Root + settings.Connections;
 
             Load(file);
-            watch.Add(file, () => {
-                Load(file);
-            });
         }
 
         public void Load(string file) {
