@@ -51,9 +51,9 @@
       <Project>{641457c2-a76b-47d8-af78-eb9e19df9d03}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Server\Server.csproj">
-      <Project>{8b369af1-16d5-4e55-91d9-8afceb021414}</Project>
-      <Name>Server</Name>
+    <ProjectReference Include="..\NetJS\NetJS.csproj">
+      <Project>{4c352ee0-cc0c-419e-ad88-24faf7cee643}</Project>
+      <Name>NetJS</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -42,9 +42,9 @@ namespace NetJS.Core.Javascript {
                     if (i >= MaxLoops) {
                         var message = "Maximum number of loops exceeded";
 #if debug_enabled
-                        throw new Exception(Debug.Message(node, message));
+                        throw new InternalError(Debug.Message(node, message));
 #else
-                        throw new Exception(message);
+                        throw new InternalError(message);
 #endif
                     }
                 } else {

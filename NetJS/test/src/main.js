@@ -12,6 +12,7 @@ include("typescript");
 include("regex");
 include("date");
 
+/*
 time(() => {
 	var ret = [], tmp, num = 500, i = 1024;
 
@@ -56,3 +57,4 @@ time(() => {
 }, "Array speed test (200ms - 500ms)");
 
 include("C:\\Users\\Bouke\\Desktop\\linq.js");
+*/

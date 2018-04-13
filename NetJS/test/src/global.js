@@ -12,7 +12,7 @@ assert(() => decodeURI("https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B") 
 assert(() => encodeURIComponent("?x=шеллы") == "%3Fx%3D%D1%88%D0%B5%D0%BB%D0%BB%D1%8B", "EncodeURIComponent");
 assert(() => decodeURIComponent("%3Fx%3D%D1%88%D0%B5%D0%BB%D0%BB%D1%8B") == "?x=шеллы", "DecodeURIComponent");
 
-assert(() => eval("3 + 5") == 8, "Eval simple addition");
+assert(() => eval("return 3 + 5") == 8, "Eval simple addition");
 
 var factorial = function(x){
 	var result = 1;
