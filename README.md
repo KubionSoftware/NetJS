@@ -4,11 +4,10 @@ NetJS is a javascript engine implemented in .NET
 It allows for backend development in javascript while still using the .NET framework and running your applications in IIS.
 
 The engine implements all standard javascript features.
-Next to the standard it adds support for HTML literals and provides some serverside features like session management, IO and logging.
+Next to the standard it provides serverside features like session management, IO, logging, SQL and many more.
 
 ## Table of contents
 
-* [HTML literals](#html-literals)
 * [Include and import](#include-import)
 * [Session](#session)
 * [IO](#io)
@@ -17,32 +16,18 @@ Next to the standard it adds support for HTML literals and provides some servers
 * [SQL](#sql)
 * [Installation](#installation)
 
-<a name="html-literals"/>
-
-## HTML literatals
-You can write html without having to escape it as a string
-
-```html
-<div class='users'>
-  for(var user of users){
-    <div class='user' data-id='#user.id#'>
-      <div class='user-name'>user.name</div>
-      <div class='user-address'>user.address + ", " + user.city</div>
-    </div>
-  }
-</div>
-```
-
 Every scope has a buffer for text output, wheneven an expression outputs a value it is converted to a string and added to the buffer.
 This allows you easily output HTML or text without having to store it in a javascript variable for return.
 
 <a name="include-import"/>
 
 ## Include and import
-You can include another javascript file. This runs the code in the file and returns the value.
+You can include another javascript or html file. This runs the code in the file and returns the value.
 
 ```javascript
-include("renderLayout.js", {loggedIn: true});
+include("logic.js", {loggedIn: true});
+
+include("article.html", {title: "My article", body: "Lorem impsum..."});
 ```
 
 You can also import javascript files. This will run the code in that file in the current scope.
