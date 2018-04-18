@@ -269,8 +269,8 @@ namespace NetJS.Core {
                 } else if (command == "stepOut") {
                     StepOut();
                 }
-            } catch (Exception) {
-                // TODO: log error
+            } catch (Exception e) {
+                Log.Write("Error while handling debug message - " + e);
             }
         }
 
@@ -302,8 +302,8 @@ namespace NetJS.Core {
                 try {
                     var responseBytes = Encoding.UTF8.GetBytes(message);
                     socket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, cancellationToken);
-                }catch(Exception) {
-                    // TODO: log error
+                }catch(Exception e) {
+                    Log.Write("Error while sending debug message - " + e);
                 }
             }
         }

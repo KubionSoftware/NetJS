@@ -132,6 +132,19 @@ namespace NetJS.Core.Javascript {
             return Static.Undefined;
         }
 
+        public Constant GetStackVariable(string variable) {
+            Constant value = null;
+            if (_variables.TryGetValue(variable, ref value)) {
+                return value;
+            }
+
+            if (StackParent != null) {
+                return StackParent.GetStackVariable(variable);
+            }
+
+            return Static.Undefined;
+        }
+
         public bool SetVariable(string variable, Constant value, bool create = true) {
             if (!_variables.ContainsKey(variable)) {
                 if (ScopeParent != null) {

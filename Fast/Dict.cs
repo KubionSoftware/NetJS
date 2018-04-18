@@ -24,56 +24,36 @@ namespace Fast
             _values = new Entry[length][];
         }
 
+        private IEnumerable<A> All<A>(Func<Entry, A> action) {
+            var items = new List<A>();
+            for (var r = 0; r < _values.Length; r++) {
+                var row = _values[r];
+                if (row != null) {
+                    for (var i = 0; i < row.Length; i++) {
+                        var item = row[i];
+                        if (item.Key == null) break;
+                        items.Add(action(item));
+                    }
+                }
+            }
+            return items;
+        }
+
         public IEnumerable<Entry> Items {
             get {
-                var items = new List<Entry>();
-                for (var r = 0; r < _values.Length; r++) {
-                    var row = _values[r];
-                    if (row != null) {
-                        for (var i = 0; i < row.Length; i++) {
-                            var item = row[i];
-                            if (item.Key == null) break;
-                            items.Add(item);
-                        }
-                    }
-                }
-                return items;
+                return All(item => item);
             }
         }
-
-        // TODO: remove duplicate code
+        
         public IEnumerable<string> Keys {
             get {
-                var items = new List<string>();
-                for (var r = 0; r < _values.Length; r++) {
-                    var row = _values[r];
-                    if (row != null) {
-                        for (var i = 0; i < row.Length; i++) {
-                            var item = row[i];
-                            if (item.Key == null) break;
-                            items.Add(item.Key);
-                        }
-                    }
-                }
-                return items;
+                return All(item => item.Key);
             }
         }
-
-        // TODO: remove duplicate code
+        
         public IEnumerable<T> Values {
             get {
-                var items = new List<T>();
-                for (var r = 0; r < _values.Length; r++) {
-                    var row = _values[r];
-                    if (row != null) {
-                        for (var i = 0; i < row.Length; i++) {
-                            var item = row[i];
-                            if (item.Key == null) break;
-                            items.Add(item.Value);
-                        }
-                    }
-                }
-                return items;
+                return All(item => item.Value);
             }
         }
 

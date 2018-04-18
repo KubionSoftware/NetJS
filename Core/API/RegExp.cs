@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace NetJS.Core.Internal {
+namespace NetJS.Core.API {
     class RegExp {
 
         public static Javascript.Constant constructor(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {

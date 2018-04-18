@@ -1,6 +1,6 @@
 ﻿using Util;
 
-namespace NetJS.Core.Internal {
+namespace NetJS.Core.API {
     public class JSON {
 
         public static Javascript.Constant parse(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {

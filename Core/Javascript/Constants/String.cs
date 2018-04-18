@@ -58,7 +58,7 @@ namespace NetJS.Core.Javascript {
 
         public override Constant In(Constant other, Scope scope) {
             if (other is Object obj) {
-                return new Boolean(obj.Get(Value) is Undefined ? false : true);
+                return new Boolean(obj.Has(Value));
             }
 
             return base.In(other, scope);

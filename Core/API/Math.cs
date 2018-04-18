@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NetJS.Core.Internal {
+namespace NetJS.Core.API {
     public class Math {
 
         private static Random _random = new Random();

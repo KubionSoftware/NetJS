@@ -41,5 +41,13 @@ namespace NetJS.Server {
 
             return request;
         }
+
+        public static HttpContext GetContext(Core.Javascript.Scope scope, string method) {
+            var context = HttpContext.Current;
+            if (context == null) {
+                throw new Core.Javascript.Error($"Can't use method '{method}' because NetJS is not being run as a server");
+            }
+            return context;
+        }
     }
 }

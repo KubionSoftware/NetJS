@@ -30,7 +30,6 @@ namespace Testing {
                 Console.WriteLine("Test successful - " + message);
                 Program.NumSuccess++;
             } else {
-                
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine("Test failed - " + message);
                 Program.NumFailed++;

@@ -302,7 +302,7 @@ namespace NetJS.Core.Javascript {
                         } else if (c == '\\') {
                             escaping = true;
                         } else if (c == '\r') {
-                            // TODO: ignore this?
+                            // Cariage returns are ignored in order to normalize newlines
                         } else if (c == '\n' && stringStart != '`') {
                             throw createError("Newline in string literal");
                         } else {

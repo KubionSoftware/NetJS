@@ -2,7 +2,7 @@
 using System.Web;
 using NetJS.Core.Javascript;
 
-namespace NetJS.External {
+namespace NetJS.API {
     /// <summary>Functions class contain functions that are injected directly into the engine.</summary>
     public class Functions {
 
@@ -22,13 +22,6 @@ namespace NetJS.External {
             var buffer = returnVar ? new StringBuilder() : scope.Buffer;
             var templateScope = new Scope(application.Engine.Scope, scope, node, ScopeType.Template, buffer);
 
-            // TODO: THIS IS A MEGA-HACK, REMOVE AS SOON AS POSSIBLE!!!
-            foreach (var key in scope.Variables) {
-                if (key.StartsWith("__") && key.EndsWith("__")) {
-                    templateScope.SetVariable(key, scope.GetVariable(key));
-                }
-            }
-
             // Pass arguments
             if (arguments.Length > 1) {
                 var parameters = (Object)arguments[1];
@@ -43,7 +36,7 @@ namespace NetJS.External {
             if (returnVar) {
                 return result.IsUndefined() ? new String(buffer.ToString()) : result;
             } else {
-                buffer.Append(result.ToString());
+                buffer.Append(Core.Tool.ToString(result, scope));
                 return Static.Undefined;
             }
         }

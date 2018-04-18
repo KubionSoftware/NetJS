@@ -19,9 +19,8 @@ namespace NetJS.Server {
         public JSApplication CreateApplication() {
             var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory);
 
-            foreach(var key in ConfigurationManager.AppSettings.AllKeys) {
-                application.Settings.Set(key, ConfigurationManager.AppSettings[key].ToString());
-            }
+            application.Engine.RegisterClass(typeof(API.Cookies));
+            application.Engine.RegisterClass(typeof(API.Headers));
 
             return application;
         }
@@ -33,7 +32,6 @@ namespace NetJS.Server {
             jsContext.Set("request", Tool.CreateRequest(context, path, application.Engine.Scope));
 
             var response = NetJS.Core.Tool.Construct("Object", application.Engine.Scope);
-            response.Set("contentType", new NetJS.Core.Javascript.String("text/html"));
             response.Set("statusCode", new NetJS.Core.Javascript.Number(200));
             jsContext.Set("response", response);
 
@@ -43,10 +41,10 @@ namespace NetJS.Server {
             var responseString = _service.RunTemplate(application.Settings.Entry, arguments, ref application, ref session);
 
             try {
-                context.Response.ContentType = response.Get<NetJS.Core.Javascript.String>("contentType").Value;
+                //context.Response.ContentType = response.Get<NetJS.Core.Javascript.String>("contentType").Value;
                 context.Response.StatusCode = (int)response.Get<NetJS.Core.Javascript.Number>("statusCode").Value;
-            } catch (Exception) {
-                // TODO: log error
+            } catch (Exception e) {
+                Core.Log.Write("Error while processing context.Response - " + e);
             }
 
             context.Response.AppendHeader("Access-Control-Allow-Origin", "*");

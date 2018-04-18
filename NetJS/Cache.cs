@@ -20,11 +20,16 @@ namespace NetJS {
 
         private Dictionary<string, SourceFile> Files = new Dictionary<string, SourceFile>();
 
-        public Block GetFile(string name, JSApplication application) {
+        public string GetPath(string name, JSApplication application) {
             var path = name;
             if (!System.IO.Path.IsPathRooted(path)) {
                 path = application.Settings.Root + application.Settings.TemplateFolder + path;
             }
+            return path;
+        }
+
+        public Block GetFile(string name, JSApplication application) {
+            var path = GetPath(name, application);
             var key = Core.Tool.NormalizePath(path);
 
             if (Files.ContainsKey(key)) {

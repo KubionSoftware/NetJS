@@ -13,6 +13,7 @@ load("typescript");
 load("regex");
 load("date");
 load("xdoc");
+load("io");
 
 /*
 time(() => {
@@ -57,6 +58,6 @@ time(() => {
 		tmp = c.pop();
 	}
 }, "Array speed test (200ms - 500ms)");
-
-include("C:\\Users\\Bouke\\Desktop\\linq.js");
 */
+
+include("C:\\Users\\Bouke\\Documents\\linq.js");

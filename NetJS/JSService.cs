@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using NetJS.Core.Javascript;
-using NetJS.Core.Internal;
+using NetJS.Core.API;
 using NetJS.Core;
 
 namespace NetJS { 
@@ -20,10 +20,10 @@ namespace NetJS {
                 scope.SetVariable("__application__", new Foreign(application));
                 scope.SetVariable("__session__", new Foreign(session));
 
-                NetJS.External.XDoc.SetXDocInfo(new External.XDoc.XDocInfo() { AppCache = null, SVCache = svCache }, scope);
+                NetJS.API.XDoc.SetXDocInfo(new API.XDoc.XDocInfo() { AppCache = null, SVCache = svCache }, scope);
 
                 // TODO: better way to forward session
-                var result = External.Functions.include(
+                var result = API.Functions.include(
                     Static.Undefined,
                     new Constant[] { new Core.Javascript.String(template), arguments },
                     scope

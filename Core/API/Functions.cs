@@ -3,7 +3,7 @@ using System;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace NetJS.Core.Internal {
+namespace NetJS.Core.API {
     public class Functions {
 
         public static Constant parseInt(Constant _this, Constant[] arguments, Scope scope) {

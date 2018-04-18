@@ -7,7 +7,7 @@ namespace NetJS {
 
         public Cache Cache { get; }
         public Connections Connections { get; }
-        public External.Config Config { get; }
+        public API.Config Config { get; }
         public Settings Settings { get; }
 
         public Engine Engine { get; }
@@ -25,18 +25,19 @@ namespace NetJS {
 
             Engine = new Engine();
             Engine.Init();
-            Engine.RegisterClass(typeof(External.HTTP));
-            Engine.RegisterClass(typeof(External.SQL));
-            Engine.RegisterClass(typeof(External.IO));
-            Engine.RegisterClass(typeof(External.Log));
-            Engine.RegisterClass(typeof(External.Session));
-            Engine.RegisterClass(typeof(External.XDoc));
-            Engine.RegisterClass(typeof(External.Base64));
-            Engine.RegisterClass(typeof(External.Buffer));
-            Engine.RegisterFunctions(typeof(External.Functions));
+            Engine.RegisterClass(typeof(API.HTTP));
+            Engine.RegisterClass(typeof(API.SQL));
+            Engine.RegisterClass(typeof(API.IO));
+            Engine.RegisterClass(typeof(API.Log));
+            Engine.RegisterClass(typeof(API.Session));
+            Engine.RegisterClass(typeof(API.XDoc));
+            Engine.RegisterClass(typeof(API.Base64));
+            Engine.RegisterClass(typeof(API.Buffer));
+            Engine.RegisterClass(typeof(API.Windows));
+            Engine.RegisterFunctions(typeof(API.Functions));
 
             Connections = new Connections(Settings);
-            Config = new External.Config(Engine.Scope, Settings);
+            Config = new API.Config(Engine.Scope, Settings);
 
             XDocService = new XDocServices.XDocService();
         }

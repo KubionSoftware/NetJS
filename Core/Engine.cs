@@ -38,19 +38,27 @@ namespace NetJS.Core {
             Scope.SetVariable("Function", functionConstructor);
             _prototypes["Function"] = functionConstructor;
 
-            RegisterType(typeof(Internal.Object));
-            RegisterType(typeof(Internal.Function));
-            RegisterType(typeof(Internal.Array));
-            RegisterType(typeof(Internal.Date));
-            RegisterType(typeof(Internal.String));
-            RegisterType(typeof(Internal.Number));
-            RegisterType(typeof(Internal.Boolean));
-            RegisterType(typeof(Internal.RegExp));
+            RegisterType(typeof(API.Object));
+            RegisterType(typeof(API.Function));
+            RegisterType(typeof(API.Array));
+            RegisterType(typeof(API.Date));
+            RegisterType(typeof(API.String));
+            RegisterType(typeof(API.Number));
+            RegisterType(typeof(API.Boolean));
+            RegisterType(typeof(API.RegExp));
 
-            RegisterClass(typeof(Internal.JSON));
-            RegisterClass(typeof(Internal.Math));
+            RegisterClass(typeof(API.JSON));
+            RegisterClass(typeof(API.Math));
 
-            RegisterFunctions(typeof(Internal.Functions));
+            RegisterFunctions(typeof(API.Functions));
+        }
+
+        public void RegisterDLL(string file) {
+            var dll = Assembly.LoadFile(file);
+
+            foreach (Type type in dll.GetExportedTypes()) {
+                RegisterType(type);
+            }
         }
 
         private Javascript.ExternalFunction GetFunction(MethodInfo info) {

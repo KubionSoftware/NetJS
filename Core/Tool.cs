@@ -5,6 +5,10 @@ namespace NetJS.Core {
     public class Tool {
 
         public static string ToString(Javascript.Constant constant, Javascript.Scope scope) {
+            if(constant == null || constant.IsUndefined()) {
+                return "";
+            }
+
             var node = new Javascript.Call() {
                 Left = new Javascript.Access(true) {
                     Left = constant,
@@ -63,7 +67,7 @@ namespace NetJS.Core {
                 }
             }
 
-            if (insidePath.Length == 0) throw new Javascript.InternalError("Could not find src folder");
+            if (insidePath.Length == 0) return path;
 
             return insidePath;
         }

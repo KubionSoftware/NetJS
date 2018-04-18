@@ -17,6 +17,10 @@ namespace NetJS {
 
         public Settings(string root) {
             SetRoot(root);
+
+            foreach (var key in ConfigurationManager.AppSettings.AllKeys) {
+                Set(key, ConfigurationManager.AppSettings[key].ToString());
+            }
         }
 
         public void Set(string key, string value) {

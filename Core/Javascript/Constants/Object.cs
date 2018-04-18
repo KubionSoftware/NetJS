@@ -43,6 +43,10 @@ namespace NetJS.Core.Javascript {
             Properties.Set(name, value);
         }
 
+        public bool Has(string name) {
+            return Properties.ContainsKey(name);
+        }
+
         public void Remove(string name) {
             Properties.Remove(name);
         }

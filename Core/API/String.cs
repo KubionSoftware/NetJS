@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using NetJS.Core.Javascript;
 
-namespace NetJS.Core.Internal {
+namespace NetJS.Core.API {
     class String {
 
         public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
@@ -125,7 +125,6 @@ namespace NetJS.Core.Internal {
                     var separator = (Javascript.String)arguments[0];
 
                     if (separator.Value.Length == 0) {
-                        // TODO: performance
                         return Tool.ToArray(str.Value.ToCharArray().Select(c => c.ToString()).ToArray(), scope);
                     } else {
                         return Tool.ToArray(str.Value.Split(new string[] { separator.Value }, StringSplitOptions.None), scope);

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Util {
+namespace NetJS.Util {
     public class Base64 {
 
         public static string Encode(string plainText) {

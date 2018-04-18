@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace NetJS.External {
+namespace NetJS.API {
     public class Base64 {
 
         public static Constant decode(Constant _this, Constant[] arguments, Scope scope) {

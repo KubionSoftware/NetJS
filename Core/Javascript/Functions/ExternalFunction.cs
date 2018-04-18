@@ -24,13 +24,6 @@ namespace NetJS.Core.Javascript {
 
                 var functionScope = new Scope(Scope, scope, this, ScopeType.Function, scope.Buffer);
 
-                // TODO: THIS IS A MEGA-HACK, REMOVE AS SOON AS POSSIBLE!!!
-                foreach (var key in scope.Variables) {
-                    if (key.StartsWith("__") && key.EndsWith("__")) {
-                        functionScope.SetVariable(key, scope.GetVariable(key));
-                    }
-                }
-
                 var result = Function(_this, arguments, functionScope);
                 return result;
             }

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class Access : BinaryOperator {
-        // TODO: better name
-        public bool IsDot;
+        // If the variable is a key like obj.a (true) or a variable like obj[a] (false)
+        public bool IsKey;
 
-        public Access(bool isDot) : base(16) {
-            IsDot = isDot;
+        public Access(bool isKey) : base(16) {
+            IsKey = isKey;
         }
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
@@ -19,7 +19,7 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Scope scope, bool getValue = true) {
             var left = Left.Execute(scope, false);
-            var right = Right.Execute(scope, !IsDot);
+            var right = Right.Execute(scope, !IsKey);
 
             var result = Execute(left, right, scope);
             return getValue ? result.GetValue(scope) : result;
@@ -28,7 +28,7 @@ namespace NetJS.Core.Javascript {
         public override void Uneval(StringBuilder builder, int depth) {
             Left.Uneval(builder, depth);
 
-            if (IsDot) {
+            if (IsKey) {
                 builder.Append(Tokens.Access);
                 Right.Uneval(builder, depth);
             } else {

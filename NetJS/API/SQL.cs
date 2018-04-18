@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using String = NetJS.Core.Javascript.String;
 
-namespace NetJS.External {
+namespace NetJS.API {
     /// <summary>SQL class contains basic methods for communicating with SQL databases configured in the config.</summary>
     /// <remarks>This class can make SELECT, UPDATE, INSERT and custom query's.
     /// Configuration is needed to make a DB connection.</remarks>

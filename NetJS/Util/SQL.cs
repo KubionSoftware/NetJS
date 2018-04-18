@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using Util;
 
-namespace Util {
+namespace NetJS.Util {
     public static class SQL {
 
         public static SqlConnection Open(string connectionString) {

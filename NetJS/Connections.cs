@@ -13,7 +13,7 @@ namespace NetJS {
         public SqlConnection Connection;
 
         public SQLConnection(string connectionString) {
-            Connection = SQL.Open(connectionString);
+            Connection = Util.SQL.Open(connectionString);
         }
     }
 
@@ -21,6 +21,10 @@ namespace NetJS {
         public string Url;
 
         public HTTPConnection(string url) {
+            if (!url.EndsWith("/")) {
+                url += "/";
+            }
+
             Url = url;
         }
     }
@@ -45,8 +49,8 @@ namespace NetJS {
                             try {
                                 sqlConnection.Connection.Close();
                                 sqlConnection.Connection.Dispose();
-                            } catch (Exception) {
-                                // TODO: log error
+                            } catch (Exception e) {
+                                Core.Log.Write("Error while closing SQL connection - " + e);
                             }
                         }
                     }
@@ -68,8 +72,8 @@ namespace NetJS {
                                 _connections[key] = new HTTPConnection(connectionJson.String("url"));
                             }
                         }
-                    }catch {
-                        // TODO: log error
+                    }catch (Exception e) {
+                        Core.Log.Write("Error while parsing connection JSON - " + e);
                     }
                 } else {
 
@@ -85,8 +89,8 @@ namespace NetJS {
                         if(sqlConnection.Connection.State != System.Data.ConnectionState.Open) {
                             try {
                                 sqlConnection.Connection.Open();
-                            } catch {
-                                // TODO: log error
+                            } catch (Exception e) {
+                                Core.Log.Write("Error while opening SQL connection - " + e);
                             }
                         }
                         return sqlConnection.Connection;

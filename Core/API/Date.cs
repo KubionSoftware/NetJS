@@ -1,7 +1,7 @@
 ﻿using NetJS.Core.Javascript;
 using System;
 
-namespace NetJS.Core.Internal {
+namespace NetJS.Core.API {
     class Date {
 
         public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {

@@ -1,7 +1,7 @@
 ﻿using NetJS.Core.Javascript;
 using System;
 
-namespace NetJS.External {
+namespace NetJS.API {
     /// <summary>Log class contains methods for logging to a file.</summary>
     public class Log {
 
@@ -14,8 +14,7 @@ namespace NetJS.External {
 
             var application = Tool.GetFromScope<JSApplication>(scope, "__application__");
             if (application == null) throw new InternalError("No application");
-
-            // TODO: save base directory
+            
             var file = application.Settings.Root + application.Settings.Log;
 
             try {

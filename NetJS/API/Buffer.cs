@@ -1,6 +1,6 @@
 ﻿using NetJS.Core.Javascript;
 
-namespace NetJS.External {
+namespace NetJS.API {
     public class Buffer {
 
         public static Constant set(Constant _this, Constant[] arguments, Scope scope) {

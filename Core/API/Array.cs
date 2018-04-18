@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NetJS.Core.Javascript;
 using System.Text;
 
-namespace NetJS.Core.Internal {
+namespace NetJS.Core.API {
     class Array {
 
         public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
@@ -373,7 +373,11 @@ namespace NetJS.Core.Internal {
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
-            return join(_this, arguments, scope);
+            // Because this is actually useful
+            return JSON.stringify(Static.Undefined, new Constant[] { _this }, scope);
+
+            // According to javascript specification
+            // return join(_this, arguments, scope);
         }
     }
 }

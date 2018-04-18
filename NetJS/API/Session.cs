@@ -1,7 +1,7 @@
 ﻿using NetJS.Core.Javascript;
 using System.Web;
 
-namespace NetJS.External {
+namespace NetJS.API {
     /// <summary>Sessions are implemented using ASP.NET. You can use the session to store and retrieve values.</summary>
     /// <remarks>This class can set, get and remove key-value pairs.
     /// Unlike SessionStorage in browsers, this session allows you to store all types of variables instread of only strings.</remarks>
@@ -10,7 +10,6 @@ namespace NetJS.External {
     /// console.log(Sessions.get("key"); //prints: value
     /// Sessions.delete("key");</code></example>
     public class Session {
-
         
         /// <summary>Sessions.get takes a key, gets the value linked in the session and returns the value.</summary>
         /// <param name="key">The key to get a value from</param>
@@ -22,8 +21,8 @@ namespace NetJS.External {
 
             var session = Tool.GetFromScope<JSSession>(scope, "__session__");
             if (session == null) throw new InternalError("No session");
-            var value = session == null ? null : session.Get(key);
 
+            var value = session.Get(key);
             if(value == null) return Static.Undefined;
             return value;
         }
@@ -39,7 +38,8 @@ namespace NetJS.External {
 
             var session = Tool.GetFromScope<JSSession>(scope, "__session__");
             if (session == null) throw new InternalError("No session");
-            if (session != null) session.Set(key, value);
+
+            session.Set(key, value);
 
             return Static.Undefined;
         }
@@ -53,7 +53,8 @@ namespace NetJS.External {
 
             var session = Tool.GetFromScope<JSSession>(scope, "__session__");
             if (session == null) throw new InternalError("No session");
-            if (session != null) session.Remove(key);
+
+            session.Remove(key);
 
             return Static.Undefined;
         }
@@ -64,9 +65,21 @@ namespace NetJS.External {
         public static Constant clear(Constant _this, Constant[] arguments, Scope scope) {
             var session = Tool.GetFromScope<JSSession>(scope, "__session__");
             if (session == null) throw new InternalError("No session");
-            if (session != null) session.Clear();
+
+            session.Clear();
 
             return Static.Undefined;
+        }
+
+        /// <summary>Sessions.getAll returns the entire session object.</summary>
+        /// <returns>Object containing all keys and values.</returns>
+        /// <example><code lang="javascript">var session = Sessions.getAll();</code></example>
+        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
+        public static Constant getAll(Constant _this, Constant[] arguments, Scope scope) {
+            var session = Tool.GetFromScope<JSSession>(scope, "__session__");
+            if (session == null) throw new InternalError("No session");
+
+            return session.GetObject(scope);
         }
     }
 }

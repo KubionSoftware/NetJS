@@ -1,6 +1,6 @@
 ﻿using NetJS.Core.Javascript;
 
-namespace NetJS.Core.Internal {
+namespace NetJS.Core.API {
     class Object {
 
         public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
@@ -10,7 +10,11 @@ namespace NetJS.Core.Internal {
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
-            return new Javascript.String("[object Object]");
+            // Because this is actually useful
+            return JSON.stringify(null, new Constant[] { _this }, scope);
+
+            // According to javascript specification
+            // return new Javascript.String("[object Object]");
         }
     }
 }

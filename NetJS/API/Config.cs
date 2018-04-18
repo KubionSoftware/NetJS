@@ -1,7 +1,7 @@
 ﻿using NetJS.Core.Javascript;
-using NetJS.Core.Internal;
+using NetJS.Core.API;
 
-namespace NetJS.External {
+namespace NetJS.API {
     public class Config {
 
         public Config(Scope scope, Settings settings) {

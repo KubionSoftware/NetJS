@@ -2,7 +2,7 @@
 using System.Web;
 using NetJS.Core.Javascript;
 
-namespace NetJS.External {
+namespace NetJS.API {
     /// <summary>A Compatibility class for XDoc, to ensure possibility of usage of XDoc with NetJS.</summary>
     public class XDoc {
 
