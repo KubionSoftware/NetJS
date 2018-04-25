@@ -41,6 +41,7 @@ namespace NetJS.Core {
             RegisterType(typeof(API.Object));
             RegisterType(typeof(API.Function));
             RegisterType(typeof(API.Array));
+            RegisterType(typeof(API.Uint8Array));
             RegisterType(typeof(API.Date));
             RegisterType(typeof(API.String));
             RegisterType(typeof(API.Number));
@@ -57,7 +58,7 @@ namespace NetJS.Core {
             var dll = Assembly.LoadFile(file);
 
             foreach (Type type in dll.GetExportedTypes()) {
-                RegisterType(type);
+                RegisterClass(type);
             }
         }
 

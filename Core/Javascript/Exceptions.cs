@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NetJS.Core.Javascript {
 
@@ -22,6 +23,10 @@ namespace NetJS.Core.Javascript {
 #if debug_enabled
             StackTrace.Add(location);
 #endif
+        }
+
+        public override string ToString() {
+            return Message + "\n" + string.Join("\n", StackTrace.Select(loc => Debug.GetFileName(loc.FileId) + " (" + loc.LineNr + ")"));
         }
     }
 

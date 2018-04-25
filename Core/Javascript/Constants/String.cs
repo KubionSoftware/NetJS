@@ -25,15 +25,9 @@ namespace NetJS.Core.Javascript {
         public override Constant Add(Constant other, Scope scope) {
             if (other is String s) {
                 return new String(Value + s.Value);
-            } else if (other is Number n) {
-                return new String(Value + n.Value.ToString(CultureInfo.InvariantCulture));
-            } else if (other is Boolean b) {
-                return new String(Value + (b.Value ? Tokens.True : Tokens.False));
-            } else if (other is Undefined || other is Null) {
-                return this;
+            } else {
+                return new String(Value + other.ToString());
             }
-
-            return base.Add(other, scope);
         }
 
         public override Constant Equals(Constant other, Scope scope) {

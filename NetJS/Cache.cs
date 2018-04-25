@@ -20,10 +20,10 @@ namespace NetJS {
 
         private Dictionary<string, SourceFile> Files = new Dictionary<string, SourceFile>();
 
-        public string GetPath(string name, JSApplication application) {
+        public string GetPath(string name, JSApplication application, bool inSource = true) {
             var path = name;
             if (!System.IO.Path.IsPathRooted(path)) {
-                path = application.Settings.Root + application.Settings.TemplateFolder + path;
+                path = application.Settings.Root + (inSource ? application.Settings.TemplateFolder : "") + path;
             }
             return path;
         }

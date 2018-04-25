@@ -19,36 +19,14 @@ namespace NetJS.Server {
         public JSApplication CreateApplication() {
             var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory);
 
-            application.Engine.RegisterClass(typeof(API.Cookies));
-            application.Engine.RegisterClass(typeof(API.Headers));
+            application.Engine.RegisterClass(typeof(API.Request));
+            application.Engine.RegisterClass(typeof(API.Response));
 
             return application;
         }
 
         public void ProcessRequest(HttpContext context, NetJS.JSApplication application, NetJS.JSSession session) {
-            var path = Tool.GetPath(context.Request);
-
-            var jsContext = NetJS.Core.Tool.Construct("Object", application.Engine.Scope);
-            jsContext.Set("request", Tool.CreateRequest(context, path, application.Engine.Scope));
-
-            var response = NetJS.Core.Tool.Construct("Object", application.Engine.Scope);
-            response.Set("statusCode", new NetJS.Core.Javascript.Number(200));
-            jsContext.Set("response", response);
-
-            var arguments = NetJS.Core.Tool.Construct("Object", application.Engine.Scope);
-            arguments.Set("context", jsContext);
-
-            var responseString = _service.RunTemplate(application.Settings.Entry, arguments, ref application, ref session);
-
-            try {
-                //context.Response.ContentType = response.Get<NetJS.Core.Javascript.String>("contentType").Value;
-                context.Response.StatusCode = (int)response.Get<NetJS.Core.Javascript.Number>("statusCode").Value;
-            } catch (Exception e) {
-                Core.Log.Write("Error while processing context.Response - " + e);
-            }
-
-            context.Response.AppendHeader("Access-Control-Allow-Origin", "*");
-            context.Response.AppendHeader("Access-Control-Allow-Headers", "X-Requested-With");
+            var responseString = _service.RunTemplate(application.Settings.Entry, "", ref application, ref session);
 
             var buffer = Encoding.UTF8.GetBytes(responseString);
             var output = context.Response.OutputStream;

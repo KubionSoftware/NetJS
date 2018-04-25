@@ -175,5 +175,12 @@ namespace NetJS.Core.API {
 
             return new Javascript.String(result.ToString());
         }
+
+        public static Constant getBytes(Constant _this, Constant[] arguments, Scope scope) {
+            var str = (Javascript.String)_this;
+            var bytes = Encoding.Default.GetBytes(str.Value);
+
+            return new NetJS.Core.Javascript.Uint8Array(new ArrayBuffer(bytes));
+        }
     }
 }

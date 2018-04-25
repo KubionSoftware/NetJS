@@ -20,7 +20,7 @@ namespace NetJS.Core.Javascript {
                     return result;
                 }
             } catch (Exception e) {
-                result = new Result(ResultType.Throw, new String(e.Message));
+                result = new Result(ResultType.Throw, new String(e.ToString()));
             }
 
             if (CatchBody != null) {

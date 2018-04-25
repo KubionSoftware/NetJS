@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Uint8Array.cs" />
     <Compile Include="Convert.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="Engine.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Javascript\Blueprints\StringBlueprint.cs" />
     <Compile Include="Javascript\Constants\ArgumentList.cs" />
     <Compile Include="Javascript\Constants\Array.cs" />
+    <Compile Include="Javascript\Constants\ArrayBuffer.cs" />
     <Compile Include="Javascript\Constants\Boolean.cs" />
     <Compile Include="Javascript\Constants\Constant.cs" />
     <Compile Include="Javascript\Constants\Date.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="Javascript\Constants\Path.cs" />
     <Compile Include="Javascript\Constants\String.cs" />
     <Compile Include="Javascript\Constants\TypedVariable.cs" />
+    <Compile Include="Javascript\Constants\Uint8Array.cs" />
     <Compile Include="Javascript\Constants\Variable.cs" />
     <Compile Include="Javascript\Exceptions.cs" />
     <Compile Include="Javascript\Expression.cs" />

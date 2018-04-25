@@ -15,14 +15,13 @@ namespace NetJS.API
             return application.Settings.Root + name.Value;
         }
 
-        /// <summary>Writes content into a file.</summary>
-        /// <param name = "file">A filename</param>
-        /// <param name = "content">The content to be written</param>
-        /// <example><code lang="javascript">IO.write("data.json", { name: "Hello World!");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
-         public static Constant write(Constant _this, Constant[] arguments, Scope scope) {
-            var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.write");
-            var content = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.write");
+        /// <summary>Writes text into a file.</summary>
+        /// <param name = "file">A filename (string)</param>
+        /// <param name = "content">The text to be written (string)</param>
+        /// <example><code lang="javascript">IO.writeText("data.json", "Hello World!");</code></example>
+        public static Constant writeText(Constant _this, Constant[] arguments, Scope scope) {
+            var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.writeText");
+            var content = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.writeText");
 
             var application = Tool.GetApplication(scope);
             var file = GetFile(application, name);
@@ -36,28 +35,63 @@ namespace NetJS.API
             return Static.Undefined;
         }
 
-        /// <summary>Reads and returns content of a file.</summary>
-        /// <param name= "file">A filename to read from </param>
-        /// <returns>The content of the file.</returns>
-        /// <example><code lang="javascript">var content = IO.read("data.json");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
-        public static Constant read(Constant _this, Constant[] arguments, Scope scope) {
-            var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.read");
+        /// <summary>Writes bytes into a file.</summary>
+        /// <param name = "file">A filename</param>
+        /// <param name = "content">The bytes to be written (Uint8Array)</param>
+        /// <example><code lang="javascript">IO.writeBytes("image.png", bytes);</code></example>
+        public static Constant writeBytes(Constant _this, Constant[] arguments, Scope scope) {
+            var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.writeBytes");
+            var content = Core.Tool.GetArgument<Core.Javascript.Uint8Array>(arguments, 1, "IO.writeBytes");
+
+            var application = Tool.GetApplication(scope);
+            var file = GetFile(application, name);
+
+            try {
+                System.IO.File.WriteAllBytes(file, content.Buffer.Data);
+            } catch {
+                throw new IOError($"Could not write bytes to file '{file}'");
+            }
+
+            return Static.Undefined;
+        }
+
+        /// <summary>Reads and returns text content of a file.</summary>
+        /// <param name= "file">A filename to read from (string)</param>
+        /// <returns>The content of the file (string)</returns>
+        /// <example><code lang="javascript">var text = IO.readText("data.json");</code></example>
+        public static Constant readText(Constant _this, Constant[] arguments, Scope scope) {
+            var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.readText");
 
             var application = Tool.GetApplication(scope);
             var file = GetFile(application, name);
             
             try {
-                return new Core.Javascript.String(System.IO.File.ReadAllText(application.Settings.Root + name.Value));
+                return new Core.Javascript.String(System.IO.File.ReadAllText(file));
             }catch {
                 throw new IOError($"Could not read text from file '{file}'");
             }
         }
-        
+
+        /// <summary>Reads and returns binary content of a file.</summary>
+        /// <param name= "file">A filename to read from (string)</param>
+        /// <returns>The binary content of the file (Uint8Array)</returns>
+        /// <example><code lang="javascript">var bytes = IO.readBytes("image.png");</code></example>
+        public static Constant readBytes(Constant _this, Constant[] arguments, Scope scope) {
+            var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.readBytes");
+
+            var application = Tool.GetApplication(scope);
+            var file = GetFile(application, name);
+
+            try {
+                return new Core.Javascript.Uint8Array(new Core.Javascript.ArrayBuffer(System.IO.File.ReadAllBytes(file)));
+            } catch {
+                throw new IOError($"Could not read bytes from file '{file}'");
+            }
+        }
+
         /// <summary>Deletes a file.</summary>
         /// <param name= "file">A filename to delete</param>
         /// <example><code lang="javascript">IO.deleteFile("data.json");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant deleteFile(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.delete");
 
@@ -76,7 +110,6 @@ namespace NetJS.API
         /// <param name= "source">The file to copy</param>
         /// <param name= "destination">The file to copy to</param>
         /// <example><code lang="javascript">IO.copyFile("a.txt", "b.txt");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant copyFile(Constant _this, Constant[] arguments, Scope scope) {
             var a = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.copy");
             var b = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.copy");
@@ -97,7 +130,6 @@ namespace NetJS.API
         /// <param name= "source">The source location</param>
         /// <param name= "destination">The destination</param>
         /// <example><code lang="javascript">IO.moveFile("a.txt", "files/b.txt");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant moveFile(Constant _this, Constant[] arguments, Scope scope) {
             var a = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.moveFile");
             var b = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.moveFile");
@@ -118,7 +150,6 @@ namespace NetJS.API
         /// <param name= "source">The source location</param>
         /// <param name= "destination">The destination</param>
         /// <example><code lang="javascript">IO.moveDirectory("files", "documents/files");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant moveDirectory(Constant _this, Constant[] arguments, Scope scope) {
             var a = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.moveDirectory");
             var b = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.moveDirectory");
@@ -138,7 +169,6 @@ namespace NetJS.API
         /// <summary>Get all files in a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var files = IO.getFiles("documents");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant getFiles(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
@@ -155,7 +185,6 @@ namespace NetJS.API
         /// <summary>Get all directories in a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var directories = IO.getDirectories("documents");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant getDirectories(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getDirectories");
 
@@ -172,7 +201,6 @@ namespace NetJS.API
         /// <summary>Checks if the file exists.</summary>
         /// <param name= "file">The file path</param>
         /// <example><code lang="javascript">var exists = IO.fileExists("name.txt");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant fileExists(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
@@ -189,7 +217,6 @@ namespace NetJS.API
         /// <summary>Checks if the directory exists.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var exists = IO.directoryExists("documents");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant directoryExists(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
@@ -206,7 +233,6 @@ namespace NetJS.API
         /// <summary>Creates a new directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">IO.createDirectory("documents");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant createDirectory(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
@@ -224,7 +250,6 @@ namespace NetJS.API
         /// <summary>Deletes a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">IO.deleteDirectory("documents");</code></example>
-        /// <exception cref = "InternalError">Thrown when no application can be found in the application scope.</exception>
         public static Constant deleteDirectory(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 

@@ -9,18 +9,22 @@ namespace NetJS.Core {
                 return "";
             }
 
-            var node = new Javascript.Call() {
-                Left = new Javascript.Access(true) {
-                    Left = constant,
-                    Right = new Javascript.Variable("toString")
-                },
-                Right = new Javascript.ArgumentList() { Arguments = new Javascript.Constant[] { } }
-            };
+            try {
+                var node = new Javascript.Call() {
+                    Left = new Javascript.Access(true) {
+                        Left = constant,
+                        Right = new Javascript.Variable("toString")
+                    },
+                    Right = new Javascript.ArgumentList() { Arguments = new Javascript.Constant[] { } }
+                };
 
-            var result = node.Execute(scope);
+                var result = node.Execute(scope);
 
-            if(result is Javascript.String s) {
-                return s.Value;
+                if (result is Javascript.String s) {
+                    return s.Value;
+                }
+            } catch {
+                return constant.ToString();
             }
 
             return "";

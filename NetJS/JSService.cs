@@ -35,14 +35,14 @@ namespace NetJS {
                     return scope.Buffer.ToString();
                 }
             } catch (Error e) {
-                return e.Message + "\n" + string.Join("\n", e.StackTrace.Select(loc => Debug.GetFileName(loc.FileId) + " (" + loc.LineNr + ")"));
+                return e.ToString();
             } catch (Exception e) {
                 return "System error - " + e.ToString();
             }
         }
 
         public string RunTemplate(string template) {
-            return RunTemplate(template, "{}");
+            return RunTemplate(template, "");
         }
 
         public string RunTemplate(string template, string data) {
@@ -67,7 +67,12 @@ namespace NetJS {
 
         public string RunTemplate(string template, string data, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
             try {
-                Core.Javascript.Constant arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.Scope);
+                Core.Javascript.Constant arguments;
+                if (data.Length == 0) {
+                    arguments = Core.Tool.Construct("Object", application.Engine.Scope);
+                } else {
+                    arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.Scope);
+                }
 
                 if (arguments is Core.Javascript.Object a) {
                     return RunTemplate(template, a, ref application, ref session, ref svCache);

@@ -87,6 +87,10 @@ namespace NetJS.Core.Javascript {
             builder.Append(Tokens.NotANumber);
         }
 
+        public override string ToString() {
+            return "NaN";
+        }
+
         public override string ToDebugString() {
             return "NaN";
         }
@@ -108,6 +112,10 @@ namespace NetJS.Core.Javascript {
 
         public override void Uneval(StringBuilder builder, int depth) {
             builder.Append(Tokens.Infinity);
+        }
+
+        public override string ToString() {
+            return "Infinity";
         }
 
         public override string ToDebugString() {
