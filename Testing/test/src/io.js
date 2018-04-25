@@ -1,10 +1,10 @@
 // write + read
-assert(() => IO.write("io/a.txt", "testvalue38") == undefined, "IO.write");
-assert(() => IO.read("io/a.txt") == "testvalue38", "IO.read");
+assert(() => IO.writeText("io/a.txt", "testvalue38") == undefined, "IO.write");
+assert(() => IO.readText("io/a.txt") == "testvalue38", "IO.read");
 
 // copy file
 assert(() => IO.copyFile("io/a.txt", "io/b.txt") == undefined, "IO.copy");
-assert(() => IO.read("io/b.txt") == "testvalue38", "IO.copy new file");
+assert(() => IO.readText("io/b.txt") == "testvalue38", "IO.copy new file");
 
 // delete file
 assert(() => IO.deleteFile("io/a.txt") == undefined, "IO.delete");
@@ -13,7 +13,7 @@ assert(() => !IO.fileExists("io/a.txt"), "IO.delete gone");
 // move file
 assert(() => IO.moveFile("io/b.txt", "io/c.txt") == undefined, "IO.move");
 assert(() => !IO.fileExists("io/b.txt"), "IO.move old gone");
-assert(() => IO.read("io/c.txt") == "testvalue38", "IO.move new file");
+assert(() => IO.readText("io/c.txt") == "testvalue38", "IO.move new file");
 
 IO.deleteFile("io/c.txt");
 
