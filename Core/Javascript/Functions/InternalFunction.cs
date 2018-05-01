@@ -18,11 +18,11 @@ namespace NetJS.Core.Javascript {
                 var argumentList = (ArgumentList)other;
                 var functionScope = new Scope(Scope, scope, this, ScopeType.Function, scope.Buffer);
 
-                functionScope.SetVariable("this", _this);
+                functionScope.DeclareVariable("this", DeclarationScope.Function, true, _this);
 
                 for (var i = 0; i < argumentList.Arguments.Count && i < Parameters.Parameters.Count; i++) {
                     var value = argumentList.Arguments[i].Execute(scope);
-                    Parameters.Parameters[i].Assignment(value, functionScope);
+                    functionScope.DeclareVariable(Parameters.Parameters[i].Name, DeclarationScope.Function, false, value, Parameters.Parameters[i].Type);
                 }
 
                 var result = Body.Execute(functionScope).Constant;
@@ -39,7 +39,7 @@ namespace NetJS.Core.Javascript {
         }
 
         public static void UnevalFunction(StringBuilder builder, int depth, string name, ParameterList parameters, Block body) {
-            builder.Append(Tokens.Variable + " " + name + " " + Tokens.Assign + " ");
+            builder.Append(Tokens.Var + " " + name + " " + Tokens.Assign + " ");
             builder.Append(Tokens.Function);
 
             parameters.Uneval(builder, depth);

@@ -33,7 +33,7 @@ namespace NetJS.Core.Javascript {
             public override bool Before(Scope scope) {
                 if (_index >= _array.List.Count) return false;
                 // TODO: better way to declare
-                _forOfNode.Declaration.Declarations[0].Variable.Assignment(_array.List[_index], scope);
+                scope.DeclareVariable(_forOfNode.Declaration.Declarations[0].Variable, DeclarationScope.Block, _array.List[_index]);
                 _index++;
                 return true;
             }

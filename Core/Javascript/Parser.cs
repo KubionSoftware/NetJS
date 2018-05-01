@@ -24,7 +24,9 @@ namespace NetJS.Core.Javascript {
             _fileId = fileId;
 
             _statements = new Dictionary<string, Func<Statement>>() {
-                { Tokens.Variable, ParseDeclaration },
+                { Tokens.Var, ParseDeclaration },
+                { Tokens.Let, ParseDeclaration },
+                { Tokens.Const, ParseDeclaration },
                 { Tokens.Function, ParseFunctionDeclaration },
                 { Tokens.Return, ParseReturn },
                 { Tokens.If, ParseIf },
@@ -158,13 +160,17 @@ namespace NetJS.Core.Javascript {
             while (_index < _tokens.Count) {
                 var token = _tokens[_index];
 
-                if (token.Type == Token.Group.WhiteSpace || (token.Type != Token.Group.String && token.Content == Tokens.ExpressionEnd)) {
+                if (token.Type == Token.Group.WhiteSpace || token.Is(Tokens.ExpressionEnd)) {
+                    // Skip whitespace and semicolons
                     _index++;
                 } else if (token.Type == Token.Group.Comment) {
+                    // Skip comments
                     _index++;
-                } else if (token.Type != Token.Group.String && (token.Content == Tokens.BlockClose || token.Content == Tokens.Case || token.Content == Tokens.ConditionalSeperator || token.Content == Tokens.Default)) {
+                } else if (token.Is(Tokens.BlockClose) || token.Is(Tokens.Case) || token.Is(Tokens.Default)) {
+                    // Break when end of block found or start of new switch case/default
                     break;
                 } else if (_statements.ContainsKey(token.Content)) {
+                    // Parse statement
                     var startIndex = _index;
                     var node = _statements[token.Content]();
 
@@ -174,10 +180,12 @@ namespace NetJS.Core.Javascript {
 
                     list.Nodes.Add(node);
                 } else {
+                    // Try to parse as an expression
                     var startIndex = _index;
                     var expression = ParseExpression();
                     if (expression == null) {
                         if (_index == startIndex) {
+                            // The parse result is null and the index didn't advance
                             throw CreateError($"Did not expect token '{token.Content}' while parsing statement");
                         }
                     } else {
@@ -186,6 +194,7 @@ namespace NetJS.Core.Javascript {
                 }
 
                 if(maxStatements != -1 && list.Nodes.Count >= maxStatements) {
+                    // Break if the maximum number of statements is reached
                     break;
                 }
             }
@@ -193,31 +202,34 @@ namespace NetJS.Core.Javascript {
             return list;
         }
 
-        public string Next(string context) {
+        // Advances the index and returns the next token that is not a whitespace or comment
+        public Token Next(string context) {
             while (_index < _tokens.Count) {
                 var token = _tokens[_index];
                 _index++;
-                if (token.Type != Token.Group.WhiteSpace && token.Type != Token.Group.Comment) return token.Content;
+                if (token.Type != Token.Group.WhiteSpace && token.Type != Token.Group.Comment) return token;
             }
 
             throw CreateError($"No '{context}' token found");
         }
 
-        public string Peek(int offset = 0) {
+        // Returns the next token that is not a whitespace or comment, without advancing the index
+        public Token Peek(int offset = 0) {
             var index = _index;
 
             while (index < _tokens.Count) {
                 var token = _tokens[index];
                 if (token.Type != Token.Group.WhiteSpace && token.Type != Token.Group.Comment) {
-                    if (offset == 0) return token.Content;
+                    if (offset == 0) return token;
                     offset--;
                 }
                 index++;
             }
 
-            return "";
+            return new Token("", Token.Group.None, -1, -1);
         }
 
+        // Skips the next token that is equal to the parameter skipToken
         public void Skip(string skipToken) {
             while (_index < _tokens.Count) {
                 var token = _tokens[_index];
@@ -235,11 +247,30 @@ namespace NetJS.Core.Javascript {
             throw CreateError("Expected token '" + skipToken + "'");
         }
 
+        // Skips the next token where the type is equal to the parameter type
+        public void Skip(Token.Group type) {
+            while (_index < _tokens.Count) {
+                var token = _tokens[_index];
+
+                if (token.Type != Token.Group.WhiteSpace && token.Type != Token.Group.Comment) {
+                    if (token.Type == type) {
+                        _index++;
+                        return;
+                    } else {
+                        throw CreateError("Expected token with type '" + type + "' but found '" + token + "'");
+                    }
+                }
+                _index++;
+            }
+            throw CreateError("Expected token with type '" + type + "'");
+        }
+
+        // Parses a typescript type
         public string ParseType() {
             Skip(Tokens.TypeSeperator);
-            var type = Next("type name");
+            var type = Next("type name").Content;
 
-            if (Peek() == Tokens.ArrayOpen && Peek(1) == Tokens.ArrayClose) {
+            if (Peek().Is(Tokens.ArrayOpen) && Peek(1).Is(Tokens.ArrayClose)) {
                 Skip(Tokens.ArrayOpen);
                 Skip(Tokens.ArrayClose);
                 type += Tokens.ArrayOpen + Tokens.ArrayClose;
@@ -248,24 +279,31 @@ namespace NetJS.Core.Javascript {
             return type;
         }
 
+        // Parses a variable declaration
         public Declaration ParseDeclaration() {
-            Skip(Tokens.Variable);
+            var token = Next("parse declaration");
+            if (!(token.Is(Tokens.Var) || token.Is(Tokens.Let) || token.Is(Tokens.Const))) {
+                throw CreateError($"Invalid declaration token '{token}'");
+            }
 
-            var result = new Declaration();
+            var scope = token.Is(Tokens.Var) ? DeclarationScope.Function : DeclarationScope.Block;
+            var constant = token.Is(Tokens.Const);
+
+            var result = new Declaration(scope, constant);
 
             while (true) {
                 var name = Next("variable name");
                 Variable variable;
 
-                if(Peek() == Tokens.TypeSeperator) {
+                if(Peek().Is(Tokens.TypeSeperator)) {
                     var type = ParseType();
-                    variable = new TypedVariable(name, type);
+                    variable = new Variable(name.Content, constant, type);
                 } else {
-                    variable = new Variable(name);
+                    variable = new Variable(name.Content, constant);
                 }
 
                 Expression expression = null;
-                if (Peek() == Tokens.Assign) {
+                if (Peek().Is(Tokens.Assign)) {
                     Skip(Tokens.Assign);
                     expression = ParseExpression();
 
@@ -276,7 +314,7 @@ namespace NetJS.Core.Javascript {
 
                 result.Declarations.Add(new Declaration.DeclarationVariable(variable, expression));
 
-                if (Peek() != Tokens.Sequence) {
+                if (!Peek().Is(Tokens.Sequence)) {
                     break;
                 }
                 Skip(Tokens.Sequence);
@@ -288,7 +326,7 @@ namespace NetJS.Core.Javascript {
         public Return ParseReturn() {
             Skip(Tokens.Return);
 
-            if (Peek() == Tokens.ExpressionEnd) {
+            if (Peek().Is(Tokens.ExpressionEnd)) {
                 return new Return();
             }
 
@@ -390,6 +428,7 @@ namespace NetJS.Core.Javascript {
                 var token = _tokens[_index];
 
                 if (token.Type != Token.Group.String && (_stopTokens.Contains(token.Content) || token.Type == Token.Group.Html)) break;
+                if (token.Type == Token.Group.ExpressionEnd) break;
 
                 if (token.Type == Token.Group.WhiteSpace) {
                     _index++;
@@ -397,8 +436,7 @@ namespace NetJS.Core.Javascript {
                     CombineExpression(ref left, new StringBlueprint(token.Content));
                     _index++;
                 } else if (token.Type == Token.Group.Template) {
-                    CombineExpression(ref left, ParseTemplate(token.Content, _fileId));
-                    _index++;
+                    CombineExpression(ref left, ParseTemplate());
                 } else if (token.Type == Token.Group.Number) {
                     CombineExpression(ref left, new NumberBlueprint(Double.Parse(token.Content)));
                     _index++;
@@ -449,7 +487,7 @@ namespace NetJS.Core.Javascript {
             var variable = new Variable(content);
             _index++;
 
-            if (Peek() == Tokens.ArrowFunction) {
+            if (Peek().Is(Tokens.ArrowFunction)) {
                 var parameters = new ParameterList();
                 parameters.Parameters.Add(variable);
                 return ParseArrowFunction(parameters);
@@ -493,7 +531,7 @@ namespace NetJS.Core.Javascript {
             if (IsVariable(LastExpression(left))) {
                 return ParseCall();
             } else {
-                if (Peek(2) == Tokens.Sequence) {
+                if (Peek(2).Is(Tokens.Sequence)) {
                     var parameters = ParseParameters();
                     return ParseArrowFunction(parameters);
                 } else {
@@ -501,7 +539,7 @@ namespace NetJS.Core.Javascript {
                     var expression = ParseExpression();
                     Skip(Tokens.GroupClose);
 
-                    if (expression == null && Peek() == Tokens.ArrowFunction) {
+                    if (expression == null && Peek().Is(Tokens.ArrowFunction)) {
                         return ParseArrowFunction(new ParameterList());
                     } else {
                         if (expression is Operator expressionOperation) {
@@ -548,7 +586,7 @@ namespace NetJS.Core.Javascript {
                 }
             }
 
-            var flags = valid ? Next("regex flags") : "";
+            var flags = valid ? Next("regex flags").Content : "";
 
             return new Call() {
                 Left = new New() {
@@ -573,8 +611,8 @@ namespace NetJS.Core.Javascript {
             }
 
             var peek = Peek();
-            if(peek.ToLower() == Tokens.Exponent) {
-                Skip(peek);
+            if(peek.Content.ToLower() == Tokens.Exponent) {
+                Skip(peek.Content);
                 s += Tokens.Exponent;
                 s += Next("number exponent");
             }
@@ -587,76 +625,45 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public static File ParseFile(string template, int fileId) {
-            var expressions = ParseTemplateExpressions(template, fileId);
+        public File ParseFile() {
+            var expressions = ParseTemplateExpressions();
             return new File(expressions);
         }
 
-        public static Expression ParseTemplate(string template, int fileId) {
-            var expressions = ParseTemplateExpressions(template, fileId);
+        public Expression ParseTemplate() {
+            var expressions = ParseTemplateExpressions();
             if (expressions.Count == 0) return new StringBlueprint("");
 
             Expression result = expressions[0];
             for (var i = 1; i < expressions.Count; i++) {
-                result = new Addition() { Left = result, Right = expressions[i] };
+                if (result is StringBlueprint rs && expressions[i] is StringBlueprint es) {
+                    result = new StringBlueprint(rs.Value + es.Value);
+                } else {
+                    result = new Addition() { Left = result, Right = expressions[i] };
+                }
             }
 
             if (result is Operator op) op.Precedence = GroupPrecedence;
             return result;
         }
 
-        public static List<Expression> ParseTemplateExpressions(string template, int fileId) {
-            var inExpression = false;
-            var depth = 0;
-            var buffer = "";
-
+        public List<Expression> ParseTemplateExpressions() {
             var parts = new List<Expression>();
 
-            for (var i = 0; i < template.Length; i++) {
-                var c = template[i];
+            Skip(Token.Group.Template);
 
-                if (inExpression) {
-                    if (c == '{') {
-                        buffer += c;
-                        depth++;
-                    } else if (c == '}') {
-                        depth--;
-                        if (depth == 0) {
-                            if (buffer.Length > 0) {
-                                var tokens = Lexer.Lex(buffer, fileId);
-                                var parser = new Parser(fileId, tokens);
-                                var expression = parser.ParseExpression();
+            while (true) {
+                var next = Next("template string");
 
-                                if (expression == null) {
-                                    throw parser.CreateError("Invalid expression in template string or include");
-                                }
+                if(next.Type == Token.Group.Template) {
+                    break;
+                } else if(next.Type == Token.Group.ExpressionStart) {
+                    parts.Add(ParseExpression());
 
-                                parts.Add(expression);
-                                buffer = "";
-                            }
-                            inExpression = false;
-                        } else {
-                            buffer += c;
-                        }
-                    } else {
-                        buffer += c;
-                    }
-                } else if (c == '$' && i < template.Length - 1 && template[i + 1] == '{') {
-                    inExpression = true;
-                    i++;
-                    depth = 1;
-                    if (buffer.Length > 0) {
-                        parts.Add(new StringBlueprint(buffer));
-                        buffer = "";
-                    }
-                } else {
-                    buffer += c;
+                    Skip(Token.Group.ExpressionEnd);
+                } else if(next.Type == Token.Group.String) {
+                    parts.Add(new StringBlueprint(next.Content));
                 }
-            }
-
-            if (buffer.Length > 0) {
-                parts.Add(new StringBlueprint(buffer));
-                buffer = "";
             }
 
             return parts;
@@ -689,7 +696,7 @@ namespace NetJS.Core.Javascript {
         }
 
         public Block ParseBlock() {
-            if (Peek() == Tokens.BlockOpen) {
+            if (Peek().Is(Tokens.BlockOpen)) {
                 Skip(Tokens.BlockOpen);
                 var body = ParseStatements();
                 Skip(Tokens.BlockClose);
@@ -707,7 +714,7 @@ namespace NetJS.Core.Javascript {
             var declaration = ParseDeclaration();
 
             var peek = Peek();
-            if (peek == Tokens.ExpressionEnd) {
+            if (peek.Is(Tokens.ExpressionEnd)) {
                 Skip(Tokens.ExpressionEnd);
                 var check = ParseExpression();
                 Skip(Tokens.ExpressionEnd);
@@ -715,13 +722,13 @@ namespace NetJS.Core.Javascript {
                 Skip(Tokens.GroupClose);
 
                 return new For() { Declaration = declaration, Check = check, Action = action, Body = ParseBlock() };
-            } else if (peek == Tokens.ForIn) {
+            } else if (peek.Is(Tokens.ForIn)) {
                 Skip(Tokens.ForIn);
                 var collection = ParseExpression();
                 Skip(Tokens.GroupClose);
 
                 return new ForIn() { Declaration = declaration, Collection = collection, Body = ParseBlock() };
-            } else if (peek == Tokens.ForOf) {
+            } else if (peek.Is(Tokens.ForOf)) {
                 Skip(Tokens.ForOf);
                 var collection = ParseExpression();
                 Skip(Tokens.GroupClose);
@@ -749,10 +756,10 @@ namespace NetJS.Core.Javascript {
             var result = new If();
             result.Ifs.Add(ParseIfPart());
 
-            while (Peek() == Tokens.Else) {
+            while (Peek().Is(Tokens.Else)) {
                 Skip(Tokens.Else);
 
-                if (Peek() == Tokens.If) {
+                if (Peek().Is(Tokens.If)) {
                     result.Ifs.Add(ParseIfPart());
                 } else {
                     result.Else = ParseBlock();
@@ -773,7 +780,7 @@ namespace NetJS.Core.Javascript {
 
             var result = new If();
 
-            while (Peek() == Tokens.Case) {
+            while (Peek().Is(Tokens.Case)) {
                 Skip(Tokens.Case);
                 var value = ParseExpression();
                 var check = new Equals() { Left = reference, Right = value };
@@ -785,7 +792,7 @@ namespace NetJS.Core.Javascript {
                 result.Ifs.Add(new If.IfBlock(check, body));
             }
 
-            if (Peek() == Tokens.Default) {
+            if (Peek().Is(Tokens.Default)) {
                 Skip(Tokens.Default);
                 Skip(Tokens.CaseSeperator);
 
@@ -814,15 +821,15 @@ namespace NetJS.Core.Javascript {
 
             Skip(Tokens.ArrayOpen);
             
-            while (Peek() != Tokens.ArrayClose) {
+            while (!Peek().Is(Tokens.ArrayClose)) {
                 var value = ParseExpression();
                 list.Add(value);
 
                 var next = Peek();
 
-                if (next == Tokens.ArrayClose) {
+                if (next.Is(Tokens.ArrayClose)) {
                     break;
-                } else if (next == Tokens.Sequence) {
+                } else if (next.Is(Tokens.Sequence)) {
                     Skip(Tokens.Sequence);
                 } else {
                     throw CreateError("Invalid array");
@@ -839,21 +846,21 @@ namespace NetJS.Core.Javascript {
 
             Skip(Tokens.BlockOpen);
 
-            while (Peek() != Tokens.BlockClose) {
+            while (!Peek().Is(Tokens.BlockClose)) {
                 var key = Next("object key");
 
                 Skip(Tokens.KeyValueSeperator);
 
                 var value = ParseExpression();
 
-                blueprints[key] = value;
+                blueprints[key.Content] = value;
 
                 var peek = Peek();
-                if (peek != Tokens.Sequence && peek != Tokens.BlockClose) {
+                if (!peek.Is(Tokens.Sequence) && !peek.Is(Tokens.BlockClose)) {
                     throw CreateError("Invalid object");
                 }
 
-                if (peek == Tokens.BlockClose) {
+                if (peek.Is(Tokens.BlockClose)) {
                     break;
                 }
 
@@ -870,28 +877,28 @@ namespace NetJS.Core.Javascript {
 
             Skip(Tokens.GroupOpen);
 
-            if (Peek() != Tokens.GroupClose) {
+            if (!Peek().Is(Tokens.GroupClose)) {
                 while (_index < _tokens.Count) {
                     var name = Next("parameter name");
                     
-                    if (!Tokens.IsValidName(name)) {
-                        throw CreateError($"Invalid parameter name '{name}'");
+                    if (!Tokens.IsValidName(name.Content)) {
+                        throw CreateError($"Invalid parameter name '{name.Content}'");
                     }
 
                     var peek = Peek();
 
-                    if (peek == Tokens.TypeSeperator) {
+                    if (peek.Is(Tokens.TypeSeperator)) {
                         var type = ParseType();
                         peek = Peek();
 
-                        list.Parameters.Add(new TypedVariable(name, type));
+                        list.Parameters.Add(new Variable(name.Content, false, type));
                     } else {
-                        list.Parameters.Add(new Variable(name));
+                        list.Parameters.Add(new Variable(name.Content));
                     }
 
-                    if (peek == Tokens.GroupClose) {
+                    if (peek.Is(Tokens.GroupClose)) {
                         break;
-                    } else if (peek == Tokens.Sequence) {
+                    } else if (peek.Is(Tokens.Sequence)) {
                         Skip(Tokens.Sequence);
                         continue;
                     }
@@ -911,7 +918,7 @@ namespace NetJS.Core.Javascript {
             var parameters = ParseParameters();
 
             var type = "";
-            if(Peek() == Tokens.TypeSeperator) {
+            if(Peek().Is(Tokens.TypeSeperator)) {
                 type = ParseType();
             }
 
@@ -928,16 +935,16 @@ namespace NetJS.Core.Javascript {
             var parameters = ParseParameters();
 
             var type = "";
-            if (Peek() == Tokens.TypeSeperator) {
+            if (Peek().Is(Tokens.TypeSeperator)) {
                 type = ParseType();
             }
 
             var body = ParseBlock();
 
-            var function = new FunctionBlueprint(name, type, parameters, body);
+            var function = new FunctionBlueprint(name.Content, type, parameters, body);
             
-            var declaration = new Declaration();
-            declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(name), function));
+            var declaration = new Declaration(DeclarationScope.Function, false);
+            declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(name.Content), function));
 
             return declaration;
         }
@@ -975,19 +982,19 @@ namespace NetJS.Core.Javascript {
             var result = new Try();
             result.TryBody = ParseBlock();
 
-            if (Peek() == Tokens.Catch) {
+            if (Peek().Is(Tokens.Catch)) {
                 Skip(Tokens.Catch);
 
-                if (Peek() == Tokens.GroupOpen) {
+                if (Peek().Is(Tokens.GroupOpen)) {
                     Skip(Tokens.GroupOpen);
-                    result.CatchVariable = new Variable(Next("catch variable"));
+                    result.CatchVariable = new Variable(Next("catch variable").Content);
                     Skip(Tokens.GroupClose);
                 }
 
                 result.CatchBody = ParseBlock();
             }
 
-            if (Peek() == Tokens.Finally) {
+            if (Peek().Is(Tokens.Finally)) {
                 Skip(Tokens.Finally);
 
                 result.FinallyBody = ParseBlock();
@@ -1012,7 +1019,7 @@ namespace NetJS.Core.Javascript {
 
             Block body;
 
-            if (Peek() == Tokens.BlockOpen) {
+            if (Peek().Is(Tokens.BlockOpen)) {
                 body = ParseBlock();
             } else {
                 body = new Block();

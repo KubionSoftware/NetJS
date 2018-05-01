@@ -15,9 +15,9 @@ namespace NetJS.API {
                 var content = System.IO.File.ReadAllText(file);
 
                 var config = JSON.parse(Static.Undefined, new[] { new String(content) }, scope);
-                scope.SetVariable("Config", config);
+                scope.DeclareVariable("Config", Core.Javascript.DeclarationScope.Global, true, config);
             } else {
-                scope.SetVariable("Config", Core.Tool.Construct("Object", scope));
+                scope.DeclareVariable("Config", Core.Javascript.DeclarationScope.Global, true, Core.Tool.Construct("Object", scope));
             }
         }
     }

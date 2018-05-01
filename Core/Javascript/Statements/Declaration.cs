@@ -5,6 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
+
+    public enum DeclarationScope {
+        Global,
+        Function,
+        Block
+    }
+
     public class Declaration : Statement {
         public class DeclarationVariable {
             public Variable Variable;
@@ -18,19 +25,31 @@ namespace NetJS.Core.Javascript {
 
         public List<DeclarationVariable> Declarations = new List<DeclarationVariable>();
 
+        public DeclarationScope Scope;
+        public bool IsConstant;
+
+        public Declaration(DeclarationScope scope, bool isConstant) {
+            Scope = scope;
+            IsConstant = isConstant;
+        }
+
         public override Result Execute(Scope scope) {
             foreach (var declaration in Declarations) {
-                scope.DeclareVariable(declaration.Variable.Name, Static.Undefined);
+                Constant value = Static.Undefined;
+
                 if (declaration.Expression != null) {
-                    declaration.Variable.Assignment(declaration.Expression.Execute(scope), scope);
+                    value = declaration.Expression.Execute(scope);
                 }
+
+                scope.DeclareVariable(declaration.Variable.Name, Scope, IsConstant, value, declaration.Variable.Type);
             }
 
             return new Result(ResultType.None);
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.Variable + " ");
+            var token = IsConstant ? Tokens.Const : (Scope == DeclarationScope.Block ? Tokens.Let : Tokens.Var);
+            builder.Append(token + " ");
 
             for (var i = 0; i < Declarations.Count; i++) {
                 if (i > 0) builder.Append(", ");

@@ -9,7 +9,7 @@ load("array");
 load("operators");
 load("html");
 load("global");
-load("typescript");
+load("typescript.ts");
 load("regex");
 load("date");
 load("xdoc");

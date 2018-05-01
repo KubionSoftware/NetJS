@@ -57,9 +57,9 @@ namespace NetJS {
                 throw new IOError($"Could not find file '{path}'");
             }
 
-            if (path.EndsWith(".js")) {
+            if (path.EndsWith(".js") || path.EndsWith(".ts")) {
                 var fileId = Core.Debug.GetFileId(path);
-                var tokens = Lexer.Lex(source, fileId);
+                var tokens = new Lexer(source, fileId).Lex();
                 var parser = new Parser(fileId, tokens);
 
                 return new SourceFile() {
@@ -69,7 +69,9 @@ namespace NetJS {
                 };
             } else {
                 var fileId = Core.Debug.GetFileId(path);
-                File file = Parser.ParseFile(source, fileId);
+                var tokens = new Lexer("`" + source + "`", fileId).Lex();
+                var parser = new Parser(fileId, tokens);
+                File file = parser.ParseFile();
 
                 return new SourceFile() {
                     LastModified = lastModified,

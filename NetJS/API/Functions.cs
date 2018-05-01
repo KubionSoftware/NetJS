@@ -20,13 +20,13 @@ namespace NetJS.API {
 
             // Create scope
             var buffer = returnVar ? new StringBuilder() : scope.Buffer;
-            var templateScope = new Scope(application.Engine.Scope, scope, node, ScopeType.Template, buffer);
+            var templateScope = new Scope(application.Engine.Scope, scope, node, ScopeType.Function, buffer);
 
             // Pass arguments
             if (arguments.Length > 1) {
                 var parameters = (Object)arguments[1];
                 foreach (var key in parameters.GetKeys()) {
-                    templateScope.SetVariable(key, parameters.Get(key));
+                    templateScope.DeclareVariable(key, Core.Javascript.DeclarationScope.Function, false, parameters.Get(key));
                 }
             }
 

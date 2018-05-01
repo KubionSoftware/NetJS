@@ -72,7 +72,7 @@ namespace NetJS.API {
             var query = ((Core.Javascript.String)arguments[1]).Value;
 
             try {
-                if (query.Trim().ToUpper().StartsWith("SELECT")) {
+                if (true /*query.Trim().ToUpper().StartsWith("SELECT")*/) {
                     var rows = Util.SQL.Get(connection, query, new SqlParameter[] { });
 
                     var result = new Core.Javascript.Array();
@@ -87,6 +87,14 @@ namespace NetJS.API {
                                 rowObject.Set(key, new Core.Javascript.Number(i));
                             } else if (value is double d) {
                                 rowObject.Set(key, new Core.Javascript.Number(d));
+                            } else if (value is bool b) {
+                                rowObject.Set(key, new Core.Javascript.Boolean(b));
+                            } else if (value is byte bt) {
+                                rowObject.Set(key, new Core.Javascript.Number(bt));
+                            } else if (value is Int16 i16) {
+                                rowObject.Set(key, new Core.Javascript.Number(i16));
+                            } else if (value is Decimal dc) {
+                                rowObject.Set(key, new Core.Javascript.Number((double)dc));
                             } else if (value is DateTime date) {
                                 rowObject.Set(key, new Core.Javascript.Date(date));
                             } else if (value is DBNull) {

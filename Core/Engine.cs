@@ -32,10 +32,10 @@ namespace NetJS.Core {
             functionConstructor.Set("prototype", functionPrototype);
             functionPrototype.Set("constructor", functionConstructor);
 
-            Scope.SetVariable("Object", objectConstructor);
+            Scope.DeclareVariable("Object", Javascript.DeclarationScope.Global, true, objectConstructor);
             _prototypes["Object"] = objectConstructor;
 
-            Scope.SetVariable("Function", functionConstructor);
+            Scope.DeclareVariable("Function", Javascript.DeclarationScope.Global, true, functionConstructor);
             _prototypes["Function"] = functionConstructor;
 
             RegisterType(typeof(API.Object));
@@ -87,7 +87,7 @@ namespace NetJS.Core {
                 } catch { }
             }
 
-            new Javascript.Variable(type.Name).Assignment(obj, Scope);
+            Scope.DeclareVariable(type.Name, Javascript.DeclarationScope.Global, true, obj);
         }
 
         public void RegisterType(Type type) {
@@ -106,7 +106,7 @@ namespace NetJS.Core {
                 }
             }
 
-            Scope.SetVariable(type.Name, constructor);
+            Scope.DeclareVariable(type.Name, Javascript.DeclarationScope.Global, true, constructor);
             _prototypes[type.Name] = constructor;
         }
 
@@ -114,7 +114,7 @@ namespace NetJS.Core {
             var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
             foreach (var method in methods) {
                 try {
-                    Scope.SetVariable(method.Name.Replace("@", ""), GetFunction(method));
+                    Scope.DeclareVariable(method.Name.Replace("@", ""), Javascript.DeclarationScope.Global, true, GetFunction(method));
                 } catch { }
             }
         }

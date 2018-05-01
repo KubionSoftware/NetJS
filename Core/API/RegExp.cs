@@ -12,11 +12,11 @@ namespace NetJS.Core.API {
             var flags = arguments.Length > 1 ? (Javascript.String)arguments[1] : new Javascript.String("");
             thisObject.Set("flags", flags);
 
-            thisObject.Set("global", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Tokens.RegexGlobal) != -1));
-            thisObject.Set("ignoreCase", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Tokens.RegexIgnoreCase) != -1));
-            thisObject.Set("multiline", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Tokens.RegexMultiLine) != -1));
-            thisObject.Set("unicode", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Tokens.RegexUnicode) != -1));
-            thisObject.Set("sticky", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Tokens.RegexSticky) != -1));
+            thisObject.Set("global", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Chars.RegexGlobal) != -1));
+            thisObject.Set("ignoreCase", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Chars.RegexIgnoreCase) != -1));
+            thisObject.Set("multiline", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Chars.RegexMultiLine) != -1));
+            thisObject.Set("unicode", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Chars.RegexUnicode) != -1));
+            thisObject.Set("sticky", new Javascript.Boolean(flags.Value.IndexOf(Javascript.Chars.RegexSticky) != -1));
 
             return Javascript.Static.Undefined;
         }
