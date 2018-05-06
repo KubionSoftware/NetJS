@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class ExternalFunction : Function {
+        public string Name;
         public Func<Constant, Constant[], Scope, Constant> Function;
 
-        public ExternalFunction(Func<Constant, Constant[], Scope, Constant> function, Scope scope) : base(scope) {
+        public ExternalFunction(string name, Func<Constant, Constant[], Scope, Constant> function, Scope scope) : base(scope) {
+            Name = name;
             Function = function;
         }
 
@@ -32,7 +34,11 @@ namespace NetJS.Core.Javascript {
         }
 
         public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append("[[externalFunction]](){}");
+            builder.Append($"[[{Name}]](){{}}");
+        }
+
+        public override string ToDebugString() {
+            return $"[[{Name}]](){{}}";
         }
     }
 }

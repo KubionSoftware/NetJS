@@ -349,6 +349,8 @@ namespace NetJS.Core.Javascript {
         public void CombineExpression(ref Expression left, Expression expression) {
             if (left == null) {
                 left = expression;
+            } else if (expression == null) {
+                throw CreateError("Expression is null");
             } else if (left is Operator leftOperation) {
                 if (expression is Operator expressionOperation) {
                     if (expressionOperation.Precedence > leftOperation.Precedence) {
@@ -401,10 +403,8 @@ namespace NetJS.Core.Javascript {
                 } else {
                     throw CreateError($"Operator {op.ToDebugString()} doesn't accept a left-hand argument {left.ToDebugString()}");
                 }
-            }
-
-            if (expression == null) {
-                throw CreateError("Expression is null");
+            } else {
+                throw CreateError($"Could not combine expression {left.ToDebugString()} with {expression.ToDebugString()}");
             }
 
 #if debug_enabled
@@ -423,50 +423,69 @@ namespace NetJS.Core.Javascript {
         public Expression ParseExpression() {
             var parts = new List<string>();
             Expression left = null;
+            var previousNewLine = false;
 
             while (_index < _tokens.Count) {
                 var token = _tokens[_index];
 
                 if (token.Type != Token.Group.String && (_stopTokens.Contains(token.Content) || token.Type == Token.Group.Html)) break;
                 if (token.Type == Token.Group.ExpressionEnd) break;
+                
+                var startIndex = _index;
 
-                if (token.Type == Token.Group.WhiteSpace) {
-                    _index++;
-                } else if (token.Type == Token.Group.String) {
-                    CombineExpression(ref left, new StringBlueprint(token.Content));
-                    _index++;
-                } else if (token.Type == Token.Group.Template) {
-                    CombineExpression(ref left, ParseTemplate());
-                } else if (token.Type == Token.Group.Number) {
-                    CombineExpression(ref left, new NumberBlueprint(Double.Parse(token.Content)));
-                    _index++;
-                } else if (token.Type == Token.Group.Comment) {
-                    _index++;
-                } else if (_expressions.ContainsKey(token.Content)) {
-                    CombineExpression(ref left, _expressions[token.Content](left));
-                    _index++;
-                } else if (_parseExpressions.ContainsKey(token.Content)) {
-                    CombineExpression(ref left, _parseExpressions[token.Content](left));
-                } else if (_assignExpressions.ContainsKey(token.Content)) {
-                    CombineAssign(ref left, _assignExpressions[token.Content]());
-                    _index++;
-                } else if (token.Content == Tokens.Divide) {
-                    CombineExpression(ref left, ParseDivide(left));
-                } else if (token.Content == Tokens.Increment) {
-                    CombineExpression(ref left, ParsePreOrPost(left, new PrefixIncrement(), new PostfixIncrement()));
-                    _index++;
-                } else if (token.Content == Tokens.Decrement) {
-                    CombineExpression(ref left, ParsePreOrPost(left, new PrefixDecrement(), new PostfixDecrement()));
-                    _index++;
-                } else if (token.Content == Tokens.GroupOpen) {
-                    CombineExpression(ref left, ParseGroup(left));
-                } else if (_statements.ContainsKey(token.Content)) {
-                    break;
-                } else {
-                    CombineExpression(ref left, ParseVariable(token.Content));
+                try {
+                    if (token.Type == Token.Group.WhiteSpace) {
+                        if (token.Content.Contains("\n")) previousNewLine = true;
+
+                        _index++;
+                        continue;
+                    } else if (token.Type == Token.Group.Comment) {
+                        _index++;
+                        continue;
+                    } else if (token.Type == Token.Group.String) {
+                        CombineExpression(ref left, new StringBlueprint(token.Content));
+                        _index++;
+                    } else if (token.Type == Token.Group.Template) {
+                        CombineExpression(ref left, ParseTemplate());
+                    } else if (token.Type == Token.Group.Number) {
+                        CombineExpression(ref left, new NumberBlueprint(Double.Parse(token.Content)));
+                        _index++;
+                    } else if (_expressions.ContainsKey(token.Content)) {
+                        CombineExpression(ref left, _expressions[token.Content](left));
+                        _index++;
+                    } else if (_parseExpressions.ContainsKey(token.Content)) {
+                        CombineExpression(ref left, _parseExpressions[token.Content](left));
+                    } else if (_assignExpressions.ContainsKey(token.Content)) {
+                        CombineAssign(ref left, _assignExpressions[token.Content]());
+                        _index++;
+                    } else if (token.Content == Tokens.Divide) {
+                        CombineExpression(ref left, ParseDivide(left));
+                    } else if (token.Content == Tokens.Increment) {
+                        CombineExpression(ref left, ParsePreOrPost(left, new PrefixIncrement(), new PostfixIncrement()));
+                        _index++;
+                    } else if (token.Content == Tokens.Decrement) {
+                        CombineExpression(ref left, ParsePreOrPost(left, new PrefixDecrement(), new PostfixDecrement()));
+                        _index++;
+                    } else if (token.Content == Tokens.GroupOpen) {
+                        CombineExpression(ref left, ParseGroup(left));
+                    } else if (_statements.ContainsKey(token.Content)) {
+                        break;
+                    } else {
+                        CombineExpression(ref left, ParseVariable(token.Content));
+                    }
+                    
+                    previousNewLine = false;
+                } catch (Exception e) {
+                    if (previousNewLine) {
+                        _index = startIndex;
+                        break;
+                    } else {
+                        throw;
+                    }
                 }
             }
 
+            // Walk up the tree to return highest expression
             while (true) {
                 if (!(left is Operator)) {
                     break;
@@ -703,7 +722,11 @@ namespace NetJS.Core.Javascript {
 
                 return body;
             } else {
-                return ParseStatements(1);
+                var statement = ParseStatements(1);
+                if (Peek().Is(Tokens.ExpressionEnd)) {
+                    Skip(Tokens.ExpressionEnd);
+                }
+                return statement;
             }
         }
 

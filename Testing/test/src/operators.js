@@ -146,6 +146,14 @@ assert(() => typeof function(){} === "function", "Typeof Function");
 assert(() => typeof Math.sin === "function", "Typeof Math.sin");
 assert(() => typeof (x => x) === "function", "Typeof arrow function");
 
+// Instance of
+assert(() => function(){} instanceof Function, "Function instance of Function");
+assert(() => function(){} instanceof Object, "Function instance of Object");
+assert(() => !(function(){} instanceof Array), "Function not instance of Array");
+assert(() => [] instanceof Array, "[] instance of Array");
+assert(() => [] instanceof Object, "[] instance of Object");
+assert(() => !([] instanceof Function), "[] not instance of Function");
+
 // In
 
 var obj = {x: 3};

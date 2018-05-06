@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Console.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -51,6 +52,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{641457c2-a76b-47d8-af78-eb9e19df9d03}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NetJS\NetJS.csproj">
       <Project>{4c352ee0-cc0c-419e-ad88-24faf7cee643}</Project>
       <Name>NetJS</Name>

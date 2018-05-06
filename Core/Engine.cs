@@ -62,8 +62,8 @@ namespace NetJS.Core {
             }
         }
 
-        private Javascript.ExternalFunction GetFunction(MethodInfo info) {
-            return new Javascript.ExternalFunction(
+        private Javascript.ExternalFunction GetFunction(string className, MethodInfo info) {
+            return new Javascript.ExternalFunction(className + "." + info.Name,
                 (Func<
                     Javascript.Constant,
                     Javascript.Constant[],
@@ -83,7 +83,7 @@ namespace NetJS.Core {
 
             foreach (var method in methods) {
                 try {
-                    obj.Set(method.Name.Replace("@", ""), GetFunction(method));
+                    obj.Set(method.Name.Replace("@", ""), GetFunction(type.Name, method));
                 } catch { }
             }
 
@@ -93,7 +93,7 @@ namespace NetJS.Core {
         public void RegisterType(Type type) {
             var prototype = Tool.Construct("Object", Scope);
 
-            var constructor = GetFunction(type.GetMethod("constructor"));
+            var constructor = GetFunction(type.Name, type.GetMethod("constructor"));
             constructor.Set("prototype", prototype);
             prototype.Set("constructor", constructor);
 
@@ -101,7 +101,7 @@ namespace NetJS.Core {
             foreach (var method in methods) {
                 if (method.Name != "constructor") {
                     try {
-                        prototype.Set(method.Name.Replace("@", ""), GetFunction(method));
+                        prototype.Set(method.Name.Replace("@", ""), GetFunction(type.Name, method));
                     } catch { }
                 }
             }
@@ -114,7 +114,7 @@ namespace NetJS.Core {
             var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
             foreach (var method in methods) {
                 try {
-                    Scope.DeclareVariable(method.Name.Replace("@", ""), Javascript.DeclarationScope.Global, true, GetFunction(method));
+                    Scope.DeclareVariable(method.Name.Replace("@", ""), Javascript.DeclarationScope.Global, true, GetFunction(type.Name, method));
                 } catch { }
             }
         }

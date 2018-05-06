@@ -1,5 +1,5 @@
 var s = JSON.stringify({x: {y: 3, z: true}});
-assert(() => s == '{"x":{"z":true,"y":3}}', "JSON.stringify - " + s);
+assert(() => s == '{"x":{"y":3,"z":true}}', "JSON.stringify");
 
 var data = JSON.parse('{"obj":{"b":3,"c":true},"string":"abc","number":4,"bool":true,"array":[1,2,3]}');
 assert(() => data.obj.b == 3, "JSON.parse object");

@@ -217,6 +217,14 @@ namespace NetJS.Core.Javascript {
             DeclareVariable(variable.Name, declarationScope, variable.Constant, value, variable.Type);
         }
 
+        public void Set(string key, Constant value) {
+            _variables.Set(key, new ScopeVariable(value, true, "any"));
+        }
+
+        public void Remove(string key) {
+            _variables.Remove(key);
+        }
+
         private int _depth = -1;
         public int Depth {
             get {

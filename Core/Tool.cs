@@ -86,7 +86,7 @@ namespace NetJS.Core {
             }
 
             var argument = arguments[index];
-            if (argument.GetType() != typeof(T)) throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+            if (!(argument is T)) throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
 
             return (T)argument;
         }

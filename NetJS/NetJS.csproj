@@ -49,6 +49,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Async.cs" />
+    <Compile Include="API\DLL.cs" />
+    <Compile Include="API\XML.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="Connections.cs" />
     <Compile Include="API\Base64.cs" />

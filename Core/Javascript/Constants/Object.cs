@@ -67,6 +67,19 @@ namespace NetJS.Core.Javascript {
             return new String("object");
         }
 
+        public override Constant InstanceOf(Constant other, Scope scope) {
+            if(other is Object o) {
+                var prototype = o.Get("prototype");
+                if (__proto__ == prototype) {
+                    return Static.True;
+                } else if(__proto__ != null) {
+                    return __proto__.InstanceOf(other, scope);
+                }
+            }
+
+            return Static.False;
+        }
+
         public override void Uneval(StringBuilder builder, int depth) {
             UnevalDictionary(Properties.ToDictionary(pair => pair.Key, pair => (Expression)pair.Value), builder, depth);
         }
@@ -133,6 +146,7 @@ namespace NetJS.Core.Javascript {
         }
 
         public override string ToDebugString() {
+            return "{}";
             return $"{{\n{string.Join(",\n", Properties.Select(pair => pair.Key + ": " + pair.Value.ToDebugString()))}\n}}";
         }
     }

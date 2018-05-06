@@ -22,7 +22,7 @@ for(var key in obj){
 	s += key;
 	total += obj[key];
 }
-assert(() => s.indexOf("x") != -1 && s.indexOf("y") != -1 && s.indexOf("z") != -1, "For key in object loop (keys)");
+assert(() => s == "xyz", "For key in object loop (keys)");
 assert(() => total == 10, "For key in object loop (values)");
 
 var s = "";

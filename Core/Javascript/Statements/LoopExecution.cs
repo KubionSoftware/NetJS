@@ -23,9 +23,12 @@ namespace NetJS.Core.Javascript {
             var outerScope = new Scope(parent, parent, node, ScopeType.Block, parent.Buffer);
             if (!Start(outerScope)) return new Result(ResultType.None);
 
+            var unsafeVar = parent.GetStackVariable("__unsafe__");
+            var isUnsafe = unsafeVar is Boolean b ? b.Value : false;
+
             var i = 0;
             while (true) {
-                var innerScope = new Scope(parent, parent, node, ScopeType.Block, parent.Buffer);
+                var innerScope = new Scope(outerScope, parent, node, ScopeType.Block, outerScope.Buffer);
 
                 if (Before(innerScope)) {
                     var result = Body.Execute(innerScope);
@@ -40,14 +43,16 @@ namespace NetJS.Core.Javascript {
                         break;
                     }
 
-                    i++;
-                    if (i >= MaxLoops) {
-                        var message = "Maximum number of loops exceeded";
+                    if (!isUnsafe) {
+                        i++;
+                        if (i >= MaxLoops) {
+                            var message = "Maximum number of loops exceeded";
 #if debug_enabled
-                        throw new InternalError(Debug.Message(node, message));
+                            throw new InternalError(Debug.Message(node, message));
 #else
                         throw new InternalError(message);
 #endif
+                        }
                     }
                 } else {
                     break;
