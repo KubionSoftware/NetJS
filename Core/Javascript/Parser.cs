@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetJS.Core.Javascript.Blueprints;
+using System;
 using System.Collections.Generic;
 
 namespace NetJS.Core.Javascript {
@@ -28,6 +29,7 @@ namespace NetJS.Core.Javascript {
                 { Tokens.Let, ParseDeclaration },
                 { Tokens.Const, ParseDeclaration },
                 { Tokens.Function, ParseFunctionDeclaration },
+                { Tokens.Class, ParseClassDeclaration },
                 { Tokens.Return, ParseReturn },
                 { Tokens.If, ParseIf },
                 { Tokens.Switch, ParseSwitch },
@@ -92,7 +94,7 @@ namespace NetJS.Core.Javascript {
             };
 
             _parseExpressions = new Dictionary<string, Func<Expression, Expression>> {
-                { Tokens.Function, (l) => ParseAnonymousFunction() },
+                { Tokens.Function, (l) => ParseFunctionExpression() },
                 { Tokens.BlockOpen, (l) => ParseObject() },
                 { Tokens.ArrayOpen, (l) => {
                     return IsVariable(LastExpression(l)) ? (Expression)ParseArrayAccess() : ParseArray();
@@ -935,26 +937,7 @@ namespace NetJS.Core.Javascript {
             return list;
         }
 
-        public Expression ParseAnonymousFunction() {
-            Skip(Tokens.Function);
-
-            var parameters = ParseParameters();
-
-            var type = "";
-            if(Peek().Is(Tokens.TypeSeperator)) {
-                type = ParseType();
-            }
-
-            var body = ParseBlock();
-
-            return new FunctionBlueprint("", type, parameters, body);
-        }
-
-        public Statement ParseFunctionDeclaration() {
-            Skip(Tokens.Function);
-
-            var name = Next("function name");
-
+        public FunctionBlueprint ParseFunction(string name) {
             var parameters = ParseParameters();
 
             var type = "";
@@ -964,10 +947,63 @@ namespace NetJS.Core.Javascript {
 
             var body = ParseBlock();
 
-            var function = new FunctionBlueprint(name.Content, type, parameters, body);
+            var function = new FunctionBlueprint(name, type, parameters, body);
+            return function;
+        }
+
+        public Expression ParseFunctionExpression() {
+            Skip(Tokens.Function);
+
+            return ParseFunction("");
+        }
+
+        public Statement ParseFunctionDeclaration() {
+            Skip(Tokens.Function);
+
+            var name = Next("function name");
+            var function = ParseFunction(name.Content);
             
-            var declaration = new Declaration(DeclarationScope.Function, false);
+            var declaration = new Declaration(DeclarationScope.Global, false);
             declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(name.Content), function));
+
+            return declaration;
+        }
+
+        public Statement ParseClassDeclaration() {
+            Skip(Tokens.Class);
+
+            var className = Next("class name");
+            var classBlueprint = new ClassBlueprint();
+
+            if (Peek().Is(Tokens.Extends)) {
+                Skip(Tokens.Extends);
+                var prototype = Next("class extends");
+                classBlueprint.Prototype = prototype.Content;
+            }
+
+            Skip(Tokens.BlockOpen);
+
+            while (!Peek().Is(Tokens.BlockClose)) {
+                var functionName = Next("class member name");
+                var isStatic = functionName.Is(Tokens.Static);
+                if (isStatic) functionName = Next("class member name");
+
+                var function = ParseFunction(functionName.Content);
+
+                if(functionName.Is(Tokens.Constructor)) {
+                    if (classBlueprint.Constructor != null) throw CreateError("A class can only have one constructor");
+                    classBlueprint.Constructor = function;
+                } else if (isStatic) {
+                    classBlueprint.StaticMethods.Add(function);
+                } else {
+                    classBlueprint.PrototypeMethods.Add(function);
+                }
+            }
+
+            Skip(Tokens.BlockClose);
+
+            var declaration = new Declaration(DeclarationScope.Global, false);
+            declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(className.Content), classBlueprint));
 
             return declaration;
         }

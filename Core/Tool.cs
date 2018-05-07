@@ -43,11 +43,22 @@ namespace NetJS.Core {
         }
 
         public static Javascript.Object Prototype(string name, Javascript.Scope scope) {
-            var obj = scope.Engine.GetPrototype(name);
+            Javascript.Object obj = null;
+            try {
+                obj = scope.Engine.GetPrototype(name);
+            } catch {
+                if(scope.GetVariable(name) is Javascript.Object ob) {
+                    obj = ob;
+                } else {
+                    throw new Javascript.InternalError($"Could not get prototype of '{name}'");
+                }
+            }
+            
             var prototype = obj.Get("prototype");
-            if(prototype is Javascript.Object o) {
+            if (prototype is Javascript.Object o) {
                 return o;
             }
+
             throw new Javascript.InternalError($"Could not get prototype of '{name}'");
         }
 

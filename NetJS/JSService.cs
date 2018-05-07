@@ -13,10 +13,10 @@ namespace NetJS {
         public string RunTemplate(string template, Core.Javascript.Object arguments, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
             try {
                 if (arguments == null) {
-                    arguments = Core.Tool.Construct("Object", application.Engine.Scope);
+                    arguments = Core.Tool.Construct("Object", application.Engine.GlobalScope);
                 }
 
-                var scope = new Scope(application.Engine.Scope, null, null, ScopeType.Function, new StringBuilder());
+                var scope = new Scope(application.Engine.GlobalScope, null, null, ScopeType.Function, new StringBuilder());
                 scope.DeclareVariable("__application__", Core.Javascript.DeclarationScope.Function, true, new Foreign(application));
                 scope.DeclareVariable("__session__", Core.Javascript.DeclarationScope.Function, true, new Foreign(session));
 
@@ -69,9 +69,9 @@ namespace NetJS {
             try {
                 Core.Javascript.Constant arguments;
                 if (data.Length == 0) {
-                    arguments = Core.Tool.Construct("Object", application.Engine.Scope);
+                    arguments = Core.Tool.Construct("Object", application.Engine.GlobalScope);
                 } else {
-                    arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.Scope);
+                    arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.GlobalScope);
                 }
 
                 if (arguments is Core.Javascript.Object a) {

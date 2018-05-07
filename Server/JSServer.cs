@@ -22,6 +22,9 @@ namespace NetJS.Server {
             application.Engine.RegisterClass(typeof(API.Request));
             application.Engine.RegisterClass(typeof(API.Response));
 
+            var session = new JSSession();
+            _service.RunTemplate(application.Settings.Startup, "", ref application, ref session);
+
             return application;
         }
 

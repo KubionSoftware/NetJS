@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace NetJS.Core.Javascript {
 
     public enum DeclarationScope {
+        Engine,
         Global,
         Function,
         Block

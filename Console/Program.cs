@@ -26,6 +26,8 @@ namespace NetJS.Console {
 
             application.Engine.RegisterClass(typeof(API.Console));
 
+            service.RunTemplate("startup.js", data, ref application, ref session);
+
             try {
                 var result = service.RunTemplate("main.js", data, ref application, ref session);
                 System.Console.WriteLine(result);

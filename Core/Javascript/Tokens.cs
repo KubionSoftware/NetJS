@@ -32,26 +32,37 @@ namespace NetJS.Core.Javascript {
         public const string Var = "var";
         public const string Let = "let";
         public const string Const = "const";
+
         public const string Function = "function";
         public const string ArrowFunction = "=>";
         public const string Return = "return";
+
         public const string If = "if";
         public const string Else = "else";
+
         public const string Switch = "switch";
         public const string Case = "case";
         public const string CaseSeperator = ":";
         public const string Default = "default";
+
         public const string For = "for";
         public const string ForIn = "in";
         public const string ForOf = "of";
         public const string While = "while";
         public const string Do = "do";
+
         public const string Break = "break";
         public const string Continue = "continue";
+
         public const string Throw = "throw";
         public const string Try = "try";
         public const string Catch = "catch";
         public const string Finally = "finally";
+
+        public const string Class = "class";
+        public const string Constructor = "constructor";
+        public const string Static = "static";
+        public const string Extends = "extends";
 
         public const string True = "true";
         public const string False = "false";

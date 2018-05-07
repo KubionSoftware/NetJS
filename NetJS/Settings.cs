@@ -11,6 +11,7 @@ namespace NetJS {
 
         public string TemplateFolder { get; private set; } = "src/";
         public string Entry { get; private set; } = "main.js";
+        public string Startup { get; private set; } = "startup.js";
         public string Config { get; private set; } = "config.json";
         public string Connections { get; private set; } = "connections.json";
         public string Log { get; private set; } = "log.txt";
@@ -27,6 +28,7 @@ namespace NetJS {
             if (key == "JSFiles") SetRoot(value);
             if (key == "JSTemplates") SetTemplateFolder(value);
             if (key == "JSEntry") Entry = value;
+            if (key == "JSStartup") Startup = value;
             if (key == "JSConfig") Config = value;
             if (key == "JSConnections") Connections = value;
             if (key == "JSLog") Log = value;

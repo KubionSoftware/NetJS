@@ -8,6 +8,7 @@ namespace NetJS.Core.Javascript {
 
     public enum ScopeType {
         Engine,
+        Global,
         Function,
         Block
     }
@@ -198,6 +199,10 @@ namespace NetJS.Core.Javascript {
 
             if (declarationScope == DeclarationScope.Function) {
                 scope = GetScope(ScopeType.Function);
+            } else if (declarationScope == DeclarationScope.Global) {
+                scope = GetScope(ScopeType.Global);
+            } else if (declarationScope == DeclarationScope.Engine) {
+                scope = GetScope(ScopeType.Engine);
             } else if (declarationScope == DeclarationScope.Block) {
                 // Check if the variable is not declared yet
                 if (scope._variables.ContainsKey(name)) {

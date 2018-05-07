@@ -40,7 +40,7 @@ namespace NetJS {
             Engine.RegisterFunctions(typeof(API.Functions));
 
             Connections = new Connections(Settings);
-            Config = new API.Config(Engine.Scope, Settings);
+            Config = new API.Config(Engine.GlobalScope, Settings);
 
             XDocService = new XDocServices.XDocService();
         }

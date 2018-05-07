@@ -1,7 +1,9 @@
 ﻿using NetJS.Core.Javascript;
+using System;
 using System.Globalization;
 
 namespace NetJS.Core.API {
+
     class Number {
 
         public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {

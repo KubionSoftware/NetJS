@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace NetJS.Core {
     public class Engine {
         
-        public Javascript.Scope Scope { get; private set; }
+        public Javascript.Scope EngineScope { get; private set; }
+        public Javascript.Scope GlobalScope { get; private set; }
         private Dictionary<string, Javascript.Object> _prototypes = new Dictionary<string, Javascript.Object>();
 
         public Javascript.Object GetPrototype(string name) {
@@ -16,7 +18,8 @@ namespace NetJS.Core {
         }
 
         public Engine() {
-            Scope = new Javascript.Scope(this, null);
+            EngineScope = new Javascript.Scope(this, null);
+            GlobalScope = new Javascript.Scope(EngineScope, null, null, Javascript.ScopeType.Global, null);
         }
 
         public void Init() {
@@ -32,10 +35,10 @@ namespace NetJS.Core {
             functionConstructor.Set("prototype", functionPrototype);
             functionPrototype.Set("constructor", functionConstructor);
 
-            Scope.DeclareVariable("Object", Javascript.DeclarationScope.Global, true, objectConstructor);
+            EngineScope.DeclareVariable("Object", Javascript.DeclarationScope.Engine, true, objectConstructor);
             _prototypes["Object"] = objectConstructor;
 
-            Scope.DeclareVariable("Function", Javascript.DeclarationScope.Global, true, functionConstructor);
+            EngineScope.DeclareVariable("Function", Javascript.DeclarationScope.Engine, true, functionConstructor);
             _prototypes["Function"] = functionConstructor;
 
             RegisterType(typeof(API.Object));
@@ -74,12 +77,12 @@ namespace NetJS.Core {
                     Javascript.Constant[],
                     Javascript.Scope,
                     Javascript.Constant
-                >)), Scope);
+                >)), EngineScope);
         }
 
         public void RegisterClass(Type type) {
             var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
-            var obj = Tool.Construct("Object", Scope);
+            var obj = Tool.Construct("Object", EngineScope);
 
             foreach (var method in methods) {
                 try {
@@ -87,11 +90,11 @@ namespace NetJS.Core {
                 } catch { }
             }
 
-            Scope.DeclareVariable(type.Name, Javascript.DeclarationScope.Global, true, obj);
+            EngineScope.DeclareVariable(type.Name, Javascript.DeclarationScope.Engine, true, obj);
         }
 
         public void RegisterType(Type type) {
-            var prototype = Tool.Construct("Object", Scope);
+            var prototype = Tool.Construct("Object", EngineScope);
 
             var constructor = GetFunction(type.Name, type.GetMethod("constructor"));
             constructor.Set("prototype", prototype);
@@ -101,12 +104,16 @@ namespace NetJS.Core {
             foreach (var method in methods) {
                 if (method.Name != "constructor") {
                     try {
-                        prototype.Set(method.Name.Replace("@", ""), GetFunction(type.Name, method));
+                        if (method.GetCustomAttributes(typeof(API.StaticFunction), false).Any()) {
+                            constructor.Set(method.Name.Replace("@", ""), GetFunction(type.Name, method));
+                        } else {
+                            prototype.Set(method.Name.Replace("@", ""), GetFunction(type.Name, method));
+                        }
                     } catch { }
                 }
             }
 
-            Scope.DeclareVariable(type.Name, Javascript.DeclarationScope.Global, true, constructor);
+            EngineScope.DeclareVariable(type.Name, Javascript.DeclarationScope.Engine, true, constructor);
             _prototypes[type.Name] = constructor;
         }
 
@@ -114,7 +121,7 @@ namespace NetJS.Core {
             var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
             foreach (var method in methods) {
                 try {
-                    Scope.DeclareVariable(method.Name.Replace("@", ""), Javascript.DeclarationScope.Global, true, GetFunction(type.Name, method));
+                    EngineScope.DeclareVariable(method.Name.Replace("@", ""), Javascript.DeclarationScope.Engine, true, GetFunction(type.Name, method));
                 } catch { }
             }
         }

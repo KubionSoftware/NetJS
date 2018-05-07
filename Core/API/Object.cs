@@ -9,13 +9,21 @@ namespace NetJS.Core.API {
             return Static.Undefined;
         }
 
-        // TODO: this should be a static method Object.keys(obj) instead of obj.keys()
+        [StaticFunction]
         public static Constant keys(Constant _this, Constant[] arguments, Scope scope) {
-            if(_this is Javascript.Object o) {
-                return Tool.ToArray(o.GetKeys(), scope);
-            }
+            var o = Tool.GetArgument<Javascript.Object>(arguments, 0, "Object.keys");
+            return Tool.ToArray(o.GetKeys(), scope);
+        }
 
-            return Static.Undefined;
+        [StaticFunction]
+        public static Constant values(Constant _this, Constant[] arguments, Scope scope) {
+            var o = Tool.GetArgument<Javascript.Object>(arguments, 0, "Object.values");
+            var keys = o.GetKeys();
+            var array = new Javascript.Array();
+            foreach(var key in keys) {
+                array.List.Add(o.Get(key));
+            }
+            return array;
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {

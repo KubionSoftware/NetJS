@@ -11,7 +11,13 @@ namespace NetJS.Core.API {
 
             return new Javascript.Array((int)length.Value);
         }
-        
+
+        [StaticFunction]
+        public static Constant isArray(Constant _this, Constant[] arguments, Scope scope) {
+            var o = Tool.GetArgument(arguments, 0, "Array.isArray");
+            return new Javascript.Boolean(o is Javascript.Array);
+        }
+
         public static Constant forEach(Constant _this, Constant[] arguments, Scope scope) {
             var array = (Javascript.Array)_this;
 

@@ -14,6 +14,7 @@ load("regex");
 load("date");
 load("xdoc");
 load("io");
+load("class");
 
 time(() => unsafe(function(){
 	var ret = [], tmp, num = 500, i = 1024;

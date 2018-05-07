@@ -21,7 +21,7 @@ namespace NetJS.API {
 
             // Create scope
             var buffer = returnVar ? new StringBuilder() : scope.Buffer;
-            var templateScope = new Scope(application.Engine.Scope, scope, node, ScopeType.Function, buffer);
+            var templateScope = new Scope(application.Engine.GlobalScope, scope, node, ScopeType.Function, buffer);
 
             // Pass arguments
             if (arguments.Length > 1) {
