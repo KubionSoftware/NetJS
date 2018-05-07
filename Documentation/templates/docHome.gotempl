@@ -1,0 +1,27 @@
+{{range . -}}
+# {{.Name}}
+{{range $index, $class := .Classes}}
+## [[{{.Name}} | {{removeSpecial .Name}}]]
+{{if .Summary}}{{range splitText .Summary -}}
+_{{.}}_
+{{end}}{{end}}
+
+{{- if .Variables -}}
+**variables**:
+{{- range .Variables -}}
+* [[{{.Name}} | {{$class.Name}}#{{removeSpecial .Name}}]]
+{{- end}}{{end}}
+
+{{if .Functions -}}
+**functions**:
+{{range .Functions -}}
+* [[{{getFunctionDef .}} | {{$class.Name}}#{{getFunctionMD .}}]]
+{{end}}{{end}}
+{{- if .Examples}}{{if checkExampleTitles .Examples}}
+**examples**:
+{{- range .Examples}}
+* [[{{.Name}} | {{$class.Name}}#{{removeSpecial .Name}}]]
+{{end}}{{else}}
+**[[examples | {{$class.Name}}#examples]]**{{end}}{{- end}}
+<br>
+{{end}}{{end}}

@@ -1,0 +1,77 @@
+# {{.Name}}
+{{if .Summary}}{{range splitText .Summary -}}
+{{.}}
+{{- end}}{{end}}
+{{if .Remarks}}{{range splitText .Remarks -}}
+_{{.}}_
+{{end}}<br>{{end}}
+{{if .Configuration}}## Configuration
+{{range splitText .Configuration}}{{transformExamples .}}
+{{- end}}
+<br>
+{{end}}
+
+## Index
+{{if .Variables}}**variables**:
+{{- range .Variables}}
+* [{{.Name}}](#{{.Name}})
+{{- end}}{{end}}
+{{if .Functions}}**functions**:
+{{- range .Functions}}
+* [{{getFunctionDef .}}](#{{getFunctionMD .}})
+{{- end}}{{end}}
+{{if .Examples}}{{if checkExampleTitles .Examples}}
+**examples**:
+{{- range .Examples}}
+* [{{.Name}}](#{{removeSpecial .Name}})
+{{end}}{{else}}
+[**examples**](#examples){{end -}}
+<br>{{end}}
+
+{{if .Variables}}## Variables
+{{- range .Variables}}
+### {{.Name}}
+{{range splitText .Summary -}}
+{{.}}
+{{end}}
+{{range splitText .Value -}}
+_{{.}}_
+{{end}}{{end -}}
+<br>{{end}}
+
+{{if .Functions}}## Functions
+{{- range .Functions}}
+### {{getFunctionDef .}}
+{{range splitText .Summary}}{{.}}
+{{end}}
+{{- if .Params}}
+
+Variable | Description
+------------------------- | ------------------------
+{{- range .Params}}
+{{.Name}} | {{.Description}}
+{{- end}}
+{{end}}
+{{if .Exceptions}}{{range .Exceptions -}}
+* _**{{.Type}}**: {{.Description}}_
+{{end}}{{end}}
+<br>
+{{if .Examples}}
+**Example:**
+{{- range .Examples}}
+{{if .Name}}**{{.Name}}**{{end}}
+{{range splitText .Example}}{{transformCode .}}
+{{end}}
+<br>
+{{end}}{{end -}}
+{{end}}{{end -}}
+
+{{if .Examples}}
+## Examples
+{{range .Examples}}{{if .Name}}### {{.Name}}{{end}}
+{{transformExamples .Example}}
+
+<br>
+
+{{end}}
+{{- end}}

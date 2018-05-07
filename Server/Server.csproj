@@ -41,6 +41,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\Documentation\Server.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -109,9 +110,6 @@
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
-    <Path Include="$(SolutionDir)..\NetJS.wiki" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{641457c2-a76b-47d8-af78-eb9e19df9d03}</Project>
       <Name>Core</Name>
@@ -121,15 +119,4 @@
       <Name>NetJS</Name>
     </ProjectReference>
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$(ConfigurationName) == Release AND Exists(@(Path))">
-    <Message Text="Updating wiki documentation..." Importance="high" />
-    <Exec Command="$(ProjectDir)docs\XMLtoMD.exe -output=$(SolutionDir)..\NetJS.wiki\documentation -input=NetJS.xml -logto=XMLtoMD.log" Condition="$(OS) == Windows_NT" />
-    <Exec Command="$(ProjectDir)docs\XMLtoMDDarwin -output=$(SolutionDir)..\NetJS.wiki\documentation -input=NetJS.xml -logto=XMLtoMD.log" Condition="$(OS) == OSX" />
-    <Exec Command="$(ProjectDir)docs\XMLtoMDLinux -output=$(SolutionDir)..\NetJS.wiki\documentation -input=NetJS.xml -logto=XMLtoMD.log" Condition="$(OS) == Unix" />
-    <Message Text="Wiki documentation updated" Importance="high" />
-  </Target>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$(ConfigurationName) == Release">
-    <Message Text="Moving bin folders to release" Importance="high" />
-    <Copy SourceFiles="@(ReleaseFiles)" DestinationFolder="$(SolutionDir)release\bin" />
-  </Target>
 </Project>

@@ -63,7 +63,7 @@ namespace NetJS.API {
             return includeLoad(arguments, true, scope);
         }
 
-        /// <summary>out writes a string to the output buffer
+        /// <summary>out writes a string to the output buffer</summary>
         /// <param name="value">The string to write</param>
         /// <example><code lang="javascript">out(JSON.stringify(data));</code></example>
         public static Constant @out(Constant _this, Constant[] arguments, Scope scope) {
@@ -72,7 +72,7 @@ namespace NetJS.API {
             return Static.Undefined;
         }
 
-        /// <summary>outLine writes a string to the output buffer and appends a newline
+        /// <summary>outLine writes a string to the output buffer and appends a newline</summary>
         /// <param name="value">The string to write</param>
         /// <example><code lang="javascript">outLine(JSON.stringify(data));</code></example>
         public static Constant @outLine(Constant _this, Constant[] arguments, Scope scope) {
