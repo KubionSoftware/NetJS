@@ -9,14 +9,13 @@ load("array");
 load("operators");
 load("html");
 load("global");
-load("typescript");
+load("typescript.ts");
 load("regex");
 load("date");
 load("xdoc");
 load("io");
 
-/*
-time(() => {
+time(() => unsafe(function(){
 	var ret = [], tmp, num = 500, i = 1024;
 
 	for ( var j1 = 0; j1 < i * 15; j1++ ) {
@@ -57,7 +56,6 @@ time(() => {
 	for ( var j8 = 0; j8 < i * 25; j8++ ) {
 		tmp = c.pop();
 	}
-}, "Array speed test (200ms - 500ms)");
-*/
+}), "Array speed test (200ms - 500ms)");
 
-include("C:\\Users\\Bouke\\Documents\\linq.js");
+time(() => {try{load("linq.js")}catch{}}, "Linq.js load");

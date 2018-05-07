@@ -64,7 +64,7 @@ namespace NetJS.Core.API {
 
             try {
                 // TODO: file id
-                var tokens = Lexer.Lex(code.Value, -1);
+                var tokens = new Lexer(code.Value, -1).Lex();
                 var parser = new Parser(-1, tokens);
                 var block = parser.Parse();
 

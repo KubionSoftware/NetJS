@@ -1,6 +1,6 @@
 // write + read
-assert(() => IO.writeText("io/a.txt", "testvalue38") == undefined, "IO.write");
-assert(() => IO.readText("io/a.txt") == "testvalue38", "IO.read");
+assert(() => IO.writeText("io/a.txt", "testvalue38") == undefined, "IO.writeText");
+assert(() => IO.readText("io/a.txt") == "testvalue38", "IO.readText");
 
 // copy file
 assert(() => IO.copyFile("io/a.txt", "io/b.txt") == undefined, "IO.copy");

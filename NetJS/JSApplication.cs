@@ -34,6 +34,9 @@ namespace NetJS {
             Engine.RegisterClass(typeof(API.Base64));
             Engine.RegisterClass(typeof(API.Buffer));
             Engine.RegisterClass(typeof(API.Windows));
+            Engine.RegisterClass(typeof(API.Async));
+            Engine.RegisterClass(typeof(API.DLL));
+            Engine.RegisterClass(typeof(API.XML));
             Engine.RegisterFunctions(typeof(API.Functions));
 
             Connections = new Connections(Settings);

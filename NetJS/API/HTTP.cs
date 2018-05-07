@@ -27,17 +27,25 @@ namespace NetJS.API {
         /// <exception cref="Error">Thrown if the request failed</exception>
         public static Constant execute(Constant _this, Constant[] arguments, Scope scope) {
             var connectionName = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "HTTP.execute").Value;
+            string url;
+            string query = "";
+            int settingsIndex = 1;
 
-            var application = Tool.GetFromScope<JSApplication>(scope, "__application__");
-            if (application == null) throw new InternalError("No application");
+            if (connectionName.ToLower().StartsWith("http")) {
+                url = connectionName;
+            } else {
+                var application = Tool.GetFromScope<JSApplication>(scope, "__application__");
+                if (application == null) throw new InternalError("No application");
 
-            var url = application.Connections.GetHttpUrl(connectionName);
+                url = application.Connections.GetHttpUrl(connectionName);
 
-            var query = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "HTTP.execute").Value;
+                query = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "HTTP.execute").Value;
+                settingsIndex++;
+            }
 
             var request = WebRequest.CreateHttp(url + query);
 
-            var settings = Core.Tool.GetArgument<Core.Javascript.Object>(arguments, 2, "HTTP.execute", false);
+            var settings = Core.Tool.GetArgument<Core.Javascript.Object>(arguments, settingsIndex, "HTTP.execute", false);
             if(settings != null) {
                 if (settings.Get("cookies") is Core.Javascript.Object cookies) {
                     foreach (var key in cookies.GetKeys()) {

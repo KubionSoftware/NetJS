@@ -9,6 +9,15 @@ namespace NetJS.Core.API {
             return Static.Undefined;
         }
 
+        // TODO: this should be a static method Object.keys(obj) instead of obj.keys()
+        public static Constant keys(Constant _this, Constant[] arguments, Scope scope) {
+            if(_this is Javascript.Object o) {
+                return Tool.ToArray(o.GetKeys(), scope);
+            }
+
+            return Static.Undefined;
+        }
+
         public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
             // Because this is actually useful
             return JSON.stringify(null, new Constant[] { _this }, scope);

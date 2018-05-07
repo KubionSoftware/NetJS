@@ -16,9 +16,9 @@ namespace NetJS {
                     arguments = Core.Tool.Construct("Object", application.Engine.Scope);
                 }
 
-                var scope = new Scope(application.Engine.Scope, null, null, ScopeType.Session, new StringBuilder());
-                scope.SetVariable("__application__", new Foreign(application));
-                scope.SetVariable("__session__", new Foreign(session));
+                var scope = new Scope(application.Engine.Scope, null, null, ScopeType.Function, new StringBuilder());
+                scope.DeclareVariable("__application__", Core.Javascript.DeclarationScope.Function, true, new Foreign(application));
+                scope.DeclareVariable("__session__", Core.Javascript.DeclarationScope.Function, true, new Foreign(session));
 
                 NetJS.API.XDoc.SetXDocInfo(new API.XDoc.XDocInfo() { AppCache = null, SVCache = svCache }, scope);
 

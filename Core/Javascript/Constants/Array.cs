@@ -7,7 +7,13 @@ using System.Threading.Tasks;
 namespace NetJS.Core.Javascript {
     public class Array : Constant {
         public List<Constant> List;
-        public Object ArrayObject;
+
+        private Object _arrayObject;
+
+        public Object GetObject(Scope scope) {
+            if (_arrayObject == null) _arrayObject = Tool.Construct("Array", scope);
+            return _arrayObject;
+        }
 
         public Array(int length = 0) {
             List = new List<Constant>(length);
@@ -51,8 +57,7 @@ namespace NetJS.Core.Javascript {
                 return new Number(List.Count);
             }
 
-            if (ArrayObject == null) ArrayObject = Tool.Construct("Array", scope);
-            return ArrayObject.Get(keyString);
+            return GetObject(scope).Get(keyString);
         }
 
         public override void SetProperty(Constant key, Constant value, Scope scope) {
@@ -62,6 +67,10 @@ namespace NetJS.Core.Javascript {
                     List[index] = value;
                 }
             }
+        }
+
+        public override Constant InstanceOf(Constant other, Scope scope) {
+            return GetObject(scope).InstanceOf(other, scope);
         }
 
         public override string ToString() {

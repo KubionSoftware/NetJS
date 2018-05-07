@@ -44,26 +44,6 @@ namespace NetJS.Core.Javascript {
             return new Boolean(false);
         }
 
-        public override Constant LogicalAnd(Constant other, Scope scope) {
-            if (other is Boolean b) {
-                return new Boolean(Value && b.Value);
-            }
-
-            return base.LogicalAnd(other, scope);
-        }
-
-        public override Constant LogicalOr(Constant other, Scope scope) {
-            if (other is Boolean b) {
-                return new Boolean(Value || b.Value);
-            }
-
-            return base.LogicalOr(other, scope);
-        }
-
-        public override Constant LogicalNot(Scope scope) {
-            return new Boolean(!Value);
-        }
-
         public override string ToString() {
             return Value ? Tokens.True : Tokens.False;
         }

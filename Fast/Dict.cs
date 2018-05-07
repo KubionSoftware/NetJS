@@ -18,23 +18,19 @@ namespace Fast
 
         private uint _length;
         private Entry[][] _values;
+        private string[] _keys;
+        private int _keyIndex = 0;
 
         public Dict(uint length = 31) {
             _length = length;
             _values = new Entry[length][];
+            _keys = new string[length];
         }
 
         private IEnumerable<A> All<A>(Func<Entry, A> action) {
-            var items = new List<A>();
-            for (var r = 0; r < _values.Length; r++) {
-                var row = _values[r];
-                if (row != null) {
-                    for (var i = 0; i < row.Length; i++) {
-                        var item = row[i];
-                        if (item.Key == null) break;
-                        items.Add(action(item));
-                    }
-                }
+            var items = new A[_keyIndex];
+            for(var i = 0; i < _keyIndex; i++) {
+                items[i] = action(GetEntry(_keys[i]));
             }
             return items;
         }
@@ -82,6 +78,16 @@ namespace Fast
         public void Set(string key, T value) {
             var hash = Hash(key);
             var row = _values[hash];
+
+            if(_keyIndex >= _keys.Length) {
+                // Resize keys array if not big enough
+                var newKeys = new string[_keys.Length * 2];
+                for (var i = 0; i < _keys.Length; i++) newKeys[i] = _keys[i];
+                _keys = newKeys;
+            }
+            // Add key to keys array
+            _keys[_keyIndex] = key;
+            _keyIndex++;
 
             if (row == null) {
                 row = new Entry[10];
@@ -164,6 +170,17 @@ namespace Fast
             var row = _values[hash];
             if (row == null) return;
 
+            // Remove the key
+            var foundKey = false;
+            for(var i = 0; i < _keyIndex; i++) {
+                if(_keys[i] == key) {
+                    _keyIndex--;
+                    foundKey = true;
+                }
+                if (foundKey) _keys[i] = _keys[i + 1];
+            }
+
+            // Remove the value
             bool found = false;
             for (var i = 0; i < row.Length; i++) {
                 if (found) row[i - 1] = row[i];

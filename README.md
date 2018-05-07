@@ -56,9 +56,9 @@ var userId = Session.get("userId");
 With the IO object you can interact with the local filesystem. It allows creating, reading, writing and deleting files.
 
 ```javascript
-var text = IO.read("disclaimer.txt");
+var text = IO.readText("disclaimer.txt");
 
-IO.write("data.json", "{}");
+IO.writeText("data.json", "{}");
 
 IO.delete("data.json");
 ```
@@ -78,9 +78,12 @@ Log.write("This is a debug message");
 With the HTTP object you can execute get and post requests
 
 ```javascript
-var getResponse = HTTP.get("example.com");
+var getResponse = HTTP.execute("https://example.com");
 
-var postResponse = HTTP.post("example.com", JSON.stringify(data));
+var postResponse = HTTP.execute("https://example.com", {
+    method: "POST",
+    content: JSON.stringify(data)
+});
 ```
 
 <a name="sql"/>

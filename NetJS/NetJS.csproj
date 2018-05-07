@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -11,7 +11,7 @@
     <AssemblyName>NetJS</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile/>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,16 +32,16 @@
     <DocumentationFile>..\Documentation\Core.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System"/>
-    <Reference Include="System.configuration"/>
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Web"/>
-    <Reference Include="System.Xml.Linq"/>
-    <Reference Include="System.Data.DataSetExtensions"/>
-    <Reference Include="Microsoft.CSharp"/>
-    <Reference Include="System.Data"/>
-    <Reference Include="System.Net.Http"/>
-    <Reference Include="System.Xml"/>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
     <Reference Include="XDocServices">
       <HintPath>lib\XDocServices.dll</HintPath>
     </Reference>
@@ -50,29 +50,32 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cache.cs"/>
-    <Compile Include="Connections.cs"/>
-    <Compile Include="API\Base64.cs"/>
-    <Compile Include="API\Buffer.cs"/>
-    <Compile Include="API\Config.cs"/>
-    <Compile Include="API\Functions.cs"/>
-    <Compile Include="API\HTTP.cs"/>
-    <Compile Include="API\IO.cs"/>
-    <Compile Include="API\Log.cs"/>
-    <Compile Include="API\Session.cs"/>
-    <Compile Include="API\SQL.cs"/>
-    <Compile Include="API\Windows.cs"/>
-    <Compile Include="API\XDoc.cs"/>
-    <Compile Include="JSApplication.cs"/>
-    <Compile Include="JSService.cs"/>
-    <Compile Include="JSSession.cs"/>
-    <Compile Include="JSStorage.cs"/>
-    <Compile Include="Properties\AssemblyInfo.cs"/>
-    <Compile Include="Settings.cs"/>
-    <Compile Include="Tool.cs"/>
-    <Compile Include="Util\Base64.cs"/>
-    <Compile Include="Util\HttpWebRequestExtensions.cs"/>
-    <Compile Include="Util\SQL.cs"/>
+    <Compile Include="API\Async.cs" />
+    <Compile Include="API\DLL.cs" />
+    <Compile Include="API\XML.cs" />
+    <Compile Include="Cache.cs" />
+    <Compile Include="Connections.cs" />
+    <Compile Include="API\Base64.cs" />
+    <Compile Include="API\Buffer.cs" />
+    <Compile Include="API\Config.cs" />
+    <Compile Include="API\Functions.cs" />
+    <Compile Include="API\HTTP.cs" />
+    <Compile Include="API\IO.cs" />
+    <Compile Include="API\Log.cs" />
+    <Compile Include="API\Session.cs" />
+    <Compile Include="API\SQL.cs" />
+    <Compile Include="API\Windows.cs" />
+    <Compile Include="API\XDoc.cs" />
+    <Compile Include="JSApplication.cs" />
+    <Compile Include="JSService.cs" />
+    <Compile Include="JSSession.cs" />
+    <Compile Include="JSStorage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="Tool.cs" />
+    <Compile Include="Util\Base64.cs" />
+    <Compile Include="Util\HttpWebRequestExtensions.cs" />
+    <Compile Include="Util\SQL.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Web;
 using NetJS.Core.Javascript;
+using System.Collections.Generic;
 
 namespace NetJS.API {
     /// <summary>Functions class contain functions that are injected directly into the engine.</summary>
@@ -20,13 +21,13 @@ namespace NetJS.API {
 
             // Create scope
             var buffer = returnVar ? new StringBuilder() : scope.Buffer;
-            var templateScope = new Scope(application.Engine.Scope, scope, node, ScopeType.Template, buffer);
+            var templateScope = new Scope(application.Engine.Scope, scope, node, ScopeType.Function, buffer);
 
             // Pass arguments
             if (arguments.Length > 1) {
                 var parameters = (Object)arguments[1];
                 foreach (var key in parameters.GetKeys()) {
-                    templateScope.SetVariable(key, parameters.Get(key));
+                    templateScope.DeclareVariable(key, Core.Javascript.DeclarationScope.Function, false, parameters.Get(key));
                 }
             }
 
@@ -47,7 +48,6 @@ namespace NetJS.API {
         /// <param name="file">The file to include</param>
         /// <param name="variables">An object with variables to setup the file before execution</param>
         /// <example><code lang="javascript">include("renderLayout.js", {loggedIn: true});</code></example>
-        /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant include(Constant _this, Constant[] arguments, Scope scope) {
             return includeLoad(arguments, false, scope);
         }
@@ -57,8 +57,8 @@ namespace NetJS.API {
         /// Default filetype is ".js".</summary>
         /// <param name="file">The file to load</param>
         /// <param name="variables">An object with variables to setup the file before execution</param>
+        /// <returns>Returns the output of the template.</returns>
         /// <example><code lang="javascript">var output = load("renderLayout.js", {loggedIn: true});</code></example>
-        /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant load(Constant _this, Constant[] arguments, Scope scope) {
             return includeLoad(arguments, true, scope);
         }
@@ -66,7 +66,6 @@ namespace NetJS.API {
         /// <summary>out writes a string to the output buffer</summary>
         /// <param name="value">The string to write</param>
         /// <example><code lang="javascript">out(JSON.stringify(data));</code></example>
-        /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant @out(Constant _this, Constant[] arguments, Scope scope) {
             var value = Core.Tool.GetArgument(arguments, 0, "out");
             scope.Buffer.Append(Core.Tool.ToString(value, scope));
@@ -76,7 +75,6 @@ namespace NetJS.API {
         /// <summary>outLine writes a string to the output buffer and appends a newline</summary>
         /// <param name="value">The string to write</param>
         /// <example><code lang="javascript">outLine(JSON.stringify(data));</code></example>
-        /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant @outLine(Constant _this, Constant[] arguments, Scope scope) {
             var value = Core.Tool.GetArgument(arguments, 0, "outLine");
             scope.Buffer.Append(Core.Tool.ToString(value, scope) + "\n");
@@ -89,7 +87,6 @@ namespace NetJS.API {
         /// <param name="file">The file to import</param>
         /// <example><code lang="javascript">import("date");
         /// FormatDate(new Date());</code></example>
-        /// <exception cref="InternalError">Thrown when no application is found in application scope.</exception>
         public static Constant import(Constant _this, Constant[] arguments, Scope scope) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "import");
 
@@ -105,7 +102,6 @@ namespace NetJS.API {
             if (scope.StackParent == null) throw new InternalError("No scope to import code in");
             return node.Execute(scope.StackParent).Constant;
         }
-
         
         /// <summary>redirect takes an url and redirects a HttpResponse to the given url.</summary>
         /// <param name="url">A url to redirect to</param>
@@ -116,6 +112,24 @@ namespace NetJS.API {
             if (context != null) {
                 context.Response.Redirect(url.Value);
             }
+            return Static.Undefined;
+        }
+
+        /// <summary>Runs unsafe code (loops)</summary>
+        /// <param name="function">The function to execute</param>
+        /// <example><code lang="javascript">unsafe(function(){
+        ///     while(true){}
+        /// });</code></example>
+        public static Constant @unsafe(Constant _this, Constant[] arguments, Scope scope) {
+            var function = Core.Tool.GetArgument<Core.Javascript.Function>(arguments, 0, "unsafe");
+            var functionArguments = new ArgumentList() {
+                Arguments = new List<Expression>() { }
+            };
+
+            scope.Set("__unsafe__", new Core.Javascript.Boolean(true));
+            function.Call(functionArguments, Static.Undefined, scope);
+            scope.Remove("__unsafe__");
+
             return Static.Undefined;
         }
     }

@@ -16,24 +16,23 @@ namespace NetJS.Console {
                     System.Console.ReadLine();
                     return;
                 }
-                data += args[i].Replace("-", "") + ": \"" + args[i + 1] + "\"";
+                data += $"\"{args[i].Replace("-", "")}\": \"{args[i + 1]}\"";
             }
             data += "}";
 
             var application = new JSApplication();
             var service = new JSService();
+            var session = new JSSession();
 
-            System.Console.WriteLine("Type 'quit' to exit the application");
+            application.Engine.RegisterClass(typeof(API.Console));
 
-            while (true) {
-                try {
-                    var result = service.RunTemplate("main.js", data);
-                    System.Console.WriteLine(result);
-                } catch (Exception e) {
-                    System.Console.WriteLine(e);
-                }
-
-                if (System.Console.ReadLine().ToLower() == "quit") return;
+            try {
+                var result = service.RunTemplate("main.js", data, ref application, ref session);
+                System.Console.WriteLine(result);
+                System.Console.Read();
+            } catch (Exception e) {
+                System.Console.WriteLine(e);
+                System.Console.Read();
             }
         }
     }

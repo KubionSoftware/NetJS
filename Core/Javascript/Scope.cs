@@ -8,17 +8,27 @@ namespace NetJS.Core.Javascript {
 
     public enum ScopeType {
         Engine,
-        Session,
-        Template,
         Function,
         Block
     }
 
     public class Scope {
 
-        private const int MAX_DEPTH = 100;
+        private class ScopeVariable {
+            public Constant Value;
+            public bool IsConstant;
+            public string Type;
 
-        private Fast.Dict<Constant> _variables;
+            public ScopeVariable(Constant value, bool isConstant, string type) {
+                Value = value;
+                IsConstant = isConstant;
+                Type = type;
+            }
+        }
+
+        private const int MAX_DEPTH = 1000;
+
+        private Fast.Dict<ScopeVariable> _variables;
 
         public Scope ScopeParent { get; }
         public Scope StackParent { get; }
@@ -33,10 +43,11 @@ namespace NetJS.Core.Javascript {
         public Scope(Engine engine, StringBuilder buffer) {
             Engine = engine;
             Type = ScopeType.Engine;
-            _variables = new Fast.Dict<Constant>();
+            _variables = new Fast.Dict<ScopeVariable>();
             Buffer = buffer;
 
-            if (Depth > 1000) {
+            if (Depth > MAX_DEPTH) {
+                // Stackoverflow
                 throw new RangeError("Maximum call stack size exceeded");
             }
         }
@@ -54,7 +65,7 @@ namespace NetJS.Core.Javascript {
             } else if (ScopeParent != null) {
                 return ScopeParent.GetScope(type);
             } else {
-                throw new InternalError($"No scope found with type '{Type.ToString()}'");
+                throw new InternalError($"No scope found with type '{type.ToString()}'");
             }
         }
 
@@ -92,7 +103,7 @@ namespace NetJS.Core.Javascript {
                 // TODO: Remove this hack
                 if (key.StartsWith("__") && key.EndsWith("__")) continue;
 
-                var value = Convert.ValueToJson(_variables.Get(key), this);
+                var value = Convert.ValueToJson(_variables.Get(key).Value, this);
                 localVariables.Value[key] = value;
             }
 
@@ -119,44 +130,59 @@ namespace NetJS.Core.Javascript {
         }
 #endif
 
-        public Constant GetVariable(string variable) {
-            Constant value = null;
-            if(_variables.TryGetValue(variable, ref value)) {
-                return value;
+        // Returns a variable, going up through the scopes
+        public Constant GetVariable(string name) {
+            ScopeVariable variable = null;
+            if(_variables.TryGetValue(name, ref variable)) {
+                return variable.Value;
             }
 
             if(ScopeParent != null) {
-                return ScopeParent.GetVariable(variable);
+                return ScopeParent.GetVariable(name);
             }
             
             return Static.Undefined;
         }
 
-        public Constant GetStackVariable(string variable) {
-            Constant value = null;
-            if (_variables.TryGetValue(variable, ref value)) {
-                return value;
+        // Returns a variable, going up through the stack
+        public Constant GetStackVariable(string name) {
+            ScopeVariable variable = null;
+            if (_variables.TryGetValue(name, ref variable)) {
+                return variable.Value;
             }
 
             if (StackParent != null) {
-                return StackParent.GetStackVariable(variable);
+                return StackParent.GetStackVariable(name);
             }
 
             return Static.Undefined;
         }
 
-        public bool SetVariable(string variable, Constant value, bool create = true) {
-            if (!_variables.ContainsKey(variable)) {
+        // Sets a variable
+        public void SetVariable(string name, Constant value) {
+            if (!_variables.ContainsKey(name)) {
                 if (ScopeParent != null) {
-                    var inParent = ScopeParent.SetVariable(variable, value, false);
-                    if (inParent) return true;
+                    ScopeParent.SetVariable(name, value);
+                    return;
+                } else {
+                    // The variable is not declared, so it can't be assigned to
+                    throw new TypeError($"Assignment to undeclared variable '{name}'");
                 }
-
-                if (!create) return false;
             }
 
-            _variables.Set(variable, value);
-            return true;
+            var variable = _variables.Get(name);
+            if (variable.IsConstant) {
+                // Constant variables can't be reassigned
+                throw new TypeError($"Assignment to constant variable '{name}'");
+            }
+
+            // TODO: optimize?
+            // Check the type
+            if (!Tool.CheckType(value, variable.Type)) {
+                throw new TypeError($"Cannot assign value with type '{value.GetType()}' to static type '{variable.Type}'");
+            }
+
+            variable.Value = value;
         }
 
         public IEnumerable<string> Variables {
@@ -167,16 +193,47 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public bool DeclareVariable(string variable, Constant value, bool create = true) {
-            _variables.Set(variable, value);
-            return true;
+        public void DeclareVariable(string name, DeclarationScope declarationScope, bool isConstant, Constant value, string type = "any") {
+            var scope = this;
+
+            if (declarationScope == DeclarationScope.Function) {
+                scope = GetScope(ScopeType.Function);
+            } else if (declarationScope == DeclarationScope.Block) {
+                // Check if the variable is not declared yet
+                if (scope._variables.ContainsKey(name)) {
+                    throw new SyntaxError($"Variable '{name}' has already been declared");
+                }
+            }
+
+            // Check type
+            if (!Tool.CheckType(value, type)) {
+                throw new TypeError($"Cannot assign value with type '{value.GetType()}' to static type '{type}'");
+            }
+
+            scope._variables.Set(name, new ScopeVariable(value, isConstant, type));
+        }
+
+        public void DeclareVariable(Variable variable, DeclarationScope declarationScope, Constant value) {
+            DeclareVariable(variable.Name, declarationScope, variable.Constant, value, variable.Type);
+        }
+
+        public void Set(string key, Constant value) {
+            _variables.Set(key, new ScopeVariable(value, true, "any"));
+        }
+
+        public void Remove(string key) {
+            _variables.Remove(key);
         }
 
         private int _depth = -1;
         public int Depth {
             get {
+                // Check if the depth is already calculated
                 if (_depth != -1) return _depth;
+
                 var depth = StackParent != null ? StackParent.Depth + 1 : 0;
+                
+                // Store the depth so it doesn't have to be calculated every time
                 _depth = depth;
                 return depth;
             }

@@ -5,11 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
-    public class Variable : Constant {
-        public string Name { get; }
 
-        public Variable(string name) {
+    public class Variable : Constant {
+        public string Name;
+        public bool Constant;
+        public string Type;
+
+        public Variable(string name, bool constant = false, string type = "any") {
             Name = name;
+            Constant = constant;
+            Type = type;
         }
 
         public override Constant Execute(Scope scope, bool getValue = true) {

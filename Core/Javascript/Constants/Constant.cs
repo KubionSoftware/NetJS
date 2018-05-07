@@ -92,18 +92,6 @@ namespace NetJS.Core.Javascript {
             throw OperatorException("new", this);
         }
 
-        public virtual Constant LogicalAnd(Constant other, Scope scope) {
-            throw OperatorException("logical and", this, other);
-        }
-
-        public virtual Constant LogicalOr(Constant other, Scope scope) {
-            throw OperatorException("logical or", this, other);
-        }
-
-        public virtual Constant LogicalNot(Scope scope) {
-            return new Boolean(!IsTrue(scope));
-        }
-
         public virtual Constant TypeOf(Scope scope) {
             return new String("undefined");
         }
@@ -121,19 +109,19 @@ namespace NetJS.Core.Javascript {
         }
 
         public virtual Constant LessThan(Constant other, Scope scope) {
-            throw OperatorException("less than", this, other);
+            throw OperatorException("< compare", this, other);
         }
 
         public virtual Constant LessThanEquals(Constant other, Scope scope) {
-            throw OperatorException("less than or equals", this, other);
+            throw OperatorException("<= compare", this, other);
         }
 
         public virtual Constant GreaterThan(Constant other, Scope scope) {
-            throw OperatorException("greater than", this, other);
+            throw OperatorException("> compare", this, other);
         }
 
         public virtual Constant GreaterThanEquals(Constant other, Scope scope) {
-            throw OperatorException("greater than or equals", this, other);
+            throw OperatorException(">= compare", this, other);
         }
 
         public virtual Constant In(Constant other, Scope scope) {

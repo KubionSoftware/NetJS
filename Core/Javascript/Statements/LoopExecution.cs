@@ -20,13 +20,18 @@ namespace NetJS.Core.Javascript {
         public abstract bool After(Scope scope);
 
         public Result Execute(Node node, Scope parent) {
-            var scope = new Scope(parent, parent, node, ScopeType.Block, parent.Buffer);
-            if (!Start(scope)) return new Result(ResultType.None);
+            var outerScope = new Scope(parent, parent, node, ScopeType.Block, parent.Buffer);
+            if (!Start(outerScope)) return new Result(ResultType.None);
+
+            var unsafeVar = parent.GetStackVariable("__unsafe__");
+            var isUnsafe = unsafeVar is Boolean b ? b.Value : false;
 
             var i = 0;
             while (true) {
-                if (Before(scope)) {
-                    var result = Body.Execute(scope);
+                var innerScope = new Scope(outerScope, parent, node, ScopeType.Block, outerScope.Buffer);
+
+                if (Before(innerScope)) {
+                    var result = Body.Execute(innerScope);
 
                     if (result.Type == ResultType.Break) {
                         break;
@@ -34,18 +39,20 @@ namespace NetJS.Core.Javascript {
                         return result;
                     }
 
-                    if (!After(scope)) {
+                    if (!After(innerScope)) {
                         break;
                     }
 
-                    i++;
-                    if (i >= MaxLoops) {
-                        var message = "Maximum number of loops exceeded";
+                    if (!isUnsafe) {
+                        i++;
+                        if (i >= MaxLoops) {
+                            var message = "Maximum number of loops exceeded";
 #if debug_enabled
-                        throw new InternalError(Debug.Message(node, message));
+                            throw new InternalError(Debug.Message(node, message));
 #else
                         throw new InternalError(message);
 #endif
+                        }
                     }
                 } else {
                     break;

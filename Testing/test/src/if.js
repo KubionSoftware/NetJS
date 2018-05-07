@@ -70,3 +70,6 @@ var getString = function(value){
 assert(() => getString(1) == "one", "Switch first");
 assert(() => getString(3) == "three", "Switch last");
 assert(() => getString(4) == "unknown", "Switch default");
+
+assert(() => (true ? "yes" : "no") == "yes", "Conditional operator true");
+assert(() => (false ? "yes" : "no") == "no", "Conditional operator false");
