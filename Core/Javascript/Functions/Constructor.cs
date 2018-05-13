@@ -21,10 +21,6 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append("[[constructor]](){}");
-        }
-
         public override string ToDebugString() {
             return "[[constructor]]";
         }

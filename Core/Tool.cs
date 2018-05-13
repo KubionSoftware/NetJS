@@ -15,7 +15,7 @@ namespace NetJS.Core {
                         Left = constant,
                         Right = new Javascript.Variable("toString")
                     },
-                    Right = new Javascript.ArgumentList() { Arguments = new Javascript.Constant[] { } }
+                    Right = new Javascript.ArgumentList()
                 };
 
                 var result = node.Execute(scope);
@@ -112,32 +112,6 @@ namespace NetJS.Core {
             }
 
             return arguments[index];
-        }
-
-        public static bool CheckType(Javascript.Constant value, string type) {
-            if (type == "any") {
-                return true;
-            } else if (type == "string") {
-                if (!(value is Javascript.String)) return false;
-            } else if (type == "number") {
-                if (!(value is Javascript.Number)) return false;
-            } else if (type == "boolean") {
-                if (!(value is Javascript.Boolean)) return false;
-            } else if (type == "object") {
-                if (!(value is Javascript.Object)) return false;
-            } else if (type == "Date") {
-                if (!(value is Javascript.Date)) return false;
-            } else if (type.EndsWith("[]")) {
-                var itemType = type.Replace("[]", "");
-                if (!(value is Javascript.Array)) return false;
-
-                var array = (Javascript.Array)value;
-                for(var i = 0; i < array.List.Count; i++) {
-                    if (!CheckType(array.List[i], itemType)) return false;
-                }
-            }
-
-            return true;
         }
     }
 }

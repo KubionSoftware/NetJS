@@ -12,12 +12,6 @@ namespace NetJS.Core.Javascript {
             return left.Comma(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(", ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "comma";
         }

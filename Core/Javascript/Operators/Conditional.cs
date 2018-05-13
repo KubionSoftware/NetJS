@@ -18,7 +18,7 @@ namespace NetJS.Core.Javascript {
 
             if (right is ArgumentList) {
                 var list = (ArgumentList)right;
-                if (list.Arguments.Count == 2) {
+                if (list.Arguments.Length == 2) {
                     if (Left.IsTrue(scope)) {
                         result = list.Arguments[0].Execute(scope);
                     } else {
@@ -32,18 +32,6 @@ namespace NetJS.Core.Javascript {
             }
 
             return result;
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            if (Right is ArgumentList) {
-                var list = (ArgumentList)Right;
-
-                Left.Uneval(builder, depth);
-                builder.Append(" " + Tokens.Conditional + " ");
-                list.Arguments[0].Uneval(builder, depth);
-                builder.Append(" " + Tokens.ConditionalSeperator + " ");
-                list.Arguments[1].Uneval(builder, depth);
-            }
         }
 
         public override string ToDebugString() {

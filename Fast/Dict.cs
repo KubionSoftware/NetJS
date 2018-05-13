@@ -43,7 +43,11 @@ namespace Fast
         
         public IEnumerable<string> Keys {
             get {
-                return All(item => item.Key);
+                var result = new string[_keyIndex];
+                for (var i = 0; i < _keyIndex; i++) {
+                    result[i] = _keys[i];
+                }
+                return result;
             }
         }
         
@@ -75,11 +79,8 @@ namespace Fast
             return list;
         }
 
-        public void Set(string key, T value) {
-            var hash = Hash(key);
-            var row = _values[hash];
-
-            if(_keyIndex >= _keys.Length) {
+        public void AddKey(string key) {
+            if (_keyIndex >= _keys.Length) {
                 // Resize keys array if not big enough
                 var newKeys = new string[_keys.Length * 2];
                 for (var i = 0; i < _keys.Length; i++) newKeys[i] = _keys[i];
@@ -88,30 +89,44 @@ namespace Fast
             // Add key to keys array
             _keys[_keyIndex] = key;
             _keyIndex++;
+        }
 
+        public void Set(string key, T value) {
+            var hash = Hash(key);
+            var row = _values[hash];
+
+            // Create a new row
             if (row == null) {
-                row = new Entry[10];
+                row = new Entry[1];
                 row[0] = new Entry() { Key = key, Value = value };
                 _values[hash] = row;
+                AddKey(key);
                 return;
             }
 
+            // Search for the key in the row
             for (var i = 0; i < row.Length; i++) {
                 if (row[i].Key == null) {
+                    // Add new entry to the row
                     row[i] = new Entry() { Key = key, Value = value };
+                    AddKey(key);
                     return;
                 }
                 if (row[i].Key == key) {
+                    // Overwrite value
                     row[i].Value = value;
                     return;
                 }
             }
 
+            // Expand the row
             var newRow = new Entry[row.Length * 2];
             for(var i = 0; i < row.Length; i++) {
                 newRow[i] = row[i];
             }
             newRow[row.Length] = new Entry() { Key = key, Value = value };
+            _values[hash] = newRow;
+            AddKey(key);
         }
 
         public bool ContainsKey(string key) {
@@ -130,13 +145,18 @@ namespace Fast
             var row = _values[hash];
             if (row == null) return false;
 
+            if(row.Length == 1) {
+                if(row[0].Key != key) return false;
+                value = row[0].Value;
+                return true;
+            }
+
             for (var i = 0; i < row.Length; i++) {
                 if (row[i].Key == null) {
                     return false;
                 }
                 if (row[i].Key == key) {
-                    var r = row[i];
-                    value = r.Value;
+                    value = row[i].Value;
                     return true;
                 }
             }
@@ -150,6 +170,11 @@ namespace Fast
 
             if (row == null) {
                 return default(Entry);
+            }
+
+            if (row.Length == 1) {
+                if (row[0].Key != key) return default(Entry);
+                return row[0];
             }
 
             for (var i = 0; i < row.Length; i++) {

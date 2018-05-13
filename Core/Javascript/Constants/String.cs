@@ -66,10 +66,6 @@ namespace NetJS.Core.Javascript {
             return new String("string");
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append($"\"{Value}\"");
-        }
-
         public override string ToDebugString() {
             return $"\"{Value}\"";
         }

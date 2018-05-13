@@ -52,10 +52,6 @@ namespace NetJS.Core.Javascript {
             return new String("boolean");
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Value ? Tokens.True : Tokens.False);
-        }
-
         public override string ToDebugString() {
             return ToString();
         }

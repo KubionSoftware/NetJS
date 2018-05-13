@@ -82,6 +82,45 @@ try{
 	assert(() => true, "Typescript invalid array failed");
 }
 
+interface Box{
+	length: number;
+	width: number;
+	height: number;
+}
+
+try{
+	var box: Box = {
+		length: 3,
+		width: 5,
+		height: 4
+	};
+	assert(() => true, "Typescript valid object interface succeeded");
+}catch{
+	assert(() => false, "Typescript valid object interface failed");
+}
+
+try{
+	var box: Box = {
+		length: "3",
+		width: 5,
+		height: 4
+	};
+	assert(() => false, "Typescript invalid object interface succeeded");
+}catch{
+	assert(() => true, "Typescript invalid object interface failed");
+}
+
+try{
+	var box: Box = {
+		lngt: 3,
+		width: 5,
+		height: 4
+	};
+	assert(() => false, "Typescript invalid object interface succeeded");
+}catch{
+	assert(() => true, "Typescript invalid object interface failed");
+}
+
 try{
 	var x: any = true;
 	x = 3;

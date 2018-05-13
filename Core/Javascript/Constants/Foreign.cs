@@ -15,9 +15,5 @@ namespace NetJS.Core.Javascript {
         public override string ToDebugString() {
             return "foreign";
         }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append("foreign");
-        }
     }
 }

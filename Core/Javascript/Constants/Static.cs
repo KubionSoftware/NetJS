@@ -33,10 +33,6 @@ namespace NetJS.Core.Javascript {
             return new String("undefined");
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.Undefined);
-        }
-
         public override string ToDebugString() {
             return "undefined";
         }
@@ -60,10 +56,6 @@ namespace NetJS.Core.Javascript {
             return new String("object");
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.Null);
-        }
-
         public override string ToDebugString() {
             return "null";
         }
@@ -81,10 +73,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant StrictEquals(Constant other, Scope scope) {
             return other is NaN ? Static.True : Static.False;
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.NotANumber);
         }
 
         public override string ToString() {
@@ -108,10 +96,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant StrictEquals(Constant other, Scope scope) {
             return other is Infinity ? Static.True : Static.False;
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.Infinity);
         }
 
         public override string ToString() {

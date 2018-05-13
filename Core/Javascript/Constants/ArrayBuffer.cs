@@ -25,10 +25,6 @@ namespace NetJS.Core.Javascript {
             return new String("object");
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append($"new ArrayBuffer({Data.Length})");
-        }
-
         public override string ToDebugString() {
             return $"ArrayBuffer[x{Data.Length}]";
         }

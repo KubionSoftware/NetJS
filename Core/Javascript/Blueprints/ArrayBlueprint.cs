@@ -23,10 +23,6 @@ namespace NetJS.Core.Javascript {
             return array;
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Object.UnevalArray(Blueprints, builder, depth);
-        }
-
         public override string ToDebugString() {
             return "arrayblueprint";
         }

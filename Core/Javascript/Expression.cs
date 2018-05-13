@@ -20,12 +20,9 @@ namespace NetJS.Core.Javascript {
                 return n.Value != 0;
             } else if (result is String s) {
                 return s.Value.Length > 0;
-            } else if (result is Object) {
-                return true;
             }
 
-            // undefined, null, NaN
-            return false;
+            return (!(result is Undefined || result is Null || result is NaN));
         }
 
         public virtual Constant GetValue(Scope scope) {

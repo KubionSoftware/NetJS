@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NetJS.Core.Javascript.Blueprints {
+namespace NetJS.Core.Javascript {
     class ClassBlueprint : Blueprint {
         public FunctionBlueprint Constructor;
         public List<FunctionBlueprint> PrototypeMethods = new List<FunctionBlueprint>();
@@ -21,7 +21,7 @@ namespace NetJS.Core.Javascript.Blueprints {
                 Name = "",
                 Body = new Block() { Nodes = new List<Node>() },
                 Parameters = new ParameterList() { Parameters = new List<Variable>() },
-                Type = "any"
+                Type = null
             } : (Function)Constructor.Instantiate(scope);
 
             // Create the prototype and assign it to the constructor
@@ -40,10 +40,6 @@ namespace NetJS.Core.Javascript.Blueprints {
             }
 
             return constructor;
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            // TODO: uneval class
         }
 
         public override string ToDebugString() {

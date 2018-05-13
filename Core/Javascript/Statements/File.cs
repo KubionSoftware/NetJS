@@ -24,9 +24,5 @@ namespace NetJS.Core.Javascript {
 
             return new Result(ResultType.None);
         }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            throw new NotImplementedException();
-        }
     }
 }

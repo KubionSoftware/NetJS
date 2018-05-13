@@ -191,10 +191,6 @@ namespace NetJS.Core.Javascript {
             return new String("number");
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Value.ToString(CultureInfo.InvariantCulture));
-        }
-
         public override string ToDebugString() {
             return ToString();
         }

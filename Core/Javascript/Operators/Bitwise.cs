@@ -12,11 +12,6 @@ namespace NetJS.Core.Javascript {
             return right.BitwiseNot(scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.BitwiseNot);
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "bitwise not";
         }
@@ -27,12 +22,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.LeftShift(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.LeftShift + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {
@@ -47,12 +36,6 @@ namespace NetJS.Core.Javascript {
             return left.RightShift(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.RightShift + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "right shift";
         }
@@ -63,12 +46,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.BitwiseAnd(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.BitwiseAnd + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {
@@ -83,12 +60,6 @@ namespace NetJS.Core.Javascript {
             return left.BitwiseXor(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.BitwiseXor + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "bitwise xor";
         }
@@ -99,12 +70,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.BitwiseOr(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.BitwiseOr + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {

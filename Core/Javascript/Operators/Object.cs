@@ -12,11 +12,6 @@ namespace NetJS.Core.Javascript {
             return right.Delete(scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.Delete + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "delete";
         }
@@ -27,12 +22,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.In(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.In + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {

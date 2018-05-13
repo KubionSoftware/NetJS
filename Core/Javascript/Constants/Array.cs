@@ -60,6 +60,10 @@ namespace NetJS.Core.Javascript {
             return GetObject(scope).Get(keyString);
         }
 
+        public override Constant InstanceOf(Constant other, Scope scope) {
+            return GetObject(scope).InstanceOf(other, scope);
+        }
+
         public override void SetProperty(Constant key, Constant value, Scope scope) {
             if (key is Number n) {
                 var index = (int)n.Value;
@@ -69,20 +73,12 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public override Constant InstanceOf(Constant other, Scope scope) {
-            return GetObject(scope).InstanceOf(other, scope);
-        }
-
         public override string ToString() {
             return "[ x" + List.Count + " ]";
         }
 
         public override Constant TypeOf(Scope scope) {
             return new String("object");
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Object.UnevalArray(List.Select(item => (Expression)item).ToList(), builder, depth);
         }
 
         public override string ToDebugString() {

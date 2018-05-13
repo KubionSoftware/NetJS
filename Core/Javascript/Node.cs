@@ -14,8 +14,7 @@ namespace NetJS.Core.Javascript {
             Id = Debug.AddNode(location);
         }
 #endif
-
-        public abstract void Uneval(StringBuilder builder, int depth);
+        
         public static void NewLine(StringBuilder builder, int depth) {
             builder.Append("\n");
             for (var i = 0; i < depth; i++) {

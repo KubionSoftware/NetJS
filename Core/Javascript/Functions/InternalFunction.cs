@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace NetJS.Core.Javascript {
     public class InternalFunction : Function {
         public string Name;
-        public string Type;
+        public Type Type;
         public ParameterList Parameters;
         public Block Body;
 
@@ -20,14 +20,14 @@ namespace NetJS.Core.Javascript {
 
                 functionScope.DeclareVariable("this", DeclarationScope.Function, true, _this);
 
-                for (var i = 0; i < argumentList.Arguments.Count && i < Parameters.Parameters.Count; i++) {
+                for (var i = 0; i < argumentList.Arguments.Length && i < Parameters.Parameters.Count; i++) {
                     var value = argumentList.Arguments[i].Execute(scope);
                     functionScope.DeclareVariable(Parameters.Parameters[i].Name, DeclarationScope.Function, false, value, Parameters.Parameters[i].Type);
                 }
 
                 var result = Body.Execute(functionScope).Constant;
-                if (Type != null && Type.Length > 0) {
-                    if (!Tool.CheckType(result, Type)) {
+                if (Type != null) {
+                    if (!Type.Check(result, scope)) {
                         throw new TypeError($"Function cannot return value of type '{result.GetType()}', must return '{Type}'");
                     }
                 }
@@ -36,24 +36,6 @@ namespace NetJS.Core.Javascript {
             }
 
             return base.Call(other, _this, scope);
-        }
-
-        public static void UnevalFunction(StringBuilder builder, int depth, string name, ParameterList parameters, Block body) {
-            builder.Append(Tokens.Var + " " + name + " " + Tokens.Assign + " ");
-            builder.Append(Tokens.Function);
-
-            parameters.Uneval(builder, depth);
-            builder.Append(Tokens.BlockOpen);
-
-            NewLine(builder, depth + 1);
-            body.Uneval(builder, depth + 1);
-
-            NewLine(builder, depth);
-            builder.Append(Tokens.BlockClose);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            UnevalFunction(builder, depth, Name, Parameters, Body);
         }
     }
 }

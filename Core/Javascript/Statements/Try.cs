@@ -24,7 +24,7 @@ namespace NetJS.Core.Javascript {
             }
 
             if (CatchBody != null) {
-                if (CatchVariable != null) CatchVariable.Assignment(result.Constant, scope);
+                if (CatchVariable != null) scope.DeclareVariable(CatchVariable, DeclarationScope.Block, result.Constant);
                 var catchResult = CatchBody.Execute(scope);
                 if (FinallyBody == null || catchResult.Type == ResultType.Return || catchResult.Type == ResultType.Throw) {
                     return catchResult;
@@ -36,38 +36,6 @@ namespace NetJS.Core.Javascript {
             }
 
             return new Result(ResultType.None);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.Try + Tokens.BlockOpen);
-            NewLine(builder, depth + 1);
-            TryBody.Uneval(builder, depth + 1);
-            NewLine(builder, depth);
-            builder.Append(Tokens.BlockClose);
-
-            if (CatchBody != null) {
-                builder.Append(Tokens.Catch);
-
-                if (CatchVariable != null) {
-                    builder.Append(Tokens.GroupOpen);
-                    CatchVariable.Uneval(builder, depth);
-                    builder.Append(Tokens.GroupClose);
-                }
-
-                builder.Append(Tokens.BlockOpen);
-                NewLine(builder, depth + 1);
-                CatchBody.Uneval(builder, depth + 1);
-                NewLine(builder, depth);
-                builder.Append(Tokens.BlockClose);
-            }
-
-            if (FinallyBody != null) {
-                builder.Append(Tokens.Finally + Tokens.BlockOpen);
-                NewLine(builder, depth + 1);
-                FinallyBody.Uneval(builder, depth + 1);
-                NewLine(builder, depth);
-                builder.Append(Tokens.BlockClose);
-            }
         }
     }
 }

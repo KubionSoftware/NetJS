@@ -70,18 +70,5 @@ namespace NetJS.Core.Javascript {
 
             return new Result(ResultType.None);
         }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            for (var i = 0; i < Nodes.Count; i++) {
-                var node = Nodes[i];
-
-                if (i > 0) NewLine(builder, depth);
-                node.Uneval(builder, depth);
-
-                if (!(node is If || node is For || node is ForOf || node is ForIn || node is While || node is Try)) {
-                    builder.Append(Tokens.ExpressionEnd);
-                }
-            }
-        }
     }
 }

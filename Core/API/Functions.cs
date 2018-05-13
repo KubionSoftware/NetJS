@@ -73,15 +73,5 @@ namespace NetJS.Core.API {
 
             return Javascript.Static.Undefined;
         }
-
-        public static Constant uneval(Constant _this, Constant[] arguments, Scope scope) {
-            var builder = new StringBuilder();
-
-            if (arguments.Length > 0) {
-                arguments[0].Uneval(builder, 0);
-            }
-
-            return new Javascript.String(builder.ToString());
-        }
     }
 }

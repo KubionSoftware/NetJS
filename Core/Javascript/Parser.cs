@@ -1,5 +1,4 @@
-﻿using NetJS.Core.Javascript.Blueprints;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace NetJS.Core.Javascript {
@@ -14,7 +13,6 @@ namespace NetJS.Core.Javascript {
         private Dictionary<string, Func<Statement>> _statements;
         private Dictionary<string, Func<Expression, Expression>> _expressions;
         private Dictionary<string, Func<Expression, Expression>> _parseExpressions;
-        private Dictionary<string, Func<Operator>> _assignExpressions;
         private HashSet<string> _stopTokens;
         
         private int _fileId;
@@ -30,6 +28,7 @@ namespace NetJS.Core.Javascript {
                 { Tokens.Const, ParseDeclaration },
                 { Tokens.Function, ParseFunctionDeclaration },
                 { Tokens.Class, ParseClassDeclaration },
+                { Tokens.Interface, ParseInterfaceDeclaration },
                 { Tokens.Return, ParseReturn },
                 { Tokens.If, ParseIf },
                 { Tokens.Switch, ParseSwitch },
@@ -68,6 +67,16 @@ namespace NetJS.Core.Javascript {
                 { Tokens.Multiply, (l) => new Multiplication() },
                 { Tokens.Remainder, (l) => new Remainder() },
                 { Tokens.Assign, (l) => new Assignment() },
+                { Tokens.Add + Tokens.Assign, (l) => new AssignmentOperator(new Addition()) },
+                { Tokens.Substract + Tokens.Assign, (l) => new AssignmentOperator(new Substraction()) },
+                { Tokens.Multiply + Tokens.Assign, (l) => new AssignmentOperator(new Multiplication()) },
+                { Tokens.Divide + Tokens.Assign, (l) => new AssignmentOperator(new Division()) },
+                { Tokens.Remainder + Tokens.Assign, (l) => new AssignmentOperator(new Remainder()) },
+                { Tokens.LeftShift + Tokens.Assign, (l) => new AssignmentOperator(new LeftShift()) },
+                { Tokens.RightShift + Tokens.Assign, (l) => new AssignmentOperator(new RightShift()) },
+                { Tokens.BitwiseAnd + Tokens.Assign, (l) => new AssignmentOperator(new BitwiseAnd()) },
+                { Tokens.BitwiseOr + Tokens.Assign, (l) => new AssignmentOperator(new BitwiseOr()) },
+                { Tokens.BitwiseXor + Tokens.Assign, (l) => new AssignmentOperator(new BitwiseXor()) },
                 { Tokens.Equals, (l) => new Equals() },
                 { Tokens.NotEquals, (l) => new NotEquals() },
                 { Tokens.StrictEquals, (l) => new StrictEquals() },
@@ -100,19 +109,6 @@ namespace NetJS.Core.Javascript {
                     return IsVariable(LastExpression(l)) ? (Expression)ParseArrayAccess() : ParseArray();
                 } },
                 { Tokens.Conditional, (l) => ParseConditional() }
-            };
-
-            _assignExpressions = new Dictionary<string, Func<Operator>> {
-                { Tokens.Add + Tokens.Assign, () => new Addition() },
-                { Tokens.Substract + Tokens.Assign, () => new Substraction() },
-                { Tokens.Multiply + Tokens.Assign, () => new Multiplication() },
-                { Tokens.Divide + Tokens.Assign, () => new Division() },
-                { Tokens.Remainder + Tokens.Assign, () => new Remainder() },
-                { Tokens.LeftShift + Tokens.Assign, () => new LeftShift() },
-                { Tokens.RightShift + Tokens.Assign, () => new RightShift() },
-                { Tokens.BitwiseAnd + Tokens.Assign, () => new BitwiseAnd() },
-                { Tokens.BitwiseOr + Tokens.Assign, () => new BitwiseOr() },
-                { Tokens.BitwiseXor + Tokens.Assign, () => new BitwiseXor() }
             };
 
             _stopTokens = new HashSet<string>() {
@@ -268,7 +264,7 @@ namespace NetJS.Core.Javascript {
         }
 
         // Parses a typescript type
-        public string ParseType() {
+        public Type ParseType() {
             Skip(Tokens.TypeSeperator);
             var type = Next("type name").Content;
 
@@ -278,7 +274,7 @@ namespace NetJS.Core.Javascript {
                 type += Tokens.ArrayOpen + Tokens.ArrayClose;
             }
 
-            return type;
+            return ParseType(type);
         }
 
         // Parses a variable declaration
@@ -414,14 +410,6 @@ namespace NetJS.Core.Javascript {
 #endif
         }
 
-        public void CombineAssign(ref Expression left, Operator op) {
-            var l = left;
-            CombineExpression(ref left, new Assignment());
-            CombineExpression(ref left, l);
-            op.Precedence = 2.5f;
-            CombineExpression(ref left, op);
-        }
-
         public Expression ParseExpression() {
             var parts = new List<string>();
             Expression left = null;
@@ -457,9 +445,6 @@ namespace NetJS.Core.Javascript {
                         _index++;
                     } else if (_parseExpressions.ContainsKey(token.Content)) {
                         CombineExpression(ref left, _parseExpressions[token.Content](left));
-                    } else if (_assignExpressions.ContainsKey(token.Content)) {
-                        CombineAssign(ref left, _assignExpressions[token.Content]());
-                        _index++;
                     } else if (token.Content == Tokens.Divide) {
                         CombineExpression(ref left, ParseDivide(left));
                     } else if (token.Content == Tokens.Increment) {
@@ -613,12 +598,10 @@ namespace NetJS.Core.Javascript {
                 Left = new New() {
                     Right = new Variable("RegExp")
                 },
-                Right = new ArgumentList() {
-                    Arguments = new List<Expression>() {
-                        new StringBlueprint(buffer),
-                        new StringBlueprint(flags)
-                    }
-                }
+                Right = new ArgumentList(
+                    new StringBlueprint(buffer),
+                    new StringBlueprint(flags)
+                )
             };
         }
 
@@ -940,7 +923,7 @@ namespace NetJS.Core.Javascript {
         public FunctionBlueprint ParseFunction(string name) {
             var parameters = ParseParameters();
 
-            var type = "";
+            Type type = null;
             if (Peek().Is(Tokens.TypeSeperator)) {
                 type = ParseType();
             }
@@ -1026,7 +1009,7 @@ namespace NetJS.Core.Javascript {
 
             Skip(Tokens.GroupClose);
 
-            return new Call() { Right = new ArgumentList() { Arguments = arguments } };
+            return new Call() { Right = new ArgumentList(arguments.ToArray()) };
         }
 
         public Throw ParseThrow() {
@@ -1070,7 +1053,7 @@ namespace NetJS.Core.Javascript {
             Skip(Tokens.ConditionalSeperator);
             arguments.Add(ParseExpression());
 
-            return new Conditional() { Right = new ArgumentList() { Arguments = arguments } };
+            return new Conditional() { Right = new ArgumentList(arguments.ToArray()) };
         }
 
         public FunctionBlueprint ParseArrowFunction(ParameterList parameters) {
@@ -1085,7 +1068,62 @@ namespace NetJS.Core.Javascript {
                 body.Nodes.Add(new Return() { Expression = ParseExpression() });
             }
 
-            return new FunctionBlueprint("", "", parameters, body);
+            return new FunctionBlueprint("", null, parameters, body);
+        }
+
+        public static Type ParseType(string type) {
+            if (type == Tokens.Any) {
+                return new AnyType();
+            } else if (type == Tokens.Void) {
+                return new VoidType();
+            } else if (type == Tokens.String) {
+                return new StringType();
+            } else if (type == Tokens.Number) {
+                return new NumberType();
+            } else if (type == Tokens.Boolean) {
+                return new BooleanType();
+            } else if (type == Tokens.Object) {
+                return new ObjectType();
+            } else if (type.EndsWith(Tokens.Array)) {
+                var itemType = type.Replace(Tokens.Array, "");
+                return new ArrayType(ParseType(itemType));
+            } else {
+                return new InstanceType(new Variable(type));
+            }
+        }
+
+        public Declaration ParseInterfaceDeclaration() {
+            Skip(Tokens.Interface);
+
+            var name = Next("interface name");
+            var i = new Interface(name.Content);
+
+            Skip(Tokens.BlockOpen);
+
+            while (!Peek().Is(Tokens.BlockClose)) {
+                var key = Next("interface key");
+
+                var optional = false;
+                if(Peek().Is(Tokens.TypeOptional)) {
+                    optional = true;
+                    Skip(Tokens.TypeOptional);
+                }
+
+                Skip(Tokens.TypeSeperator);
+
+                var type = ParseType(Next("interface type").Content);
+
+                Skip(Tokens.ExpressionEnd);
+
+                i.Add(key.Content, optional, type);
+            }
+
+            Skip(Tokens.BlockClose);
+            
+            var declaration = new Declaration(DeclarationScope.Global, false);
+            declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(name.Content), i));
+
+            return declaration;
         }
     }
 }

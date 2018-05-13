@@ -17,11 +17,6 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.LogicalNot);
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "logical not";
         }
@@ -44,12 +39,6 @@ namespace NetJS.Core.Javascript {
             return Static.True;
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.LogicalAnd + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "logical and";
         }
@@ -70,12 +59,6 @@ namespace NetJS.Core.Javascript {
             }
 
             return Static.False;
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.LogicalOr + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {

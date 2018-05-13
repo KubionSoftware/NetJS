@@ -28,13 +28,11 @@ namespace NetJS.Core.API {
             var callback = (Javascript.Function)arguments[0];
 
             for (int i = 0; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList() {
-                    Arguments = new List<Expression>() {
-                        array.List[i],
-                        new Javascript.Number(i),
-                        array
-                    }
-                };
+                var callbackArguments = new ArgumentList(
+                    array.List[i],
+                    new Javascript.Number(i),
+                    array
+                );
                 callback.Call(callbackArguments, Static.Undefined, scope);
             }
 
@@ -140,13 +138,11 @@ namespace NetJS.Core.API {
 
             var result = new Javascript.Array();
             for (int i = 0; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList() {
-                    Arguments = new List<Expression>() {
-                        array.List[i],
-                        new Javascript.Number(i),
-                        array
-                    }
-                };
+                var callbackArguments = new ArgumentList(
+                    array.List[i],
+                    new Javascript.Number(i),
+                    array
+                );
                 var value = callback.Call(callbackArguments, Static.Undefined, scope);
                 result.List.Add(value);
             }
@@ -167,13 +163,11 @@ namespace NetJS.Core.API {
             for (int i = 0; i < array.List.Count; i++) {
                 var element = array.List[i];
 
-                var callbackArguments = new ArgumentList() {
-                    Arguments = new List<Expression>() {
-                        element,
-                        new Javascript.Number(i),
-                        array
-                    }
-                };
+                var callbackArguments = new ArgumentList(
+                    element,
+                    new Javascript.Number(i),
+                    array
+                );
 
                 var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], scope);
                 if (value is Javascript.Boolean) {
@@ -204,14 +198,12 @@ namespace NetJS.Core.API {
             }
             
             for (int i = arguments.Length > 1 ? 0 : 1; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList() {
-                    Arguments = new List<Expression>() {
-                        accumulator,
-                        array.List[i],
-                        new Javascript.Number(i),
-                        array
-                    }
-                };
+                var callbackArguments = new ArgumentList(
+                    accumulator,
+                    array.List[i],
+                    new Javascript.Number(i),
+                    array
+                );
                 accumulator = callback.Call(callbackArguments, Static.Undefined, scope);
             }
 
@@ -230,13 +222,11 @@ namespace NetJS.Core.API {
             for (int i = 0; i < array.List.Count; i++) {
                 var element = array.List[i];
 
-                var callbackArguments = new ArgumentList() {
-                    Arguments = new List<Expression>() {
-                        element,
-                        new Javascript.Number(i),
-                        array
-                    }
-                };
+                var callbackArguments = new ArgumentList(
+                    element,
+                    new Javascript.Number(i),
+                    array
+                );
 
                 var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], scope);
                 if (value is Javascript.Boolean) {
@@ -333,9 +323,7 @@ namespace NetJS.Core.API {
                     var aElement = array.List[i - 1];
                     var bElement = array.List[i];
 
-                    var callbackArguments = new ArgumentList() {
-                        Arguments = new List<Expression>() { aElement, bElement }
-                    };
+                    var callbackArguments = new ArgumentList(aElement, bElement);
                     var value = (Javascript.Number)callback.Call(callbackArguments, Static.Undefined, scope);
 
                     if(value.Value > 0) {

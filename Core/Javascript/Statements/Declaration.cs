@@ -47,19 +47,5 @@ namespace NetJS.Core.Javascript {
 
             return new Result(ResultType.None);
         }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            var token = IsConstant ? Tokens.Const : (Scope == DeclarationScope.Block ? Tokens.Let : Tokens.Var);
-            builder.Append(token + " ");
-
-            for (var i = 0; i < Declarations.Count; i++) {
-                if (i > 0) builder.Append(", ");
-
-                var declaration = Declarations[i];
-                declaration.Variable.Uneval(builder, depth);
-                builder.Append(" " + Tokens.Assign + " ");
-                declaration.Expression.Uneval(builder, depth);
-            }
-        }
     }
 }

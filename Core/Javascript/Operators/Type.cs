@@ -12,11 +12,6 @@ namespace NetJS.Core.Javascript {
             return right.TypeOf(scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.TypeOf + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "typeof";
         }
@@ -27,12 +22,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.InstanceOf(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.InstanceOf + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {

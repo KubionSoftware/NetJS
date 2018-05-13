@@ -9,9 +9,9 @@ namespace NetJS.Core.Javascript {
     public class Variable : Constant {
         public string Name;
         public bool Constant;
-        public string Type;
+        public Type Type;
 
-        public Variable(string name, bool constant = false, string type = "any") {
+        public Variable(string name, bool constant = false, Type type = null) {
             Name = name;
             Constant = constant;
             Type = type;
@@ -44,10 +44,6 @@ namespace NetJS.Core.Javascript {
 
         public override string ToDebugString() {
             return Name;
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Name);
         }
     }
 }

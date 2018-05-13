@@ -25,11 +25,13 @@ namespace NetJS.Console {
             var session = new JSSession();
 
             application.Engine.RegisterClass(typeof(API.Console));
+            application.Engine.RegisterType(typeof(API.Window));
+            application.Engine.RegisterType(typeof(API.Graphics));
 
-            service.RunTemplate("startup.js", data, ref application, ref session);
+            service.RunTemplate(application.Settings.Startup, data, ref application, ref session);
 
             try {
-                var result = service.RunTemplate("main.js", data, ref application, ref session);
+                var result = service.RunTemplate(application.Settings.Entry, data, ref application, ref session);
                 System.Console.WriteLine(result);
                 System.Console.Read();
             } catch (Exception e) {

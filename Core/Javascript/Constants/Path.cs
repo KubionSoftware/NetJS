@@ -66,13 +66,6 @@ namespace NetJS.Core.Javascript {
             return Static.False;
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            for (var i = 0; i < Parts.Count; i++) {
-                if (i > 0) builder.Append(".");
-                Parts[i].Uneval(builder, depth);
-            }
-        }
-
         public override string ToDebugString() {
             return string.Join(".", Parts.Select(part => part.ToDebugString()));
         }

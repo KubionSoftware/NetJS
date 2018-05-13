@@ -18,12 +18,17 @@ namespace NetJS.Core.Javascript {
         private class ScopeVariable {
             public Constant Value;
             public bool IsConstant;
-            public string Type;
+            public Type Type;
 
-            public ScopeVariable(Constant value, bool isConstant, string type) {
+            public ScopeVariable(Constant value, bool isConstant, Type type) {
                 Value = value;
                 IsConstant = isConstant;
                 Type = type;
+            }
+
+            public bool CheckType(Constant value, Scope scope) {
+                if (Type == null) return true;
+                return Type.Check(value, scope);
             }
         }
 
@@ -44,7 +49,7 @@ namespace NetJS.Core.Javascript {
         public Scope(Engine engine, StringBuilder buffer) {
             Engine = engine;
             Type = ScopeType.Engine;
-            _variables = new Fast.Dict<ScopeVariable>();
+            _variables = new Fast.Dict<ScopeVariable>(16);
             Buffer = buffer;
 
             if (Depth > MAX_DEPTH) {
@@ -179,7 +184,7 @@ namespace NetJS.Core.Javascript {
 
             // TODO: optimize?
             // Check the type
-            if (!Tool.CheckType(value, variable.Type)) {
+            if (!variable.CheckType(value, this)) {
                 throw new TypeError($"Cannot assign value with type '{value.GetType()}' to static type '{variable.Type}'");
             }
 
@@ -194,7 +199,7 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public void DeclareVariable(string name, DeclarationScope declarationScope, bool isConstant, Constant value, string type = "any") {
+        public void DeclareVariable(string name, DeclarationScope declarationScope, bool isConstant, Constant value, Type type = null) {
             var scope = this;
 
             if (declarationScope == DeclarationScope.Function) {
@@ -211,7 +216,7 @@ namespace NetJS.Core.Javascript {
             }
 
             // Check type
-            if (!Tool.CheckType(value, type)) {
+            if (type != null && !type.Check(value, this)) {
                 throw new TypeError($"Cannot assign value with type '{value.GetType()}' to static type '{type}'");
             }
 
@@ -223,7 +228,7 @@ namespace NetJS.Core.Javascript {
         }
 
         public void Set(string key, Constant value) {
-            _variables.Set(key, new ScopeVariable(value, true, "any"));
+            _variables.Set(key, new ScopeVariable(value, true, null));
         }
 
         public void Remove(string key) {

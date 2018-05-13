@@ -25,19 +25,6 @@ namespace NetJS.Core.Javascript {
             return getValue ? result.GetValue(scope) : result;
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-
-            if (IsKey) {
-                builder.Append(Tokens.Access);
-                Right.Uneval(builder, depth);
-            } else {
-                builder.Append(Tokens.ArrayOpen);
-                Right.Uneval(builder, depth);
-                builder.Append(Tokens.ArrayClose);
-            }
-        }
-
         public override string ToDebugString() {
             return "access";
         }

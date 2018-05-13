@@ -33,15 +33,5 @@ namespace NetJS.Core.Javascript {
         public override Result Execute(Scope parent) {
             return new WhileExecution(this).Execute(this, parent);
         }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.While + Tokens.GroupOpen);
-            Check.Uneval(builder, depth);
-            builder.Append(Tokens.GroupClose + Tokens.BlockOpen);
-            NewLine(builder, depth + 1);
-            Body.Uneval(builder, depth + 1);
-            NewLine(builder, depth);
-            builder.Append(Tokens.BlockClose);
-        }
     }
 }

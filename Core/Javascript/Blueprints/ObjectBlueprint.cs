@@ -22,10 +22,6 @@ namespace NetJS.Core.Javascript {
             return newObject;
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Object.UnevalDictionary(Blueprints, builder, depth);
-        }
-
         public override string ToDebugString() {
             return "objectblueprint";
         }

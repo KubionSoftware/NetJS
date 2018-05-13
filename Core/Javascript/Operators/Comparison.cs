@@ -12,12 +12,6 @@ namespace NetJS.Core.Javascript {
             return left.LessThan(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.LessThan + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "less than";
         }
@@ -28,12 +22,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.LessThanEquals(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.LessThanEquals + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {
@@ -48,12 +36,6 @@ namespace NetJS.Core.Javascript {
             return left.GreaterThan(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.GreaterThan + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "greater than";
         }
@@ -64,12 +46,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.GreaterThanEquals(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.GreaterThanEquals + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {
@@ -84,12 +60,6 @@ namespace NetJS.Core.Javascript {
             return left.Equals(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.Equals + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "equals";
         }
@@ -100,12 +70,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.NotEquals(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.NotEquals + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {
@@ -120,12 +84,6 @@ namespace NetJS.Core.Javascript {
             return left.StrictEquals(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.StrictEquals + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "strict equals";
         }
@@ -136,12 +94,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.StrictNotEquals(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.StrictNotEquals + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {

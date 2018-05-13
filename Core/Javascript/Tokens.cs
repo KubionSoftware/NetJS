@@ -27,7 +27,16 @@ namespace NetJS.Core.Javascript {
         public const string MultiCommentClose = "*/";
 
         public const string KeyValueSeperator = ":";
+
         public const string TypeSeperator = ":";
+        public const string TypeOptional = "?";
+        public const string Interface = "interface";
+        public const string Any = "any";
+        public const string String = "string";
+        public const string Number = "number";
+        public const string Boolean = "boolean";
+        public const string Object = "object";
+        public const string Array = "[]";
 
         public const string Var = "var";
         public const string Let = "let";

@@ -12,11 +12,6 @@ namespace NetJS.Core.Javascript {
             return right.Void(scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.Void + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "void";
         }

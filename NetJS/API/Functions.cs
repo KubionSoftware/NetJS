@@ -122,9 +122,7 @@ namespace NetJS.API {
         /// });</code></example>
         public static Constant @unsafe(Constant _this, Constant[] arguments, Scope scope) {
             var function = Core.Tool.GetArgument<Core.Javascript.Function>(arguments, 0, "unsafe");
-            var functionArguments = new ArgumentList() {
-                Arguments = new List<Expression>() { }
-            };
+            var functionArguments = new ArgumentList();
 
             scope.Set("__unsafe__", new Core.Javascript.Boolean(true));
             function.Call(functionArguments, Static.Undefined, scope);

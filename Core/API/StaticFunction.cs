@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.API {
 
-    class StaticFunction : Attribute { }
+    public class StaticFunction : Attribute { }
 }

@@ -15,10 +15,7 @@ namespace NetJS.API {
             for (var i = 0; i < arguments.Length; i++) {
                 var function = Core.Tool.GetArgument<Core.Javascript.Function>(arguments, i, name);
                 var task = new Task(() => {
-                    var functionArguments = new ArgumentList() {
-                        Arguments = new List<Expression>() { }
-                    };
-                    function.Call(functionArguments, Static.Undefined, scope);
+                    function.Call(new ArgumentList(), Static.Undefined, scope);
                 });
                 task.Start();
                 tasks[i] = task;

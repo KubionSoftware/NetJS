@@ -76,6 +76,8 @@
     <Compile Include="Javascript\Constants\Object.cs" />
     <Compile Include="Javascript\Constants\Path.cs" />
     <Compile Include="Javascript\Constants\String.cs" />
+    <Compile Include="Javascript\Types\Interface.cs" />
+    <Compile Include="Javascript\Types\Type.cs" />
     <Compile Include="Javascript\Constants\Uint8Array.cs" />
     <Compile Include="Javascript\Constants\Variable.cs" />
     <Compile Include="Javascript\Exceptions.cs" />

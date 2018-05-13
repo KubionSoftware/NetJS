@@ -62,10 +62,6 @@ namespace NetJS.Core.Javascript {
             return new String("object");
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append($"new Uint8Array({Buffer.Data.Length})");
-        }
-
         public override string ToDebugString() {
             return $"Uint8Array[x{Buffer.Data.Length}]";
         }

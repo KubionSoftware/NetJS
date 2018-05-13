@@ -1,3 +1,10 @@
+## 1.2.180513
+- Performance optimizations
+- Fixed bug with Fast Dictionary
+- Added typescript interfaces
+- Added Window/Graphics API in Console
+- Removed uneval functionality
+
 ## 1.2.180506
 - Fixed for in loop order
 - Added async functionality

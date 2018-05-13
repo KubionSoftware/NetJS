@@ -12,11 +12,6 @@ namespace NetJS.Core.Javascript {
             return right.Negation(scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.Substract);
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "negation";
         }
@@ -27,12 +22,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.Multiply(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.Multiply + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {
@@ -47,12 +36,6 @@ namespace NetJS.Core.Javascript {
             return left.Divide(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.Divide + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "division";
         }
@@ -63,12 +46,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.Remainder(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.Remainder + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {
@@ -83,12 +60,6 @@ namespace NetJS.Core.Javascript {
             return left.Add(right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.Add + " ");
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "addition";
         }
@@ -99,12 +70,6 @@ namespace NetJS.Core.Javascript {
 
         public override Constant Execute(Constant left, Constant right, Scope scope) {
             return left.Substract(right, scope);
-        }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.Substract + " ");
-            Right.Uneval(builder, depth);
         }
 
         public override string ToDebugString() {

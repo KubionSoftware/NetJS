@@ -16,10 +16,6 @@ namespace NetJS.Core.Javascript {
             return new Number(Value);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Value.ToString());
-        }
-
         public override string ToDebugString() {
             return "numberblueprint";
         }

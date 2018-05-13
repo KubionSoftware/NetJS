@@ -19,10 +19,28 @@ namespace NetJS.Core.Javascript {
             return Execute(left, right, scope);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            builder.Append(" " + Tokens.Assign + " ");
-            Right.Uneval(builder, depth);
+        public override string ToDebugString() {
+            return "assigment";
+        }
+    }
+
+    public class AssignmentOperator : BinaryOperator {
+
+        private BinaryOperator _op;
+
+        public AssignmentOperator(BinaryOperator op) : base(2) {
+            _op = op;
+        }
+
+        public override Constant Execute(Constant left, Constant right, Scope scope) {
+            return left.Assignment(_op.Execute(Left.Execute(scope), right, scope), scope);
+        }
+
+        public override Constant Execute(Scope scope, bool getValue = true) {
+            // TODO: error if left not variable or access
+            var left = Left.Execute(scope, false);
+            var right = Right.Execute(scope);
+            return Execute(left, right, scope);
         }
 
         public override string ToDebugString() {

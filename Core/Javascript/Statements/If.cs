@@ -36,32 +36,5 @@ namespace NetJS.Core.Javascript {
 
             return new Result(ResultType.None, Static.Undefined);
         }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            for (var i = 0; i < Ifs.Count; i++) {
-                var ifNode = Ifs[i];
-                if (i > 0) builder.Append(Tokens.Else);
-
-                builder.Append(Tokens.If + Tokens.GroupOpen);
-                ifNode.Check.Uneval(builder, depth);
-                builder.Append(Tokens.GroupClose + Tokens.BlockOpen);
-
-                NewLine(builder, depth + 1);
-                ifNode.Body.Uneval(builder, depth + 1);
-                NewLine(builder, depth);
-
-                builder.Append(Tokens.BlockClose);
-            }
-
-            if (Else != null) {
-                builder.Append(Tokens.Else + Tokens.BlockOpen);
-
-                NewLine(builder, depth + 1);
-                Else.Uneval(builder, depth + 1);
-                NewLine(builder, depth);
-
-                builder.Append(Tokens.BlockClose);
-            }
-        }
     }
 }

@@ -20,10 +20,6 @@ namespace NetJS.Core.Javascript {
             return new String(Value);
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append("\"" + Value + "\"");
-        }
-
         public override string ToDebugString() {
             return "stringblueprint";
         }

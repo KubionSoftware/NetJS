@@ -19,7 +19,7 @@ namespace Testing {
                 var function = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.InternalFunction>(arguments, 0, "assert");
                 message = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.String>(arguments, 1, "assert").Value;
 
-                value = function.Call(new ArgumentList() { Arguments = new List<Expression>() }, null, scope);
+                value = function.Call(new ArgumentList(), null, scope);
             } catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Error.WriteLine(e);
@@ -47,7 +47,7 @@ namespace Testing {
 
                 var watch = new Stopwatch();
                 watch.Start();
-                function.Call(new ArgumentList() { Arguments = new List<Expression>() }, null, scope);
+                function.Call(new ArgumentList(), null, scope);
                 watch.Stop();
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"{message} took {watch.ElapsedMilliseconds}ms");

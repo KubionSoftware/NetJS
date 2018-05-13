@@ -37,19 +37,5 @@ namespace NetJS.Core.Javascript {
         public override Result Execute(Scope parent) {
             return new ForExecution(this).Execute(this, parent);
         }
-
-        public override void Uneval(StringBuilder builder, int depth) {
-            builder.Append(Tokens.For + Tokens.GroupOpen);
-            Declaration.Uneval(builder, depth);
-            builder.Append(Tokens.ExpressionEnd + " ");
-            Check.Uneval(builder, depth);
-            builder.Append(Tokens.ExpressionEnd + " ");
-            Action.Uneval(builder, depth);
-            builder.Append(Tokens.GroupClose + Tokens.BlockOpen);
-            NewLine(builder, depth + 1);
-            Body.Uneval(builder, depth + 1);
-            NewLine(builder, depth);
-            builder.Append(Tokens.BlockClose);
-        }
     }
 }

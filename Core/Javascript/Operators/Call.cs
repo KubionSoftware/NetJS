@@ -30,11 +30,6 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public override void Uneval(StringBuilder builder, int depth) {
-            Left.Uneval(builder, depth);
-            Right.Uneval(builder, depth);
-        }
-
         public override string ToDebugString() {
             return "call";
         }
