@@ -7,11 +7,13 @@ using System.Web;
 
 namespace NetJS.API {
     /// <summary>Sends HTTP requests.</summary>
+    /// <configuration>When using a connection from connections.json, a connection needs to be defined as following:
+    /// <example><code lang=json>{"jsonplaceholder": {"type": "http", "url": "https://jsonplaceholder.typicode.com"}}</code></example></configuration>
     class HTTP {
 
         /// <summary>Executes a HTTP request.</summary>
-        /// <param name="connectionName">A connection from the connections.json</param>
-        /// <param name="query">The query to attach to the url</param>
+        /// <param name="connectionName">A connection from the connections.json or an url</param>
+        /// <param name="query">The query to attach to the url (only usable when connectionName is not an url)</param>
         /// <param name="options">Optional settings: method (string), content (string), cookies (object), headers (object)</param>
         /// <returns>Returns the response, as a json object if response Content-Type is 'application/json'.</returns>
         /// <example><code lang="javascript">var result = HTTP.execute("REST", "articles", {

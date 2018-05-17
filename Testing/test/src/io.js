@@ -1,6 +1,12 @@
-// write + read
+// write + read text
 assert(() => IO.writeText("io/a.txt", "testvalue38") == undefined, "IO.writeText");
 assert(() => IO.readText("io/a.txt") == "testvalue38", "IO.readText");
+
+// write + read bytes
+var bytes = new Uint8Array(1);
+bytes[0] = 42;
+assert(() => IO.writeBytes("io/bytes.txt", bytes) == undefined, "IO.writeBytes");
+assert(() => IO.readBytes("io/bytes.txt")[0] == 42, "IO.readBytes");
 
 // copy file
 assert(() => IO.copyFile("io/a.txt", "io/b.txt") == undefined, "IO.copy");
