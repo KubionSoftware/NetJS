@@ -72,7 +72,7 @@ namespace NetJS.API {
             var query = ((Core.Javascript.String)arguments[1]).Value;
 
             try {
-                if (true /*query.Trim().ToUpper().StartsWith("SELECT")*/) {
+                if (query.Trim().ToUpper().StartsWith("SELECT")) {
                     var rows = Util.SQL.Get(connection, query, new SqlParameter[] { });
 
                     var result = new Core.Javascript.Array();

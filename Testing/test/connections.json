@@ -1,0 +1,5 @@
+{"jsonplaceholder": {"type": "http", "url": "https://jsonplaceholder.typicode.com"},
+"DB": {
+		"type": "sql",
+		"connectionString": "Server=technistuff.nl;Database=netjs;User Id=sa;Password=tEst1ng"
+}}

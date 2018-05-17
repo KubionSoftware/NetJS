@@ -1,0 +1,3 @@
+// HTTP execute
+assert(() => HTTP.execute("https://jsonplaceholder.typicode.com/todos/1") == "{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"delectus aut autem\",\n  \"completed\": false\n}", "HTTP.execute with url");
+assert(() => HTTP.execute("jsonplaceholder", "todos/1") == "{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"delectus aut autem\",\n  \"completed\": false\n}", "HTTP.execute with ConnectionName");
