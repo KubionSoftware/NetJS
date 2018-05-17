@@ -44,8 +44,13 @@ namespace NetJS.Console.API {
             var thisObject = (Core.Javascript.Object)_this;
 
             var options = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.Object>(arguments, 0, "Window.create");
+
+            int width = 800, height = 600;
+            if (options.Has("width")) width = (int)options.Get<Number>("width").Value;
+            if (options.Has("height")) height = (int)options.Get<Number>("height").Value;
+
             var form = new Form();
-            form.Size = new Size(800, 600);
+            form.ClientSize = new Size(width, height);
             form.Name = "";
             form.Visible = true;
 
@@ -58,6 +63,9 @@ namespace NetJS.Console.API {
             form.KeyDown += (sender, e) => HandleKeyEvent(e, thisObject, "onkeydown", scope);
 
             thisObject.Set("form", new Foreign(form));
+
+            thisObject.Set("width", new Number(width));
+            thisObject.Set("height", new Number(height));
 
             return Static.Undefined;
         }

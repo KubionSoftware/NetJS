@@ -65,5 +65,14 @@ namespace NetJS.API {
             CreateTasks(arguments, scope, "Async.run");
             return Static.Undefined;
         }
+
+        /// <summary>Sleeps for a given number of milliseconds.</summary>
+        /// <param name="time">Milliseconds to sleep (number)</param>
+        /// <example><code lang="javascript">Async.sleep(1000);</code></example>
+        public static Constant sleep(Constant _this, Constant[] arguments, Scope scope) {
+            var time = Core.Tool.GetArgument<Core.Javascript.Number>(arguments, 0, "Async.sleep");
+            Thread.Sleep((int)time.Value);
+            return Static.Undefined;
+        }
     }
 }

@@ -32,7 +32,7 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        private const int MAX_DEPTH = 1000;
+        private const int MAX_DEPTH = 100;
 
         private Fast.Dict<ScopeVariable> _variables;
 
@@ -51,11 +51,6 @@ namespace NetJS.Core.Javascript {
             Type = ScopeType.Engine;
             _variables = new Fast.Dict<ScopeVariable>(16);
             Buffer = buffer;
-
-            if (Depth > MAX_DEPTH) {
-                // Stackoverflow
-                throw new RangeError("Maximum call stack size exceeded");
-            }
         }
 
         public Scope(Scope scopeParent, Scope stackParent, Node entryNode, ScopeType type, StringBuilder buffer) : this(scopeParent.Engine, buffer) {
@@ -63,6 +58,11 @@ namespace NetJS.Core.Javascript {
             StackParent = stackParent;
             EntryNode = entryNode;
             Type = type;
+
+            if (Depth > MAX_DEPTH) {
+                // Stackoverflow
+                throw new RangeError("Maximum call stack size exceeded");
+            }
         }
 
         public Scope GetScope(ScopeType type) {

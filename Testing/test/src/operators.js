@@ -44,6 +44,7 @@ assert(() => "1" !== 1, "String !== Number");
 // Numbers
 
 assert(() => 3 + 5 == 8, "Number addition");
+assert(() => 3.2 * 2 == 6.4, "Double addition");
 assert(() => 3 - 5 == -2, "Number substraction");
 assert(() => 3 * 5 == 15, "Number multiplication");
 assert(() => 15 / 3 == 5, "Number division");

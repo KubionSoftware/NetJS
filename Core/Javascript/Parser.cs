@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace NetJS.Core.Javascript {
 
@@ -438,7 +439,7 @@ namespace NetJS.Core.Javascript {
                     } else if (token.Type == Token.Group.Template) {
                         CombineExpression(ref left, ParseTemplate());
                     } else if (token.Type == Token.Group.Number) {
-                        CombineExpression(ref left, new NumberBlueprint(Double.Parse(token.Content)));
+                        CombineExpression(ref left, new NumberBlueprint(Double.Parse(token.Content, CultureInfo.InvariantCulture)));
                         _index++;
                     } else if (_expressions.ContainsKey(token.Content)) {
                         CombineExpression(ref left, _expressions[token.Content](left));
