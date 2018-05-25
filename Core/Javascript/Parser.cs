@@ -623,7 +623,7 @@ namespace NetJS.Core.Javascript {
             }
 
             double value;
-            if(double.TryParse(s, out value)) {
+            if(double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value)) {
                 return new NumberBlueprint(value);
             } else {
                 throw CreateError("Invalid number '" + s + "'");

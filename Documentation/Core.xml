@@ -37,6 +37,11 @@
                 () => IO.writeText("big file")
             );</code></example>
         </member>
+        <member name="M:NetJS.API.Async.sleep(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+            <summary>Sleeps for a given number of milliseconds.</summary>
+            <param name="time">Milliseconds to sleep (number)</param>
+            <example><code lang="javascript">Async.sleep(1000);</code></example>
+        </member>
         <member name="M:NetJS.API.Base64.decode(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
             <summary>Decodes a base64 string.</summary>
             <param name="base64">The string to decode</param>
@@ -99,13 +104,11 @@
                 while(true){}
             });</code></example>
         </member>
-        <member name="T:NetJS.API.HTTP">
-            <summary>Sends HTTP requests.</summary>
-        </member>
+        <!-- Badly formed XML comment ignored for member "T:NetJS.API.HTTP" -->
         <member name="M:NetJS.API.HTTP.execute(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
             <summary>Executes a HTTP request.</summary>
-            <param name="connectionName">A connection from the connections.json</param>
-            <param name="query">The query to attach to the url</param>
+            <param name="connectionName">A connection from the connections.json or an url</param>
+            <param name="query">The query to attach to the url (only usable when connectionName is not an url)</param>
             <param name="options">Optional settings: method (string), content (string), cookies (object), headers (object)</param>
             <returns>Returns the response, as a json object if response Content-Type is 'application/json'.</returns>
             <example><code lang="javascript">var result = HTTP.execute("REST", "articles", {

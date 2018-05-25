@@ -1,5 +1,6 @@
 ﻿using NetJS.Core.Javascript;
 using System;
+using System.Globalization;
 
 namespace NetJS.Core.API {
     class Date {

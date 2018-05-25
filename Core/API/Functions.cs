@@ -1,5 +1,6 @@
 ﻿using NetJS.Core.Javascript;
 using System;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -9,12 +10,12 @@ namespace NetJS.Core.API {
         public static Constant parseInt(Constant _this, Constant[] arguments, Scope scope) {
             if (arguments[0] is Javascript.String s) {
                 int intResult;
-                if(int.TryParse(s.Value, out intResult)) {
+                if(int.TryParse(s.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out intResult)) {
                     return new Javascript.Number(intResult);
                 }
 
                 double floatResult;
-                if (double.TryParse(s.Value, out floatResult)) {
+                if (double.TryParse(s.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult)) {
                     return new Javascript.Number((int)floatResult);
                 }
             } else if (arguments[0] is Javascript.Number n) {
@@ -27,7 +28,7 @@ namespace NetJS.Core.API {
         public static Constant parseFloat(Constant _this, Constant[] arguments, Scope scope) {
             if (arguments[0] is Javascript.String s) {
                 double result;
-                if (double.TryParse(s.Value, out result)) {
+                if (double.TryParse(s.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out result)) {
                     return new Javascript.Number(result);
                 }
             } else if (arguments[0] is Javascript.Number n) {

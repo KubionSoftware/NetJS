@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace NetJS.Core.Javascript {
             var keyString = key.ToString();
 
             int index;
-            if (int.TryParse(keyString, out index)) {
+            if (int.TryParse(keyString, NumberStyles.Integer, CultureInfo.InvariantCulture, out index)) {
                 return Get(index);
             }
 

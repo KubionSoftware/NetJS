@@ -290,7 +290,7 @@ namespace Util {
             }
 
             double value;
-            if(!double.TryParse(temp, out value)) {
+            if(!double.TryParse(temp, NumberStyles.Float, CultureInfo.InvariantCulture, out value)) {
                 throw new Exception("Invalid double value");
             }
 
