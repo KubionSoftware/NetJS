@@ -6,6 +6,6 @@ assert(() => SQL.execute("DB", "INSERT dbo.Products (ProductID, ProductName, Pri
 "VALUES (1, 'Clamp', 12.48, 'Workbench clamp')") == undefined, "SQL.execute Insert Data");
 
 assert(() => SQL.execute("DB", "SELECT ProductID, ProductName, Price, ProductDescription " +
-"FROM dbo.Products") != undefined, "SQL.execute Select Data");
+"FROM dbo.Products")[0].ProductName == "Clamp", "SQL.execute Select Data");
 
 assert(() => SQL.execute("DB", "DROP TABLE IF EXISTS dbo.Products") == undefined, "SQL.execute drop table");

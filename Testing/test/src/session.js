@@ -1,6 +1,8 @@
-// Session set and get
+// Session set
 assert(() => Session.set("Hello", "World!") == undefined, "Session.set");
-assert(() => Session.get("Hello") == "World!", "Session.set");
+
+// get
+assert(() => Session.get("Hello") == "World!", "Session.get");
 
 // getAll
 assert(() => Session.getAll()["Hello"] == "World!", "Session.getAll");
