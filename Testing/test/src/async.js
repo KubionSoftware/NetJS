@@ -3,21 +3,15 @@ var a = 0;
 var b = 0;
 
 function test(variable) {
-    variable = parseInt(new Date().getSeconds().toString() + new Date().getMilliseconds().toString()); 
-    var t = 1;
-    for(var i = 1; i<999; i++) {
-        t = t/i + t;
-        for(var i = 1; i<999; i++) {
-            t += t/i;
-        }
-    }
-    return [variable, t];
+    variable = parseInt(new Date().getSeconds().toString()); 
+    Async.sleep(500);
+    return [variable];
 }
 assert(() => Async.waitAll(
     () => a =test(a),
-    () => b =parseInt(new Date().getSeconds().toString() + new Date().getMilliseconds().toString())
+    () => b =parseInt(new Date().getSeconds().toString())
 ) == undefined, "Async.waitAll");
-assert(() => a[0] - b < 10 && a[1] == 1998, "Async.waitAll result");
+assert(() => a[0] - b < 5, "Async.waitAll result");
 
 // waitAny
 a = false;
@@ -27,7 +21,7 @@ assert(() => Async.waitAny(
     () => a=test(a),
     () => b=test(b)
 ) == undefined, "Async.waitAny");
-assert(() => (a[0] != false && a[1] == 1998) || (b[0] != false && b[1] == 1998), "Async.waitAny result");
+assert(() => (a[0] != false) || (b[0] != false), "Async.waitAny result");
 
 // run
 assert(() => Async.run(
