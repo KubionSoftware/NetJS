@@ -14,12 +14,15 @@ namespace NetJS.Core.Javascript {
     }
 
     public class Declaration : Statement {
+
         public class DeclarationVariable {
-            public Variable Variable;
+            public string Name;
+            public Type Type;
             public Expression Expression;
 
-            public DeclarationVariable(Variable variable, Expression expression) {
-                Variable = variable;
+            public DeclarationVariable(string name, Type type, Expression expression) {
+                Name = name;
+                Type = type;
                 Expression = expression;
             }
         }
@@ -42,7 +45,7 @@ namespace NetJS.Core.Javascript {
                     value = declaration.Expression.Execute(scope);
                 }
 
-                scope.DeclareVariable(declaration.Variable.Name, Scope, IsConstant, value, declaration.Variable.Type);
+                scope.DeclareVariable(declaration.Name, Scope, IsConstant, value, declaration.Type);
             }
 
             return new Result(ResultType.None);

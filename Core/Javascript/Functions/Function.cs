@@ -13,6 +13,8 @@ namespace NetJS.Core.Javascript {
             Set("prototype", Tool.Construct("Object", scope));
         }
 
+        public abstract Constant Call(Constant[] arguments, Constant thisValue, Scope scope);
+
         public override Constant New(Scope scope) {
             return new Constructor(this);
         }

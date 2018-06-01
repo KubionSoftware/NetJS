@@ -17,16 +17,8 @@ namespace NetJS.Core.Javascript {
             Data = data;
         }
 
-        public override string ToString() {
-            return "[object ArrayBuffer]";
-        }
-
-        public override Constant TypeOf(Scope scope) {
-            return new String("object");
-        }
-
         public override string ToDebugString() {
-            return $"ArrayBuffer[x{Data.Length}]";
+            return "arraybuffer";
         }
     }
 }

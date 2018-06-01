@@ -223,8 +223,8 @@ namespace NetJS.Core.Javascript {
             scope._variables.Set(name, new ScopeVariable(value, isConstant, type));
         }
 
-        public void DeclareVariable(Variable variable, DeclarationScope declarationScope, Constant value) {
-            DeclareVariable(variable.Name, declarationScope, variable.Constant, value, variable.Type);
+        public void DeclareVariable(Declaration.DeclarationVariable variable, bool isConstant, DeclarationScope declarationScope, Constant value) {
+            DeclareVariable(variable.Name, declarationScope, isConstant, value, variable.Type);
         }
 
         public void Set(string key, Constant value) {
@@ -233,6 +233,10 @@ namespace NetJS.Core.Javascript {
 
         public void Remove(string key) {
             _variables.Remove(key);
+        }
+
+        public Object GetGlobalObject() {
+            return Engine.GlobalObject;
         }
 
         private int _depth = -1;

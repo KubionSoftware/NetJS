@@ -20,7 +20,7 @@ namespace NetJS.Core.Javascript {
             var constructor = Constructor == null ? new Javascript.InternalFunction(scope) {
                 Name = "",
                 Body = new Block() { Nodes = new List<Node>() },
-                Parameters = new ParameterList() { Parameters = new List<Variable>() },
+                Parameters = new ParameterList(),
                 Type = null
             } : (Function)Constructor.Instantiate(scope);
 

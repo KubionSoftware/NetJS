@@ -15,35 +15,7 @@ namespace NetJS.Core.Javascript {
         public override Constant GetProperty(Constant key, Scope scope) {
             return Tool.Construct("Boolean", scope).Get(key.ToString());
         }
-
-        public override Constant Add(Constant other, Scope scope) {
-            if (other is String s) {
-                return new String((Value ? Tokens.True : Tokens.False) + s.Value);
-            }
-
-            return base.Add(other, scope);
-        }
-
-        public override Constant Equals(Constant other, Scope scope) {
-            if (other is Boolean b) {
-                return new Boolean(Value == b.Value);
-            } else if (other is Number n) {
-                return new Boolean((Value ? 1 : 0) == n.Value);
-            } else if (other is String s) {
-                return new Boolean((Value ? "1" : "0") == s.Value);
-            }
-
-            return new Boolean(false);
-        }
-
-        public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is Boolean b) {
-                return new Boolean(Value == b.Value);
-            }
-
-            return new Boolean(false);
-        }
-
+        
         public override string ToString() {
             return Value ? Tokens.True : Tokens.False;
         }

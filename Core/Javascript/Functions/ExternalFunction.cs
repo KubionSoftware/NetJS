@@ -14,23 +14,11 @@ namespace NetJS.Core.Javascript {
             Function = function;
         }
 
-        public override Constant Call(Constant other, Constant _this, Scope scope) {
-            if (other is ArgumentList) {
-                var argumentList = (ArgumentList)other;
-                var arguments = new Constant[argumentList.Arguments.Length];
+        public override Constant Call(Constant[] arguments, Constant thisValue, Scope scope) {
+            var functionScope = new Scope(Scope, scope, null, ScopeType.Function, scope.Buffer);
 
-                for (var i = 0; i < argumentList.Arguments.Length; i++) {
-                    var value = argumentList.Arguments[i].Execute(scope);
-                    arguments[i] = value;
-                }
-
-                var functionScope = new Scope(Scope, scope, this, ScopeType.Function, scope.Buffer);
-
-                var result = Function(_this, arguments, functionScope);
-                return result;
-            }
-
-            return base.Call(other, _this, scope);
+            var result = Function(thisValue, arguments, functionScope);
+            return result;
         }
 
         public override string ToDebugString() {

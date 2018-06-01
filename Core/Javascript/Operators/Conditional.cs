@@ -8,30 +8,21 @@ namespace NetJS.Core.Javascript {
     public class Conditional : BinaryOperator {
         public Conditional() : base(3) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.Conditional(right, scope);
-        }
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-conditional-operator
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
-            var right = Right.Execute(scope);
-            Constant result = null;
+            var lval = Convert.ToBoolean(References.GetValue(lref, scope));
 
-            if (right is ArgumentList) {
-                var list = (ArgumentList)right;
-                if (list.Arguments.Length == 2) {
-                    if (Left.IsTrue(scope)) {
-                        result = list.Arguments[0].Execute(scope);
-                    } else {
-                        result = list.Arguments[1].Execute(scope);
-                    }
-                }
+            // TODO: save left and right expression instead of arguments
+            var arguments = (ArgumentList)rref;
+
+            if (lval) {
+                var trueRef = arguments.Arguments[0].Execute(scope);
+                return References.GetValue(trueRef, scope);
+            } else {
+                var falseRef = arguments.Arguments[1].Execute(scope);
+                return References.GetValue(falseRef, scope);
             }
-
-            if (result == null) {
-                result = Execute(Left.Execute(scope), right, scope);
-            }
-
-            return result;
         }
 
         public override string ToDebugString() {

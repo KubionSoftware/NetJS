@@ -15,11 +15,7 @@ namespace NetJS.Core.Javascript {
 
         public override Result Execute(Scope scope) {
             foreach (var expression in _expressions) {
-                if (expression is String s) {
-                    scope.Buffer.Append(s);
-                } else {
-                    scope.Buffer.Append(expression.Execute(scope).ToString());
-                }
+                scope.Buffer.Append(expression.Execute(scope).ToString());
             }
 
             return new Result(ResultType.None);

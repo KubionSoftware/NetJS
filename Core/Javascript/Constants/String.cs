@@ -21,35 +21,7 @@ namespace NetJS.Core.Javascript {
 
             return Tool.Construct("String", scope).Get(keyString);
         }
-
-        public override Constant Add(Constant other, Scope scope) {
-            if (other is String s) {
-                return new String(Value + s.Value);
-            } else {
-                return new String(Value + other.ToString());
-            }
-        }
-
-        public override Constant Equals(Constant other, Scope scope) {
-            if (other is String s) {
-                return new Boolean(Value == s.Value);
-            } else if (other is Number n) {
-                return new Boolean(Value == n.Value.ToString(CultureInfo.InvariantCulture));
-            } else if (other is Boolean b) {
-                return new Boolean(Value == (b.Value ? "1" : "0"));
-            }
-
-            return new Boolean(false);
-        }
-
-        public override Constant StrictEquals(Constant other, Scope scope) {
-            if (other is String s) {
-                return new Boolean(Value == s.Value);
-            }
-
-            return new Boolean(false);
-        }
-
+        
         public override Constant In(Constant other, Scope scope) {
             if (other is Object obj) {
                 return new Boolean(obj.Has(Value));

@@ -66,7 +66,7 @@ namespace NetJS.Core.API {
                 }
             }
 
-            return Tool.ToArray(result, scope);
+            return Tool.ToArray(result);
         }
 
         public static Javascript.Constant test(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
@@ -110,7 +110,7 @@ namespace NetJS.Core.API {
             var options = GetOptions(exp);
 
             var result = Regex.Split(str.Value, source, options);
-            return Tool.ToArray(result, scope);
+            return Tool.ToArray(result);
         }
     }
 }

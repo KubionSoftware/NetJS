@@ -12,19 +12,7 @@ namespace NetJS.Core.Javascript {
     }
 
     public class Undefined : Constant {
-
-        public override Constant Equals(Constant other, Scope scope) {
-            return other is Undefined || other is Null ? Static.True : Static.False;
-        }
-
-        public override Constant StrictEquals(Constant other, Scope scope) {
-            return other is Undefined ? Static.True : Static.False;
-        }
-
-        public override Constant Add(Constant other, Scope scope) {
-            return other;
-        }
-
+        
         public override string ToString() {
             return "";
         }
@@ -39,15 +27,7 @@ namespace NetJS.Core.Javascript {
     }
 
     public class Null : Constant {
-
-        public override Constant Equals(Constant other, Scope scope) {
-            return other is Null || other is Undefined ? Static.True : Static.False;
-        }
-
-        public override Constant StrictEquals(Constant other, Scope scope) {
-            return other is Null ? Static.True : Static.False;
-        }
-
+        
         public override string ToString() {
             return "null";
         }
@@ -61,20 +41,14 @@ namespace NetJS.Core.Javascript {
         }
     }
 
-    public class NaN : Constant {
+    public class NaN : Number {
+
+        public NaN() : base(double.NaN) { }
 
         public override Constant TypeOf(Scope scope) {
             return new String("number");
         }
-
-        public override Constant Equals(Constant other, Scope scope) {
-            return other is NaN ? Static.True : Static.False;
-        }
-
-        public override Constant StrictEquals(Constant other, Scope scope) {
-            return other is NaN ? Static.True : Static.False;
-        }
-
+        
         public override string ToString() {
             return "NaN";
         }
@@ -84,20 +58,14 @@ namespace NetJS.Core.Javascript {
         }
     }
 
-    public class Infinity : Constant {
+    public class Infinity : Number {
+
+        public Infinity() : base(double.PositiveInfinity) { }
 
         public override Constant TypeOf(Scope scope) {
             return new String("number");
         }
-
-        public override Constant Equals(Constant other, Scope scope) {
-            return other is Infinity ? Static.True : Static.False;
-        }
-
-        public override Constant StrictEquals(Constant other, Scope scope) {
-            return other is Infinity ? Static.True : Static.False;
-        }
-
+        
         public override string ToString() {
             return "Infinity";
         }

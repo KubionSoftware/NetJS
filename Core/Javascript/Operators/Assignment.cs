@@ -8,15 +8,24 @@ namespace NetJS.Core.Javascript {
     public class Assignment : BinaryOperator {
         public Assignment() : base(2) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.Assignment(right, scope);
-        }
+        public override Constant Execute(Scope scope) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-assignment-operators
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
-            // TODO: error if left not variable or access
-            var left = Left.Execute(scope, false);
-            var right = Right.Execute(scope);
-            return Execute(left, right, scope);
+            if (!(Left is ObjectBlueprint || Left is ArrayBlueprint)) {
+                var lref = Left.Execute(scope);
+                var rref = Right.Execute(scope);
+
+                var rval = References.GetValue(rref, scope);
+
+                // TODO: set function name
+
+                References.PutValue(lref, rval, scope);
+                return rval;
+            }
+
+            // TODO: destructuring
+
+            return Static.Undefined;
         }
 
         public override string ToDebugString() {
@@ -32,15 +41,14 @@ namespace NetJS.Core.Javascript {
             _op = op;
         }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.Assignment(_op.Execute(Left.Execute(scope), right, scope), scope);
-        }
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
-            // TODO: error if left not variable or access
-            var left = Left.Execute(scope, false);
-            var right = Right.Execute(scope);
-            return Execute(left, right, scope);
+            var r = _op.Execute(lval, rval, scope);
+            References.PutValue(lref, r, scope);
+
+            return r;
         }
 
         public override string ToDebugString() {

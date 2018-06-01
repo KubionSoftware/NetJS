@@ -45,10 +45,10 @@ namespace NetJS.Core.Javascript {
             _expressions = new Dictionary<string, Func<Expression, Expression>> {
                 { Tokens.True, (l) => new BooleanBlueprint(true) },
                 { Tokens.False, (l) => new BooleanBlueprint(false) },
-                { Tokens.Null, (l) => Static.Null },
-                { Tokens.Undefined, (l) => Static.Undefined },
-                { Tokens.NotANumber, (l) => Static.NaN },
-                { Tokens.Infinity, (l) => Static.Infinity },
+                { Tokens.Null, (l) => new NullBlueprint() },
+                { Tokens.Undefined, (l) => new UndefinedBlueprint() },
+                { Tokens.NotANumber, (l) => new NaNBlueprint() },
+                { Tokens.Infinity, (l) => new InfinityBlueprint() },
                 { Tokens.New, (l) => new New() },
                 { Tokens.Add, (l) => new Addition() },
                 { Tokens.Substract, (l) => {
@@ -291,14 +291,13 @@ namespace NetJS.Core.Javascript {
             var result = new Declaration(scope, constant);
 
             while (true) {
-                var name = Next("variable name");
-                Variable variable;
+                var name = Next("variable name").Content;
+                Type type;
 
                 if(Peek().Is(Tokens.TypeSeperator)) {
-                    var type = ParseType();
-                    variable = new Variable(name.Content, constant, type);
+                    type = ParseType();
                 } else {
-                    variable = new Variable(name.Content, constant);
+                    type = new AnyType();
                 }
 
                 Expression expression = null;
@@ -307,11 +306,11 @@ namespace NetJS.Core.Javascript {
                     expression = ParseExpression();
 
                     if(expression is FunctionBlueprint function) {
-                        function.Name = variable.Name;
+                        function.Name = name;
                     }
                 }
 
-                result.Declarations.Add(new Declaration.DeclarationVariable(variable, expression));
+                result.Declarations.Add(new Declaration.DeclarationVariable(name, type, expression));
 
                 if (!Peek().Is(Tokens.Sequence)) {
                     break;
@@ -342,7 +341,7 @@ namespace NetJS.Core.Javascript {
         }
 
         public bool IsVariable(Expression expression) {
-            return expression is Variable || expression is Access || expression is New || expression is FunctionBlueprint || expression is ArgumentList;
+            return expression is KeyBlueprint || expression is Access || expression is New || expression is FunctionBlueprint || expression is ArgumentList;
         }
 
         public void CombineExpression(ref Expression left, Expression expression) {
@@ -459,7 +458,7 @@ namespace NetJS.Core.Javascript {
                     } else if (_statements.ContainsKey(token.Content)) {
                         break;
                     } else {
-                        CombineExpression(ref left, ParseVariable(token.Content));
+                        CombineExpression(ref left, ParseKey(token.Content));
                     }
                     
                     previousNewLine = false;
@@ -490,16 +489,15 @@ namespace NetJS.Core.Javascript {
             return left;
         }
 
-        public Expression ParseVariable(string content) {
-            var variable = new Variable(content);
+        public Expression ParseKey(string content) {
             _index++;
 
             if (Peek().Is(Tokens.ArrowFunction)) {
                 var parameters = new ParameterList();
-                parameters.Parameters.Add(variable);
+                parameters.Parameters.Add(new Parameter(content, new AnyType()));
                 return ParseArrowFunction(parameters);
             } else {
-                return variable;
+                return new KeyBlueprint(content);
             }
         }
 
@@ -597,7 +595,7 @@ namespace NetJS.Core.Javascript {
 
             return new Call() {
                 Left = new New() {
-                    Right = new Variable("RegExp")
+                    Right = new KeyBlueprint("RegExp")
                 },
                 Right = new ArgumentList(
                     new StringBlueprint(buffer),
@@ -900,9 +898,9 @@ namespace NetJS.Core.Javascript {
                         var type = ParseType();
                         peek = Peek();
 
-                        list.Parameters.Add(new Variable(name.Content, false, type));
+                        list.Parameters.Add(new Parameter(name.Content, type));
                     } else {
-                        list.Parameters.Add(new Variable(name.Content));
+                        list.Parameters.Add(new Parameter(name.Content, new AnyType()));
                     }
 
                     if (peek.Is(Tokens.GroupClose)) {
@@ -948,7 +946,7 @@ namespace NetJS.Core.Javascript {
             var function = ParseFunction(name.Content);
             
             var declaration = new Declaration(DeclarationScope.Global, false);
-            declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(name.Content), function));
+            declaration.Declarations.Add(new Declaration.DeclarationVariable(name.Content, new AnyType(), function));
 
             return declaration;
         }
@@ -987,7 +985,7 @@ namespace NetJS.Core.Javascript {
             Skip(Tokens.BlockClose);
 
             var declaration = new Declaration(DeclarationScope.Global, false);
-            declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(className.Content), classBlueprint));
+            declaration.Declarations.Add(new Declaration.DeclarationVariable(className.Content, new AnyType(), classBlueprint));
 
             return declaration;
         }
@@ -1030,7 +1028,7 @@ namespace NetJS.Core.Javascript {
 
                 if (Peek().Is(Tokens.GroupOpen)) {
                     Skip(Tokens.GroupOpen);
-                    result.CatchVariable = new Variable(Next("catch variable").Content);
+                    result.CatchVariable = Next("catch variable").Content;
                     Skip(Tokens.GroupClose);
                 }
 
@@ -1089,7 +1087,7 @@ namespace NetJS.Core.Javascript {
                 var itemType = type.Replace(Tokens.Array, "");
                 return new ArrayType(ParseType(itemType));
             } else {
-                return new InstanceType(new Variable(type));
+                return new InstanceType(type);
             }
         }
 
@@ -1122,7 +1120,7 @@ namespace NetJS.Core.Javascript {
             Skip(Tokens.BlockClose);
             
             var declaration = new Declaration(DeclarationScope.Global, false);
-            declaration.Declarations.Add(new Declaration.DeclarationVariable(new Variable(name.Content), i));
+            declaration.Declarations.Add(new Declaration.DeclarationVariable(name.Content, new AnyType(), new InterfaceBlueprint(i)));
 
             return declaration;
         }

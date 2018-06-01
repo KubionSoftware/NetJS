@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class Access : BinaryOperator {
+
         // If the variable is a key like obj.a (true) or a variable like obj[a] (false)
         public bool IsKey;
 
@@ -13,16 +14,26 @@ namespace NetJS.Core.Javascript {
             IsKey = isKey;
         }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.Access(right, scope);
-        }
+        public override Constant Execute(Constant baseReference, Constant propertyNameReference, Scope scope) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-property-accessors
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
-            var left = Left.Execute(scope, false);
-            var right = Right.Execute(scope, !IsKey);
+            var baseValue = References.GetValue(baseReference, scope);
 
-            var result = Execute(left, right, scope);
-            return getValue ? result.GetValue(scope) : result;
+            if (IsKey) {
+                var propertyNameString = ((Javascript.String)propertyNameReference).Value;
+                var bv = References.RequireObjectCoercible(baseValue);
+
+                // TODO: strict mode
+                return new Reference(bv, new String(propertyNameString), false);
+            } else {
+                var propertyNameValue = References.GetValue(propertyNameReference, scope);
+
+                var bv = References.RequireObjectCoercible(baseValue);
+                var propertyKey = Convert.ToPropertyKey(propertyNameValue, scope);
+
+                // TODO: strict mode
+                return new Reference(bv, propertyKey, false);
+            }
         }
 
         public override string ToDebugString() {

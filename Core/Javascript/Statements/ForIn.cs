@@ -36,7 +36,7 @@ namespace NetJS.Core.Javascript {
             public override bool Before(Scope scope) {
                 if (_index >= _keys.Length) return false;
                 // TODO: better way to declare
-                scope.DeclareVariable(_forInNode.Declaration.Declarations[0].Variable, DeclarationScope.Block, new String(_keys[_index]));
+                scope.DeclareVariable(_forInNode.Declaration.Declarations[0], _forInNode.Declaration.IsConstant, DeclarationScope.Block, new String(_keys[_index]));
                 _index++;
                 return true;
             }

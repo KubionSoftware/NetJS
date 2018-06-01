@@ -28,13 +28,11 @@ namespace NetJS.Core.Javascript {
             Right = right;
         }
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
-            var left = Left.Execute(scope);
-            var right = Right.Execute(scope);
-            return Execute(left, right, scope);
+        public override Constant Execute(Scope scope) {
+            return Execute(Left.Execute(scope), Right.Execute(scope), scope);
         }
 
-        public virtual Constant Execute(Constant left, Constant right, Scope scope) {
+        public virtual Constant Execute(Constant lref, Constant rref, Scope scope) {
             throw new Exception("This operator cannot be called");
         }
     }

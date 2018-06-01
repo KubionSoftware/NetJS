@@ -7,9 +7,9 @@ namespace NetJS.Core.API {
     class Array {
 
         public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
-            var length = arguments.Length == 1 ? Tool.GetArgument<Javascript.Number>(arguments, 0, "Array constructor") : new Javascript.Number(0);
+            var length = arguments.Length == 1 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Array constructor").Value : 0;
 
-            return new Javascript.Array((int)length.Value);
+            return new Javascript.Array(length);
         }
 
         [StaticFunction]
@@ -28,11 +28,11 @@ namespace NetJS.Core.API {
             var callback = (Javascript.Function)arguments[0];
 
             for (int i = 0; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     array.List[i],
                     new Javascript.Number(i),
                     array
-                );
+                };
                 callback.Call(callbackArguments, Static.Undefined, scope);
             }
 
@@ -84,8 +84,8 @@ namespace NetJS.Core.API {
             
             for(var i = start; i < array.List.Count; i++) {
                 var element = array.List[i];
-                var equals = (Javascript.Boolean)(element.Equals(arguments[0], scope));
-                if (equals.Value) {
+                var equals = Compare.StrictEqualityComparison(element, arguments[0]);
+                if (equals) {
                     return new Javascript.Number(i);
                 }
             }
@@ -138,11 +138,11 @@ namespace NetJS.Core.API {
 
             var result = new Javascript.Array();
             for (int i = 0; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     array.List[i],
                     new Javascript.Number(i),
                     array
-                );
+                };
                 var value = callback.Call(callbackArguments, Static.Undefined, scope);
                 result.List.Add(value);
             }
@@ -163,11 +163,11 @@ namespace NetJS.Core.API {
             for (int i = 0; i < array.List.Count; i++) {
                 var element = array.List[i];
 
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     element,
                     new Javascript.Number(i),
                     array
-                );
+                };
 
                 var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], scope);
                 if (value is Javascript.Boolean) {
@@ -198,12 +198,12 @@ namespace NetJS.Core.API {
             }
             
             for (int i = arguments.Length > 1 ? 0 : 1; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     accumulator,
                     array.List[i],
                     new Javascript.Number(i),
                     array
-                );
+                };
                 accumulator = callback.Call(callbackArguments, Static.Undefined, scope);
             }
 
@@ -222,11 +222,11 @@ namespace NetJS.Core.API {
             for (int i = 0; i < array.List.Count; i++) {
                 var element = array.List[i];
 
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     element,
                     new Javascript.Number(i),
                     array
-                );
+                };
 
                 var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], scope);
                 if (value is Javascript.Boolean) {
@@ -294,12 +294,9 @@ namespace NetJS.Core.API {
             var startIndex = (int)(arguments.Length > 1 ? Tool.GetArgument<Javascript.Number>(arguments, 1, "Array.includes").Value : 0);
 
             for (int i = startIndex; i < array.List.Count; i++) {
-                var value = array.List[i].Equals(reference, scope);
-                if (value is Javascript.Boolean) {
-                    var boolValue = ((Javascript.Boolean)value).Value;
-                    if (boolValue) {
-                        return new Javascript.Boolean(true);
-                    }
+                var equals = Compare.AbstractEqualityComparison(array.List[i], reference, scope);
+                if (equals) {
+                    return new Javascript.Boolean(true);
                 }
             }
 
@@ -323,7 +320,7 @@ namespace NetJS.Core.API {
                     var aElement = array.List[i - 1];
                     var bElement = array.List[i];
 
-                    var callbackArguments = new ArgumentList(aElement, bElement);
+                    var callbackArguments = new Constant[] { aElement, bElement };
                     var value = (Javascript.Number)callback.Call(callbackArguments, Static.Undefined, scope);
 
                     if(value.Value > 0) {
@@ -352,7 +349,7 @@ namespace NetJS.Core.API {
                     result.Append(seperator);
                 }
 
-                result.Append(Tool.ToString(array.List[i], scope));
+                result.Append(Convert.ToString(array.List[i], scope));
             }
 
             return new Javascript.String(result.ToString());
@@ -362,6 +359,20 @@ namespace NetJS.Core.API {
             var array = (Javascript.Array)_this;
 
             array.List.Reverse();
+
+            return array;
+        }
+
+        public static Constant fill(Constant _this, Constant[] arguments, Scope scope) {
+            var array = (Javascript.Array)_this;
+
+            var value = Tool.GetArgument(arguments, 0, "Array.fill");
+            var start = Tool.GetArgument<Javascript.Number>(arguments, 1, "Array.fill", false) ?? new Javascript.Number(0);
+            var end = Tool.GetArgument<Javascript.Number>(arguments, 2, "Array.fill", false) ?? new Javascript.Number(array.List.Count);
+
+            for(var i = (int)start.Value; i < (int)end.Value; i++) {
+                array.List[i] = value;
+            }
 
             return array;
         }

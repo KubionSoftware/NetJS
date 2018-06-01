@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Uint8Array.cs" />
+    <Compile Include="Compare.cs" />
     <Compile Include="Convert.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="Engine.cs" />
@@ -63,9 +64,10 @@
     <Compile Include="Javascript\Blueprints\FunctionBlueprint.cs" />
     <Compile Include="Javascript\Blueprints\NumberBlueprint.cs" />
     <Compile Include="Javascript\Blueprints\ObjectBlueprint.cs" />
+    <Compile Include="Javascript\Blueprints\StaticBlueprints.cs" />
     <Compile Include="Javascript\Blueprints\StringBlueprint.cs" />
     <Compile Include="Javascript\Chars.cs" />
-    <Compile Include="Javascript\Constants\ArgumentList.cs" />
+    <Compile Include="Javascript\Functions\ArgumentList.cs" />
     <Compile Include="Javascript\Constants\Array.cs" />
     <Compile Include="Javascript\Constants\ArrayBuffer.cs" />
     <Compile Include="Javascript\Constants\Boolean.cs" />
@@ -74,12 +76,14 @@
     <Compile Include="Javascript\Constants\Foreign.cs" />
     <Compile Include="Javascript\Constants\Number.cs" />
     <Compile Include="Javascript\Constants\Object.cs" />
-    <Compile Include="Javascript\Constants\Path.cs" />
+    <Compile Include="Javascript\Constants\Reference.cs" />
     <Compile Include="Javascript\Constants\String.cs" />
+    <Compile Include="Javascript\Constants\Symbol.cs" />
+    <Compile Include="References.cs" />
     <Compile Include="Javascript\Types\Interface.cs" />
     <Compile Include="Javascript\Types\Type.cs" />
     <Compile Include="Javascript\Constants\Uint8Array.cs" />
-    <Compile Include="Javascript\Constants\Variable.cs" />
+    <Compile Include="Javascript\Blueprints\KeyBlueprint.cs" />
     <Compile Include="Javascript\Exceptions.cs" />
     <Compile Include="Javascript\Expression.cs" />
     <Compile Include="Javascript\Functions\Constructor.cs" />

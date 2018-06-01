@@ -88,21 +88,21 @@ namespace NetJS.Core.Javascript {
     }
 
     class InstanceType : Type {
-        private Variable _instance;
+        private string _instance;
 
-        public InstanceType(Variable instance) {
+        public InstanceType(string instance) {
             _instance = instance;
         }
 
         public override bool Check(Constant constant, Scope scope) {
-            var value = _instance.Execute(scope);
+            var value = scope.GetVariable(_instance);
 
             if(value is Interface i) {
                 if (constant is Object o) {
                     return i.Check(o, scope);
                 }
             } else {
-                var result = new InstanceOf() { Left = constant, Right = value }.Execute(scope);
+                var result = new InstanceOf().Execute(constant, value, scope);
                 if (result is Boolean b) {
                     return b.Value;
                 }

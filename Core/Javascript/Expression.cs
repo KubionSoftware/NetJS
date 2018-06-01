@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace NetJS.Core.Javascript {
     public abstract class Expression : Node {
 
-        public virtual Constant Execute(Scope scope, bool getValue = true) {
+        public virtual Constant Execute(Scope scope) {
             return Static.Undefined;
         }
 

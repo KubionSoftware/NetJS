@@ -12,7 +12,7 @@ namespace NetJS.Core.API {
         [StaticFunction]
         public static Constant keys(Constant _this, Constant[] arguments, Scope scope) {
             var o = Tool.GetArgument<Javascript.Object>(arguments, 0, "Object.keys");
-            return Tool.ToArray(o.GetKeys(), scope);
+            return Tool.ToArray(o.GetKeys());
         }
 
         [StaticFunction]

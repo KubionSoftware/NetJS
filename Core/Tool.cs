@@ -1,45 +1,20 @@
-﻿using System;
+﻿using NetJS.Core.Javascript;
+using System;
 using System.Collections.Generic;
 
 namespace NetJS.Core {
     public class Tool {
 
-        public static string ToString(Javascript.Constant constant, Javascript.Scope scope) {
-            if(constant == null || constant.IsUndefined()) {
-                return "";
-            }
-
-            try {
-                var node = new Javascript.Call() {
-                    Left = new Javascript.Access(true) {
-                        Left = constant,
-                        Right = new Javascript.Variable("toString")
-                    },
-                    Right = new Javascript.ArgumentList()
-                };
-
-                var result = node.Execute(scope);
-
-                if (result is Javascript.String s) {
-                    return s.Value;
-                }
-            } catch {
-                return constant.ToString();
-            }
-
-            return "";
-        }
-
-        public static Javascript.Array ToArray(IList<string> list, Javascript.Scope scope) {
+        public static Javascript.Array ToArray(IEnumerable<string> strings) {
             var array = new Javascript.Array();
-            foreach(var s in list) {
-                array.List.Add(new Javascript.String(s));
-            }
+            foreach (var s in strings) array.List.Add(new Javascript.String(s));
             return array;
         }
 
-        public static Javascript.Object Construct(string name, Javascript.Scope scope) {
-            return new Javascript.Object(Prototype(name, scope));
+        public static Javascript.Object Construct(string name, Javascript.Scope scope, Constant[] arguments = null) {
+            var constructor = (Function)new New().Execute(new Javascript.String(name), scope);
+            var obj = constructor.Call(arguments != null ? arguments : new Constant[] { }, Static.Undefined, scope);
+            return (Javascript.Object)obj;
         }
 
         public static Javascript.Object Prototype(string name, Javascript.Scope scope) {
@@ -87,12 +62,12 @@ namespace NetJS.Core {
             return insidePath;
         }
 
-        public static T GetArgument<T>(Javascript.Constant[] arguments, int index, string context, bool required = true) where T : Javascript.Constant {
+        public static T GetArgument<T>(Constant[] arguments, int index, string context, bool required = true) where T: Constant {
             if (index >= arguments.Length) {
                 if (required) {
                     throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
                 } else {
-                    return null;
+                    return default(T);
                 }
             }
 
@@ -102,7 +77,7 @@ namespace NetJS.Core {
             return (T)argument;
         }
 
-        public static Javascript.Constant GetArgument(Javascript.Constant[] arguments, int index, string context, bool required = true) {
+        public static Constant GetArgument(Constant[] arguments, int index, string context, bool required = true) {
             if (index >= arguments.Length) {
                 if (required) {
                     throw new Exception($"{context}: Expected argument at index {index}");

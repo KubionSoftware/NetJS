@@ -5,6 +5,24 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
+
+    public class InterfaceBlueprint : Blueprint {
+
+        private Interface _interface;
+
+        public InterfaceBlueprint(Interface i) {
+            _interface = i;
+        }
+
+        public override Constant Instantiate(Scope scope) {
+            return _interface;
+        }
+
+        public override string ToDebugString() {
+            throw new NotImplementedException();
+        }
+    }
+
     public class Interface : Constant {
 
         class Member {

@@ -25,8 +25,6 @@ namespace NetJS.Console {
             var session = new JSSession();
 
             application.Engine.RegisterClass(typeof(API.Console));
-            application.Engine.RegisterType(typeof(API.Window));
-            application.Engine.RegisterType(typeof(API.Graphics));
 
             service.RunTemplate(application.Settings.Startup, data, ref application, ref session);
 

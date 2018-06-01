@@ -54,15 +54,7 @@ namespace NetJS.Core.Javascript {
         public string[] GetKeys() {
             return Properties.Keys.ToArray();
         }
-
-        public override Constant Equals(Constant other, Scope scope) {
-            return new Boolean(this == other);
-        }
-
-        public override Constant StrictEquals(Constant other, Scope scope) {
-            return new Boolean(this == other);
-        }
-
+        
         public override Constant TypeOf(Scope scope) {
             return new String("object");
         }

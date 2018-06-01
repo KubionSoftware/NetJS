@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace NetJS.Core.Javascript {
     public class Try : Statement {
         public Block TryBody;
-        public Variable CatchVariable;
+        public string CatchVariable;
         public Block CatchBody;
         public Block FinallyBody;
 
@@ -24,7 +24,7 @@ namespace NetJS.Core.Javascript {
             }
 
             if (CatchBody != null) {
-                if (CatchVariable != null) scope.DeclareVariable(CatchVariable, DeclarationScope.Block, result.Constant);
+                if (CatchVariable != null) scope.DeclareVariable(CatchVariable, DeclarationScope.Block, false, result.Constant);
                 var catchResult = CatchBody.Execute(scope);
                 if (FinallyBody == null || catchResult.Type == ResultType.Return || catchResult.Type == ResultType.Throw) {
                     return catchResult;

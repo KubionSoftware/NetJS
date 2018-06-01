@@ -7,7 +7,7 @@ namespace NetJS.Core {
     public class Engine {
         
         public Javascript.Scope EngineScope { get; private set; }
-        public Javascript.Scope GlobalScope { get; private set; }
+        public Javascript.Object GlobalObject { get; private set; }
         private Dictionary<string, Javascript.Object> _prototypes = new Dictionary<string, Javascript.Object>();
 
         public Javascript.Object GetPrototype(string name) {
@@ -19,7 +19,6 @@ namespace NetJS.Core {
 
         public Engine() {
             EngineScope = new Javascript.Scope(this, null);
-            GlobalScope = new Javascript.Scope(EngineScope, null, null, Javascript.ScopeType.Global, null);
         }
 
         public void Init() {
@@ -55,6 +54,8 @@ namespace NetJS.Core {
             RegisterClass(typeof(API.Math));
 
             RegisterFunctions(typeof(API.Functions));
+
+            GlobalObject = Tool.Construct("Object", EngineScope);
         }
 
         public void RegisterDLL(string file) {

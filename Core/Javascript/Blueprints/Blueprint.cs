@@ -9,7 +9,7 @@ namespace NetJS.Core.Javascript {
 
         public abstract Constant Instantiate(Scope scope);
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
+        public override Constant Execute(Scope scope) {
             return Instantiate(scope);
         }
     }

@@ -5,7 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
+
+    public class Parameter {
+        public string Name;
+        public Type Type;
+
+        public Parameter(string name, Type type) {
+            Name = name;
+            Type = type;
+        }
+    }
+
     public class ParameterList : Node {
-        public IList<Variable> Parameters = new List<Variable>();
+        public IList<Parameter> Parameters = new List<Parameter>();
     }
 }

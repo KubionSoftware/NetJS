@@ -19,28 +19,8 @@ namespace NetJS.Core.Javascript {
                 op.SetLeft(Optimize(op.GetLeft));
                 op.SetRight(Optimize(op.GetRight));
 
-                // Convert all static access to paths
-                if (op is Access access && access.IsKey) {
-                    if (access.Left is Constant left && access.Right is Constant right) {
-                        var path = new Path() {
-                            Parts = new List<Constant>() { }
-                        };
-
-                        if (left is Path pl) {
-                            path.Parts.AddRange(pl.Parts);
-                        } else {
-                            path.Parts.Add(left);
-                        }
-
-                        if (right is Path pr) {
-                            path.Parts.AddRange(pr.Parts);
-                        } else {
-                            path.Parts.Add(right);
-                        }
-
-                        return path;
-                    }
-                }
+                // TODO: Convert all static access to references
+                
             } else if (expression is FunctionBlueprint function) {
                 function.Body = Optimize(function.Body);
             } else if (expression is ClassBlueprint c) {

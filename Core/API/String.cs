@@ -5,13 +5,11 @@ using NetJS.Core.Javascript;
 
 namespace NetJS.Core.API {
     class String {
-
+        
         public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
-            var thisObject = (Javascript.Object)_this;
+            var value = arguments.Length == 1 ? Tool.GetArgument<Javascript.String>(arguments, 0, "String constructor").Value : "";
 
-            // TODO: set value
-
-            return Static.Undefined;
+            return new Javascript.String(value);
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
@@ -125,9 +123,9 @@ namespace NetJS.Core.API {
                     var separator = (Javascript.String)arguments[0];
 
                     if (separator.Value.Length == 0) {
-                        return Tool.ToArray(str.Value.ToCharArray().Select(c => c.ToString()).ToArray(), scope);
+                        return Tool.ToArray(str.Value.ToCharArray().Select(c => c.ToString()).ToArray());
                     } else {
-                        return Tool.ToArray(str.Value.Split(new string[] { separator.Value }, StringSplitOptions.None), scope);
+                        return Tool.ToArray(str.Value.Split(new string[] { separator.Value }, StringSplitOptions.None));
                     }
                 }else if(arguments[0] is Javascript.Object) {
                     return RegExp.split(arguments[0], new Constant[] { _this }, scope);

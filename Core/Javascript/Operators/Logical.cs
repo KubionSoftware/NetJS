@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
+
     public class LogicalNot : UnaryRightOperator {
         public LogicalNot() : base(14) { }
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
-            var right = Right.Execute(scope);
-            if (right.IsTrue(scope)) {
-                return Static.False;
-            } else {
-                return Static.True;
-            }
+        public override Constant Execute(Scope scope) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-logical-not-operator
+
+            var expr = Right.Execute(scope);
+            var oldValue = Convert.ToBoolean(References.GetValue(expr, scope));
+
+            return new Boolean(!oldValue);
         }
 
         public override string ToDebugString() {
@@ -22,21 +23,20 @@ namespace NetJS.Core.Javascript {
         }
     }
 
+    // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-binary-logical-operators
+
     public class LogicalAnd : BinaryOperator {
         public LogicalAnd() : base(5) { }
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
-            var left = Left.Execute(scope);
-            if (!left.IsTrue(scope)) {
-                return Static.False;
-            }
+        public override Constant Execute(Scope scope) {
+            var lref = Left.Execute(scope);
+            var lval = References.GetValue(lref, scope);
+            var lbool = Convert.ToBoolean(lval);
 
-            var right = Right.Execute(scope);
-            if (!right.IsTrue(scope)) {
-                return Static.False;
-            }
+            if (!lbool) return lval;
 
-            return Static.True;
+            var rref = Right.Execute(scope);
+            return References.GetValue(rref, scope);
         }
 
         public override string ToDebugString() {
@@ -47,18 +47,15 @@ namespace NetJS.Core.Javascript {
     public class LogicalOr : BinaryOperator {
         public LogicalOr() : base(4) { }
 
-        public override Constant Execute(Scope scope, bool getValue = true) {
-            var left = Left.Execute(scope);
-            if (left.IsTrue(scope)) {
-                return Static.True;
-            }
+        public override Constant Execute(Scope scope) {
+            var lref = Left.Execute(scope);
+            var lval = References.GetValue(lref, scope);
+            var lbool = Convert.ToBoolean(lval);
 
-            var right = Right.Execute(scope);
-            if (right.IsTrue(scope)) {
-                return Static.True;
-            }
+            if (lbool) return lval;
 
-            return Static.False;
+            var rref = Right.Execute(scope);
+            return References.GetValue(rref, scope);
         }
 
         public override string ToDebugString() {

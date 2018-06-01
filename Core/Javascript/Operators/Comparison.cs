@@ -5,11 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
+
+    // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-relational-operators
+
     public class LessThan : BinaryOperator {
         public LessThan() : base(10) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.LessThan(right, scope);
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
+
+            var r = Compare.AbstractRelationalComparison(lval, rval, true, scope);
+            return new Boolean(r == Compare.RelationalComparisonResult.Undefined ? false : r == Compare.RelationalComparisonResult.True);
         }
 
         public override string ToDebugString() {
@@ -20,8 +27,12 @@ namespace NetJS.Core.Javascript {
     public class LessThanEquals : BinaryOperator {
         public LessThanEquals() : base(10) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.LessThanEquals(right, scope);
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
+
+            var r = Compare.AbstractRelationalComparison(rval, lval, true, scope);
+            return new Boolean(r == Compare.RelationalComparisonResult.Undefined ? false : r != Compare.RelationalComparisonResult.True);
         }
 
         public override string ToDebugString() {
@@ -32,8 +43,12 @@ namespace NetJS.Core.Javascript {
     public class GreaterThan : BinaryOperator {
         public GreaterThan() : base(10) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.GreaterThan(right, scope);
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
+
+            var r = Compare.AbstractRelationalComparison(rval, lval, true, scope);
+            return new Boolean(r == Compare.RelationalComparisonResult.Undefined ? false : r == Compare.RelationalComparisonResult.True);
         }
 
         public override string ToDebugString() {
@@ -44,8 +59,12 @@ namespace NetJS.Core.Javascript {
     public class GreaterThanEquals : BinaryOperator {
         public GreaterThanEquals() : base(10) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.GreaterThanEquals(right, scope);
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
+
+            var r = Compare.AbstractRelationalComparison(lval, rval, true, scope);
+            return new Boolean(r == Compare.RelationalComparisonResult.Undefined ? false : r != Compare.RelationalComparisonResult.True);
         }
 
         public override string ToDebugString() {
@@ -53,11 +72,16 @@ namespace NetJS.Core.Javascript {
         }
     }
 
+    // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-equality-operators
+
     public class Equals : BinaryOperator {
         public Equals() : base(9) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.Equals(right, scope);
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
+
+            return new Boolean(Compare.AbstractEqualityComparison(rval, lval, scope));
         }
 
         public override string ToDebugString() {
@@ -68,8 +92,11 @@ namespace NetJS.Core.Javascript {
     public class NotEquals : BinaryOperator {
         public NotEquals() : base(9) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.NotEquals(right, scope);
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
+
+            return new Boolean(!Compare.AbstractEqualityComparison(rval, lval, scope));
         }
 
         public override string ToDebugString() {
@@ -80,8 +107,11 @@ namespace NetJS.Core.Javascript {
     public class StrictEquals : BinaryOperator {
         public StrictEquals() : base(9) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.StrictEquals(right, scope);
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
+
+            return new Boolean(Compare.StrictEqualityComparison(rval, lval));
         }
 
         public override string ToDebugString() {
@@ -92,8 +122,11 @@ namespace NetJS.Core.Javascript {
     public class StrictNotEquals : BinaryOperator {
         public StrictNotEquals() : base(9) { }
 
-        public override Constant Execute(Constant left, Constant right, Scope scope) {
-            return left.StrictNotEquals(right, scope);
+        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+            var lval = References.GetValue(lref, scope);
+            var rval = References.GetValue(rref, scope);
+
+            return new Boolean(!Compare.StrictEqualityComparison(rval, lval));
         }
 
         public override string ToDebugString() {

@@ -7,9 +7,9 @@ namespace NetJS.Core.API {
     class Number {
 
         public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
-            var thisObject = (Javascript.Object)_this;
+            var value = arguments.Length == 1 ? Tool.GetArgument<Javascript.Number>(arguments, 0, "Number constructor").Value : 0;
 
-            return Static.Undefined;
+            return new Javascript.Number(value);
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
