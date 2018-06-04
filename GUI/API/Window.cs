@@ -11,13 +11,13 @@ using System.Windows.Forms;
 namespace NetJS.GUI.API {
     class Window {
 
-        private static void HandleMouseEvent(MouseEventArgs e, Core.Javascript.Object thisObject, string eventName, Scope scope) {
+        private static void HandleMouseEvent(MouseEventArgs e, Core.Javascript.Object thisObject, string eventName, LexicalEnvironment lex) {
             if (thisObject.Get(eventName) is Function f) {
                 var callbackArguments = new ArgumentList(
                     new Number(e.X),
                     new Number(e.Y)
                 );
-                f.Call(callbackArguments, Static.Undefined, scope);
+                f.Call(callbackArguments, Static.Undefined, lex);
             }
         }
 
@@ -30,17 +30,17 @@ namespace NetJS.GUI.API {
             }
         }
 
-        private static void HandleKeyEvent(KeyEventArgs e, Core.Javascript.Object thisObject, string eventName, Scope scope) {
+        private static void HandleKeyEvent(KeyEventArgs e, Core.Javascript.Object thisObject, string eventName, LexicalEnvironment lex) {
             if (thisObject.Get(eventName) is Function f) {
                 var callbackArguments = new ArgumentList(
                     new Number(e.KeyValue),
                     new Core.Javascript.String(GetChar(e).ToString())
                 );
-                f.Call(callbackArguments, Static.Undefined, scope);
+                f.Call(callbackArguments, Static.Undefined, lex);
             }
         }
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant constructor(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var thisObject = (Core.Javascript.Object)_this;
 
             var options = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.Object>(arguments, 0, "Window.create");
@@ -54,17 +54,17 @@ namespace NetJS.GUI.API {
             form.Name = "";
             form.Visible = true;
 
-            form.MouseMove += (sender, e) => HandleMouseEvent(e, thisObject, "onmousemove", scope);
-            form.MouseClick += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseclick", scope);
-            form.MouseUp += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseup", scope);
-            form.MouseDown += (sender, e) => HandleMouseEvent(e, thisObject, "onmousedown", scope);
+            form.MouseMove += (sender, e) => HandleMouseEvent(e, thisObject, "onmousemove", lex);
+            form.MouseClick += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseclick", lex);
+            form.MouseUp += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseup", lex);
+            form.MouseDown += (sender, e) => HandleMouseEvent(e, thisObject, "onmousedown", lex);
             
-            form.KeyUp += (sender, e) => HandleKeyEvent(e, thisObject, "onkeyup", scope);
-            form.KeyDown += (sender, e) => HandleKeyEvent(e, thisObject, "onkeydown", scope);
+            form.KeyUp += (sender, e) => HandleKeyEvent(e, thisObject, "onkeyup", lex);
+            form.KeyDown += (sender, e) => HandleKeyEvent(e, thisObject, "onkeydown", lex);
 
             form.FormClosed += (sender, e) => {
                 if (thisObject.Get("onclose") is Function f) {
-                    f.Call(new ArgumentList(), Static.Undefined, scope);
+                    f.Call(new ArgumentList(), Static.Undefined, lex);
                 }
             };
 
@@ -77,13 +77,13 @@ namespace NetJS.GUI.API {
         }
 
         [StaticFunction]
-        public static Constant doEvents(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant doEvents(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             Application.DoEvents();
             return Static.Undefined;
         }
 
         [StaticFunction]
-        public static Constant exit(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant exit(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             Environment.Exit(0);
             return Static.Undefined;
         }

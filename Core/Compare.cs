@@ -14,17 +14,17 @@ namespace NetJS.Core {
             Undefined
         }
 
-        public static RelationalComparisonResult AbstractRelationalComparison(Constant x, Constant y, bool leftFirst, Scope scope) {
+        public static RelationalComparisonResult AbstractRelationalComparison(Constant x, Constant y, bool leftFirst, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-abstract-relational-comparison
 
             // Control order of operations
             Constant px, py;
             if (leftFirst) {
-                px = Convert.ToPrimitive(x, scope);
-                py = Convert.ToPrimitive(y, scope);
+                px = Convert.ToPrimitive(x, agent);
+                py = Convert.ToPrimitive(y, agent);
             } else {
-                py = Convert.ToPrimitive(y, scope);
-                px = Convert.ToPrimitive(x, scope);
+                py = Convert.ToPrimitive(y, agent);
+                px = Convert.ToPrimitive(x, agent);
             }
 
             if(px is Javascript.String sx && py is Javascript.String sy) {
@@ -37,8 +37,8 @@ namespace NetJS.Core {
 
                 return sx.Value[k] < sy.Value[k] ? RelationalComparisonResult.True : RelationalComparisonResult.False;
             } else {
-                var nx = Convert.ToNumber(px, scope);
-                var ny = Convert.ToNumber(py, scope);
+                var nx = Convert.ToNumber(px, agent);
+                var ny = Convert.ToNumber(py, agent);
 
                 // TODO: optimize?
                 if (double.IsNaN(nx) || double.IsNaN(ny)) return RelationalComparisonResult.Undefined;
@@ -52,7 +52,7 @@ namespace NetJS.Core {
             }
         }
 
-        public static bool AbstractEqualityComparison(Constant x, Constant y, Scope scope) {
+        public static bool AbstractEqualityComparison(Constant x, Constant y, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-abstract-equality-comparison
 
             if (x.GetType() == y.GetType()) return StrictEqualityComparison(x, y);
@@ -61,24 +61,24 @@ namespace NetJS.Core {
             if (x is Undefined && y is Null) return true;
 
             if (x is Number nx && y is Javascript.String) {
-                return AbstractEqualityComparison(nx, new Number(Convert.ToNumber(y, scope)), scope);
+                return AbstractEqualityComparison(nx, new Number(Convert.ToNumber(y, agent)), agent);
             }
             if (x is Javascript.String && y is Number ny) {
-                return AbstractEqualityComparison(new Number(Convert.ToNumber(x, scope)), ny, scope);
+                return AbstractEqualityComparison(new Number(Convert.ToNumber(x, agent)), ny, agent);
             }
 
             if (x is Javascript.Boolean) {
-                return AbstractEqualityComparison(new Number(Convert.ToNumber(x, scope)), y, scope);
+                return AbstractEqualityComparison(new Number(Convert.ToNumber(x, agent)), y, agent);
             }
             if (y is Javascript.Boolean) {
-                return AbstractEqualityComparison(x, new Number(Convert.ToNumber(y, scope)), scope);
+                return AbstractEqualityComparison(x, new Number(Convert.ToNumber(y, agent)), agent);
             }
 
             if (y is Javascript.Object && (x is Javascript.String || x is Javascript.Number || x is Javascript.Symbol)) {
-                return AbstractEqualityComparison(x, Convert.ToPrimitive(y, scope), scope);
+                return AbstractEqualityComparison(x, Convert.ToPrimitive(y, agent), agent);
             }
             if (x is Javascript.Object && (y is Javascript.String || y is Javascript.Number || y is Javascript.Symbol)) {
-                return AbstractEqualityComparison(Convert.ToPrimitive(x, scope), y, scope);
+                return AbstractEqualityComparison(Convert.ToPrimitive(x, agent), y, agent);
             }
 
             return false;
@@ -123,6 +123,16 @@ namespace NetJS.Core {
             }
 
             return x == y;
+        }
+
+        public static bool SameValue(Constant x, Constant y) {
+            if (x.GetType() != y.GetType()) return false;
+            if (x is Number nx && y is Number ny) {
+                if (double.IsNaN(nx.Value) && double.IsNaN(ny.Value)) return true;
+                if (nx.Value == ny.Value) return true;
+                return false;
+            }
+            return SameValueNonNumber(x, y);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public override Constant GetProperty(Constant key, Scope scope) {
+        public override Constant GetProperty(Constant key, LexicalEnvironment lex) {
             if (key is Number n) {
                 return Get((int)n.Value);
             }
@@ -46,7 +46,7 @@ namespace NetJS.Core.Javascript {
             return Static.Undefined;
         }
 
-        public override void SetProperty(Constant key, Constant value, Scope scope) {
+        public override void SetProperty(Constant key, Constant value, LexicalEnvironment lex) {
             if (key is Number n && value is Number v) {
                 var index = (int)n.Value;
                 if (index >= 0 && index < Buffer.Data.Length) {
@@ -59,7 +59,7 @@ namespace NetJS.Core.Javascript {
             return "[object Uint8Array]";
         }
 
-        public override Constant TypeOf(Scope scope) {
+        public override Constant TypeOf(LexicalEnvironment lex) {
             return new String("object");
         }
 

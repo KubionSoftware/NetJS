@@ -1,11 +1,11 @@
 ﻿
 namespace NetJS.Core.Javascript {
     public abstract class Type {
-        public abstract bool Check(Constant constant, Scope scope);
+        public abstract bool Check(Constant constant, LexicalEnvironment lex);
     }
 
     class AnyType : Type {
-        public override bool Check(Constant constant, Scope scope) {
+        public override bool Check(Constant constant, LexicalEnvironment lex) {
             return true;
         }
 
@@ -15,7 +15,7 @@ namespace NetJS.Core.Javascript {
     }
 
     class VoidType : Type {
-        public override bool Check(Constant constant, Scope scope) {
+        public override bool Check(Constant constant, LexicalEnvironment lex) {
             return constant is Undefined;
         }
 
@@ -25,7 +25,7 @@ namespace NetJS.Core.Javascript {
     }
 
     class StringType : Type {
-        public override bool Check(Constant constant, Scope scope) {
+        public override bool Check(Constant constant, LexicalEnvironment lex) {
             return constant is String;
         }
 
@@ -35,7 +35,7 @@ namespace NetJS.Core.Javascript {
     }
 
     class NumberType : Type {
-        public override bool Check(Constant constant, Scope scope) {
+        public override bool Check(Constant constant, LexicalEnvironment lex) {
             return constant is Number;
         }
 
@@ -45,7 +45,7 @@ namespace NetJS.Core.Javascript {
     }
 
     class BooleanType : Type {
-        public override bool Check(Constant constant, Scope scope) {
+        public override bool Check(Constant constant, LexicalEnvironment lex) {
             return constant is Boolean;
         }
 
@@ -55,7 +55,7 @@ namespace NetJS.Core.Javascript {
     }
 
     class ObjectType : Type {
-        public override bool Check(Constant constant, Scope scope) {
+        public override bool Check(Constant constant, LexicalEnvironment lex) {
             return constant is Object;
         }
 
@@ -71,10 +71,10 @@ namespace NetJS.Core.Javascript {
             _elementType = elementType;
         }
 
-        public override bool Check(Constant constant, Scope scope) {
+        public override bool Check(Constant constant, LexicalEnvironment lex) {
             if (constant is Array array) {
                 for (var i = 0; i < array.List.Count; i++) {
-                    if (!_elementType.Check(array.List[i], scope)) return false;
+                    if (!_elementType.Check(array.List[i], lex)) return false;
                 }
                 return true;
             }
@@ -94,15 +94,15 @@ namespace NetJS.Core.Javascript {
             _instance = instance;
         }
 
-        public override bool Check(Constant constant, Scope scope) {
-            var value = scope.GetVariable(_instance);
+        public override bool Check(Constant constant, LexicalEnvironment lex) {
+            var value = lex.GetVariable(_instance);
 
             if(value is Interface i) {
                 if (constant is Object o) {
-                    return i.Check(o, scope);
+                    return i.Check(o, lex);
                 }
             } else {
-                var result = new InstanceOf().Execute(constant, value, scope);
+                var result = new InstanceOf().Execute(constant, value, lex);
                 if (result is Boolean b) {
                     return b.Value;
                 }

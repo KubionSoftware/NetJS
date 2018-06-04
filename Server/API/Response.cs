@@ -17,7 +17,7 @@ namespace NetJS.Server.API {
         ///     path: "localhost/example",
         ///     httpOnly: false
         /// });</code></example>
-        public static Constant setCookie(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant setCookie(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Response.setCookie").Value;
             var value = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "Response.setCookie").Value;
 
@@ -46,7 +46,7 @@ namespace NetJS.Server.API {
         /// <summary>Removes a cookie.</summary>
         /// <param name="name">The name of the cookie (string)</param>
         /// <example><code lang="javascript">Response.removeCookie("SSID")</code></example>
-        public static Constant removeCookie(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant removeCookie(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Response.removeCookie").Value;
 
             var cookie = new HttpCookie(key);
@@ -59,11 +59,11 @@ namespace NetJS.Server.API {
         /// <param name="name">The name of the header (string)</param>
         /// <param name="value">The value to set (string)</param>
         /// <example><code lang="javascript">Response.setHeader("Content-Type", "application/json");</code></example>
-        public static Constant setHeader(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant setHeader(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Response.setHeader").Value;
             var value = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "Response.setHeader").Value;
 
-            var context = Tool.GetContext(scope, "Response.setHeader");
+            var context = Tool.GetContext(lex, "Response.setHeader");
             context.Response.AppendHeader(key, value);
             return Static.Undefined;
         }
@@ -71,10 +71,10 @@ namespace NetJS.Server.API {
         /// <summary>Removes an header.</summary>
         /// <param name="name">The name of the header (string)</param>
         /// <example><code lang="javascript">Response.removeHeader("ApplicationID")</code></example>
-        public static Constant removeHeader(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant removeHeader(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Response.removeHeader").Value;
 
-            var context = Tool.GetContext(scope, "Response.removeHeader");
+            var context = Tool.GetContext(lex, "Response.removeHeader");
             context.Response.Headers.Remove(key);
             return Static.Undefined;
         }
@@ -82,10 +82,10 @@ namespace NetJS.Server.API {
         /// <summary>Sends an array of bytes and exits the execution immediately</summary>
         /// <param name="bytes">The bytes to send (Uint8Array)</param>
         /// <example><code lang="javascript">Request.sendBytes(bytes);</code></example>
-        public static Constant sendBytes(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant sendBytes(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var bytes = Core.Tool.GetArgument<Core.Javascript.Uint8Array>(arguments, 0, "Request.sendBytes");
 
-            var context = Tool.GetContext(scope, "Request.sendBytes");
+            var context = Tool.GetContext(lex, "Request.sendBytes");
             context.Response.OutputStream.Write(bytes.Buffer.Data, 0, bytes.Buffer.Data.Length);
             context.Response.OutputStream.Close();
             context.Response.End();
@@ -96,12 +96,12 @@ namespace NetJS.Server.API {
         /// <summary>Sends an file and exits the execution immediately</summary>
         /// <param name="name">The name of the file (string)</param>
         /// <example><code lang="javascript">Request.sendFile("image.png");</code></example>
-        public static Constant sendFile(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant sendFile(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Request.sendFile");
 
-            var application = NetJS.Tool.GetApplication(scope);
+            var application = NetJS.Tool.GetApplication(lex);
 
-            var context = Tool.GetContext(scope, "Request.sendFile");
+            var context = Tool.GetContext(lex, "Request.sendFile");
 
             var file = application.Cache.GetPath(name.Value, application, false);
             context.Response.ContentType = MimeMapping.GetMimeMapping(file);
@@ -114,10 +114,10 @@ namespace NetJS.Server.API {
         /// <summary>Sets the response status code.</summary>
         /// <param name="statusCode">The status code (number)</param>
         /// <example><code lang="javascript">Response.setStatusCode(200);</code></example>
-        public static Constant setStatusCode(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant setStatusCode(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var code = Core.Tool.GetArgument<Core.Javascript.Number>(arguments, 0, "Response.setStatusCode");
 
-            var context = Tool.GetContext(scope, "Response.setHeader");
+            var context = Tool.GetContext(lex, "Response.setHeader");
             context.Response.StatusCode = (int)code.Value;
             return Static.Undefined;
         }
@@ -125,10 +125,10 @@ namespace NetJS.Server.API {
         /// <summary>Sets the response status description.</summary>
         /// <param name="statusDescription">The status description (number)</param>
         /// <example><code lang="javascript">Response.setStatusDescription(200);</code></example>
-        public static Constant setStatusDescription(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant setStatusDescription(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var description = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Response.setStatusDescription");
 
-            var context = Tool.GetContext(scope, "Response.setStatusDescription");
+            var context = Tool.GetContext(lex, "Response.setStatusDescription");
             context.Response.StatusDescription = description.Value;
             return Static.Undefined;
         }
@@ -136,10 +136,10 @@ namespace NetJS.Server.API {
         /// <summary>Sets the response encoding.</summary>
         /// <param name="encoding">The web name (registered with IANA) of the encoding (string)</param>
         /// <example><code lang="javascript">Response.setEncoding("UTF-8");</code></example>
-        public static Constant setEncoding(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant setEncoding(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var encoding = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Response.setEncoding");
 
-            var context = Tool.GetContext(scope, "Response.setEncoding");
+            var context = Tool.GetContext(lex, "Response.setEncoding");
             context.Response.ContentEncoding = Encoding.GetEncoding(encoding.Value);
             return Static.Undefined;
         }

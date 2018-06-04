@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace NetJS.Core.Javascript {
     public abstract class Statement : Node {
 
-        public virtual Result Execute(Scope scope) {
-            return new Result(ResultType.None);
+        public virtual Completion Evaluate(Agent agent) {
+            return Static.NormalCompletion;
         }
     }
 }

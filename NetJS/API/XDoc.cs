@@ -11,7 +11,7 @@ namespace NetJS.API {
             public XHTMLMerge.SVCache SVCache;
         }
 
-        public static XDocInfo GetXDocInfo(Scope scope) {
+        public static XDocInfo GetXDocInfo(LexicalEnvironment lex) {
             var context = HttpContext.Current;
 
             XHTMLMerge.AppCache appCache = null;
@@ -21,8 +21,8 @@ namespace NetJS.API {
                 if (context.Application != null) appCache = (XHTMLMerge.AppCache)context.Application["AppCache"];
                 if (context.Session != null) svCache = (XHTMLMerge.SVCache)context.Session["SVCache"];
             } else {
-                var application = Tool.GetApplication(scope);
-                var session = Tool.GetSession(scope);
+                var application = Tool.GetApplication(lex);
+                var session = Tool.GetSession(lex);
 
                 if (application.Get("AppCache") is Foreign af) appCache = (XHTMLMerge.AppCache)af.Value;
                 if (session.Get("SVCache") is Foreign sf) svCache = (XHTMLMerge.SVCache)sf.Value;
@@ -34,25 +34,25 @@ namespace NetJS.API {
             return new XDocInfo() { AppCache = appCache, SVCache = svCache };
         }
 
-        public static void SetXDocInfo(XDocInfo xdoc, Scope scope) {
+        public static void SetXDocInfo(XDocInfo xdoc, LexicalEnvironment lex) {
             var context = HttpContext.Current;
 
             if (context != null) {
                 if (context.Application != null) context.Application["AppCache"] = xdoc.AppCache;
                 if (context.Session != null) context.Session["SVCache"] = xdoc.SVCache;
             } else {
-                var application = Tool.GetApplication(scope);
-                var session = Tool.GetSession(scope);
+                var application = Tool.GetApplication(lex);
+                var session = Tool.GetSession(lex);
 
                 application.Set("AppCache", new Foreign(xdoc.AppCache));
                 session.Set("SVCache", new Foreign(xdoc.SVCache));
             }
         }
 
-        private static string includeLoad(Constant _this, Constant[] arguments, Scope scope) {
+        private static string includeLoad(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.include");
 
-            var xdoc = GetXDocInfo(scope);
+            var xdoc = GetXDocInfo(lex);
 
             var parameters = new Hashtable();
             if (arguments.Length > 1) {
@@ -62,7 +62,7 @@ namespace NetJS.API {
                 }
             }
 
-            var application = Tool.GetFromScope<JSApplication>(scope, "__application__");
+            var application = Tool.GetFromScope<JSApplication>(lex, "__application__");
             if (application == null) throw new InternalError("No application");
 
             var context = HttpContext.Current;
@@ -75,9 +75,9 @@ namespace NetJS.API {
         /// <param name="name">Name of the included file</param>
         /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
         /// <returns>Undefined</returns>
-        /// <exception cref="InternalError">Thrown when no application has been found in the application scope.</exception>
-        public static Constant include(Constant _this, Constant[] arguments, Scope scope) {
-            scope.Buffer.Append(includeLoad(_this, arguments, scope));
+        /// <exception cref="InternalError">Thrown when no application has been found in the application lex.</exception>
+        public static Constant include(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            lex.Buffer.Append(includeLoad(_this, arguments, lex));
             return Static.Undefined;
         }
 
@@ -85,9 +85,9 @@ namespace NetJS.API {
         /// <param name="name">Name of the included file</param>
         /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
         /// <returns>The result of executing the file.</returns>
-        /// <exception cref="InternalError">Thrown when no application has been found in the application scope.</exception>
-        public static Constant load(Constant _this, Constant[] arguments, Scope scope) {
-            return new String(includeLoad(_this, arguments, scope));
+        /// <exception cref="InternalError">Thrown when no application has been found in the application lex.</exception>
+        public static Constant load(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            return new String(includeLoad(_this, arguments, lex));
         }
 
         /// <summary>XDoc.get gets a value from the XDoc session</summary>
@@ -95,15 +95,15 @@ namespace NetJS.API {
         /// <param name="context">Context name</param>
         /// <param name="id">ID name</param>
         /// <returns>The session value as a string</returns>
-        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
-        public static Constant get(Constant _this, Constant[] arguments, Scope scope) {
+        /// <exception cref="InternalError">Thrown when no application has been found in application lex.</exception>
+        public static Constant get(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.get").Value;
             var context = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "XDoc.get").Value;
             var id = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 2, "XDoc.get").Value;
 
-            var xdoc = GetXDocInfo(scope);
+            var xdoc = GetXDocInfo(lex);
             var value = xdoc.SVCache.GetSV(key, context + "_" + id, "");
-            SetXDocInfo(xdoc, scope);
+            SetXDocInfo(xdoc, lex);
 
             if (value.Length == 0) return Core.Javascript.Static.Undefined;
             return new Core.Javascript.String(value);
@@ -115,16 +115,16 @@ namespace NetJS.API {
         /// <param name="id">ID name</param>
         /// <param name="value">The value to set, is converted to a string</param>
         /// <returns>Undefined</returns>
-        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
-        public static Constant set(Constant _this, Constant[] arguments, Scope scope) {
+        /// <exception cref="InternalError">Thrown when no application has been found in application lex.</exception>
+        public static Constant set(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "XDoc.get").Value;
             var context = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "XDoc.get").Value;
             var id = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 2, "XDoc.get").Value;
             var value = Core.Tool.GetArgument(arguments, 3, "Session.set");
 
-            var xdoc = GetXDocInfo(scope);
+            var xdoc = GetXDocInfo(lex);
             xdoc.SVCache.SetSV(key, context + "_" + id, value.ToString());
-            SetXDocInfo(xdoc, scope);
+            SetXDocInfo(xdoc, lex);
 
             return Static.Undefined;
         }

@@ -10,7 +10,7 @@ using System.Windows.Forms;
 namespace NetJS.GUI.API {
     class Graphics {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant constructor(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var thisObject = (Core.Javascript.Object)_this;
 
             var window = Core.Tool.GetArgument<Core.Javascript.Object>(arguments, 0, "Graphics constructor");
@@ -60,35 +60,35 @@ namespace NetJS.GUI.API {
             return graphics;
         }
 
-        public static Constant fillRect(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant fillRect(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var rect = GetRectangle(arguments, "Graphics.fillRect");
             var brush = GetBrush(arguments, 4, "Graphics.fillRect");
             GetGraphics(_this).FillRectangle(brush, rect);
             return Static.Undefined;
         }
 
-        public static Constant drawRect(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant drawRect(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var rect = GetRectangle(arguments, "Graphics.drawRect");
             var pen = GetPen(arguments, 4, "Graphics.drawRect");
             GetGraphics(_this).DrawRectangle(pen, rect);
             return Static.Undefined;
         }
 
-        public static Constant fillEllipse(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant fillEllipse(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var rect = GetRectangle(arguments, "Graphics.fillEllipse");
             var brush = GetBrush(arguments, 4, "Graphics.fillEllipse");
             GetGraphics(_this).FillEllipse(brush, rect);
             return Static.Undefined;
         }
 
-        public static Constant drawEllipse(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant drawEllipse(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var rect = GetRectangle(arguments, "Graphics.drawEllipse");
             var pen = GetPen(arguments, 4, "Graphics.drawEllipse");
             GetGraphics(_this).DrawEllipse(pen, rect);
             return Static.Undefined;
         }
 
-        public static Constant drawLine(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant drawLine(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var from = GetPoint(arguments, "Graphics.drawLine");
             var to = GetPoint(arguments, "Graphics.drawLine", 2);
             var pen = GetPen(arguments, 4, "Graphics.drawLine");
@@ -96,7 +96,7 @@ namespace NetJS.GUI.API {
             return Static.Undefined;
         }
 
-        public static Constant drawString(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant drawString(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var point = GetPoint(arguments, "Graphics.drawString");
             var s = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 2, "Graphics.drawString").Value;
             var brush = GetBrush(arguments, 3, "Graphics.drawString");
@@ -104,7 +104,7 @@ namespace NetJS.GUI.API {
             return Static.Undefined;
         }
 
-        public static Constant update(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant update(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var jsGraphics = ((Core.Javascript.Object)_this).Get<Foreign>("graphics");
             var graphics = (System.Drawing.Graphics)jsGraphics.Value;
 

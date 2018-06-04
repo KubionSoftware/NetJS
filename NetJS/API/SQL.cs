@@ -26,12 +26,12 @@ namespace NetJS.API {
     /// SQL.execute(db, query);</code></example>
     class SQL {
 
-        public static Constant escape(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant escape(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var value = ((Core.Javascript.String)arguments[0]).Value;
             return new Core.Javascript.String(Util.SQL.Escape(value));
         }
 
-        public static Constant format(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant format(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var query = ((Core.Javascript.String)arguments[0]).Value;
             var data = ((Core.Javascript.Object)arguments[1]);
 
@@ -60,12 +60,12 @@ namespace NetJS.API {
         /// <param name="query">The query to be executed</param>
         /// <returns>the result if the query is a SELECT statement.</returns>
         /// <example><code lang="javascript">var id = SQL.execute("NETDB", "SELECT * FROM users;");</code></example>
-        /// <exception cref="InternalError">Thrown when no application can be found in application scope.</exception>
+        /// <exception cref="InternalError">Thrown when no application can be found in application lex.</exception>
         /// <exception cref="Error">Thrown when an error has been found while executing the query.</exception>
-        public static Constant execute(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant execute(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var connectionName = ((Core.Javascript.String)arguments[0]).Value;
 
-            var application = Tool.GetFromScope<JSApplication>(scope, "__application__");
+            var application = Tool.GetFromScope<JSApplication>(lex, "__application__");
             if (application == null) throw new InternalError("No application");
             var connection = application.Connections.GetSqlConnection(connectionName);
 
@@ -78,7 +78,7 @@ namespace NetJS.API {
                     var result = new Core.Javascript.Array();
 
                     foreach (var row in rows) {
-                        var rowObject = Core.Tool.Construct("Object", scope);
+                        var rowObject = Core.Tool.Construct("Object", lex);
                         foreach (var key in row.Keys) {
                             var value = row[key];
                             if (value is string s) {

@@ -4,20 +4,20 @@ using NetJS.Core.API;
 namespace NetJS.API {
     public class Config {
 
-        public Config(Settings settings) {
+        public Config(LexicalEnvironment lex, Settings settings) {
             var file = settings.Root + settings.Config;
 
-            Load(file);
+            Load(file, lex);
         }
 
-        public void Load(string file) {
+        public void Load(string file, LexicalEnvironment lex) {
             if (System.IO.File.Exists(file)) {
                 var content = System.IO.File.ReadAllText(file);
 
-                //var config = JSON.parse(Static.Undefined, new[] { new String(content) }, scope);
-                //scope.DeclareVariable("Config", Core.Javascript.DeclarationScope.Global, true, config);
+                var config = JSON.parse(Static.Undefined, new[] { new String(content) }, lex);
+                lex.GetGlobalObject().Set("Config", config);
             } else {
-                //scope.DeclareVariable("Config", Core.Javascript.DeclarationScope.Global, true, Core.Tool.Construct("Object", scope));
+                lex.GetGlobalObject().Set("Config", Core.Tool.Construct("Object", lex));
             }
         }
     }

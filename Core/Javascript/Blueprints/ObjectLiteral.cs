@@ -5,18 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
-    public class ObjectBlueprint : Blueprint {
+    public class ObjectLiteral : Literal {
         public Dictionary<string, Expression> Blueprints { get; }
 
-        public ObjectBlueprint(Dictionary<string, Expression> blueprints) {
+        public ObjectLiteral(Dictionary<string, Expression> blueprints) {
             Blueprints = blueprints;
         }
 
-        public override Constant Instantiate(Scope scope) {
-            var newObject = Tool.Construct("Object", scope);
+        public override Constant Instantiate(Agent agent) {
+            var newObject = Tool.Construct("Object", agent);
 
             foreach (var key in Blueprints.Keys) {
-                newObject.Set(key, Blueprints[key].Execute(scope));
+                newObject.Set(new String(key), Blueprints[key].Evaluate(agent));
             }
 
             return newObject;

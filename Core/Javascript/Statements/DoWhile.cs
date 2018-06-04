@@ -17,20 +17,20 @@ namespace NetJS.Core.Javascript {
                 _doWhileNode = doWhileNode;
             }
 
-            public override bool Start(Scope scope) {
+            public override bool Start(LexicalEnvironment lex) {
                 return true;
             }
 
-            public override bool Before(Scope scope) {
+            public override bool Before(LexicalEnvironment lex) {
                 return true;
             }
 
-            public override bool After(Scope scope) {
-                return _doWhileNode.Check.IsTrue(scope);
+            public override bool After(LexicalEnvironment lex) {
+                return _doWhileNode.Check.IsTrue(lex);
             }
         }
 
-        public override Result Execute(Scope parent) {
+        public override Completion Execute(LexicalEnvironment parent) {
             return new DoWhileExecution(this).Execute(this, parent);
         }
     }

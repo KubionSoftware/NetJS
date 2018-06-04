@@ -11,8 +11,8 @@ namespace NetJS.Core.Javascript {
 
         private Object _dateObject;
 
-        public Object GetObject(Scope scope) {
-            if (_dateObject == null) _dateObject = Tool.Construct("Date", scope);
+        public Object GetObject(LexicalEnvironment lex) {
+            if (_dateObject == null) _dateObject = Tool.Construct("Date", lex);
             return _dateObject;
         }
 
@@ -20,19 +20,19 @@ namespace NetJS.Core.Javascript {
             Value = value;
         }
 
-        public override Constant GetProperty(Constant key, Scope scope) {
-            return GetObject(scope).Get(key.ToString());
+        public override Constant GetProperty(Constant key, LexicalEnvironment lex) {
+            return GetObject(lex).Get(key.ToString());
         }
 
-        public override Constant InstanceOf(Constant other, Scope scope) {
-            return GetObject(scope).InstanceOf(other, scope);
+        public override Constant InstanceOf(Constant other, LexicalEnvironment lex) {
+            return GetObject(lex).InstanceOf(other, lex);
         }
 
         public override string ToString() {
             return Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        public override Constant TypeOf(Scope scope) {
+        public override Constant TypeOf(LexicalEnvironment lex) {
             return new String("object");
         }
 

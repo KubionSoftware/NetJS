@@ -11,12 +11,12 @@ namespace NetJS.Core.Javascript {
     public class LessThan : BinaryOperator {
         public LessThan() : base(10) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            var r = Compare.AbstractRelationalComparison(lval, rval, true, scope);
-            return new Boolean(r == Compare.RelationalComparisonResult.Undefined ? false : r == Compare.RelationalComparisonResult.True);
+            var r = Compare.AbstractRelationalComparison(lval, rval, true, agent);
+            return Boolean.Create(r == Compare.RelationalComparisonResult.Undefined ? false : r == Compare.RelationalComparisonResult.True);
         }
 
         public override string ToDebugString() {
@@ -27,12 +27,12 @@ namespace NetJS.Core.Javascript {
     public class LessThanEquals : BinaryOperator {
         public LessThanEquals() : base(10) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            var r = Compare.AbstractRelationalComparison(rval, lval, true, scope);
-            return new Boolean(r == Compare.RelationalComparisonResult.Undefined ? false : r != Compare.RelationalComparisonResult.True);
+            var r = Compare.AbstractRelationalComparison(rval, lval, true, agent);
+            return Boolean.Create(r == Compare.RelationalComparisonResult.Undefined ? false : r != Compare.RelationalComparisonResult.True);
         }
 
         public override string ToDebugString() {
@@ -43,12 +43,12 @@ namespace NetJS.Core.Javascript {
     public class GreaterThan : BinaryOperator {
         public GreaterThan() : base(10) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            var r = Compare.AbstractRelationalComparison(rval, lval, true, scope);
-            return new Boolean(r == Compare.RelationalComparisonResult.Undefined ? false : r == Compare.RelationalComparisonResult.True);
+            var r = Compare.AbstractRelationalComparison(rval, lval, true, agent);
+            return Boolean.Create(r == Compare.RelationalComparisonResult.Undefined ? false : r == Compare.RelationalComparisonResult.True);
         }
 
         public override string ToDebugString() {
@@ -59,12 +59,12 @@ namespace NetJS.Core.Javascript {
     public class GreaterThanEquals : BinaryOperator {
         public GreaterThanEquals() : base(10) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            var r = Compare.AbstractRelationalComparison(lval, rval, true, scope);
-            return new Boolean(r == Compare.RelationalComparisonResult.Undefined ? false : r != Compare.RelationalComparisonResult.True);
+            var r = Compare.AbstractRelationalComparison(lval, rval, true, agent);
+            return Boolean.Create(r == Compare.RelationalComparisonResult.Undefined ? false : r != Compare.RelationalComparisonResult.True);
         }
 
         public override string ToDebugString() {
@@ -77,11 +77,11 @@ namespace NetJS.Core.Javascript {
     public class Equals : BinaryOperator {
         public Equals() : base(9) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            return new Boolean(Compare.AbstractEqualityComparison(rval, lval, scope));
+            return Boolean.Create(Compare.AbstractEqualityComparison(rval, lval, agent));
         }
 
         public override string ToDebugString() {
@@ -92,11 +92,11 @@ namespace NetJS.Core.Javascript {
     public class NotEquals : BinaryOperator {
         public NotEquals() : base(9) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            return new Boolean(!Compare.AbstractEqualityComparison(rval, lval, scope));
+            return Boolean.Create(!Compare.AbstractEqualityComparison(rval, lval, agent));
         }
 
         public override string ToDebugString() {
@@ -107,11 +107,11 @@ namespace NetJS.Core.Javascript {
     public class StrictEquals : BinaryOperator {
         public StrictEquals() : base(9) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            return new Boolean(Compare.StrictEqualityComparison(rval, lval));
+            return Boolean.Create(Compare.StrictEqualityComparison(rval, lval));
         }
 
         public override string ToDebugString() {
@@ -122,11 +122,11 @@ namespace NetJS.Core.Javascript {
     public class StrictNotEquals : BinaryOperator {
         public StrictNotEquals() : base(9) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            return new Boolean(!Compare.StrictEqualityComparison(rval, lval));
+            return Boolean.Create(!Compare.StrictEqualityComparison(rval, lval));
         }
 
         public override string ToDebugString() {

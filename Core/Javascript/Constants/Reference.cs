@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
-    class Reference : Constant {
+    public class Reference : Constant {
 
         private Constant _base;
         private Constant _name;

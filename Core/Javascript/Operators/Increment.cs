@@ -8,12 +8,12 @@ namespace NetJS.Core.Javascript {
     public class PostfixIncrement : UnaryLeftOperator {
         public PostfixIncrement() : base(15) { }
 
-        public override Constant Execute(Constant lhs, Scope scope) {
+        public override Constant Evaluate(Constant lhs, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-postfix-increment-operator
 
-            var oldValue = Convert.ToNumber(References.GetValue(lhs, scope), scope);
+            var oldValue = Convert.ToNumber(References.GetValue(lhs, agent), agent);
             var newValue = oldValue + 1;
-            References.PutValue(lhs, new Number(newValue), scope);
+            References.PutValue(lhs, new Number(newValue), agent);
             return new Number(oldValue);
         }
 
@@ -25,12 +25,12 @@ namespace NetJS.Core.Javascript {
     public class PostfixDecrement : UnaryLeftOperator {
         public PostfixDecrement() : base(15) { }
 
-        public override Constant Execute(Constant lhs, Scope scope) {
+        public override Constant Evaluate(Constant lhs, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-postfix-decrement-operator
 
-            var oldValue = Convert.ToNumber(References.GetValue(lhs, scope), scope);
+            var oldValue = Convert.ToNumber(References.GetValue(lhs, agent), agent);
             var newValue = oldValue - 1;
-            References.PutValue(lhs, new Number(newValue), scope);
+            References.PutValue(lhs, new Number(newValue), agent);
             return new Number(oldValue);
         }
 
@@ -42,12 +42,12 @@ namespace NetJS.Core.Javascript {
     public class PrefixIncrement : UnaryRightOperator {
         public PrefixIncrement() : base(14) { }
 
-        public override Constant Execute(Constant expr, Scope scope) {
+        public override Constant Evaluate(Constant expr, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-prefix-increment-operator
 
-            var oldValue = Convert.ToNumber(References.GetValue(expr, scope), scope);
+            var oldValue = Convert.ToNumber(References.GetValue(expr, agent), agent);
             var newValue = oldValue + 1;
-            References.PutValue(expr, new Number(newValue), scope);
+            References.PutValue(expr, new Number(newValue), agent);
             return new Number(newValue);
         }
 
@@ -59,12 +59,12 @@ namespace NetJS.Core.Javascript {
     public class PrefixDecrement : UnaryRightOperator {
         public PrefixDecrement() : base(14) { }
         
-        public override Constant Execute(Constant expr, Scope scope) {
+        public override Constant Evaluate(Constant expr, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-prefix-decrement-operator
 
-            var oldValue = Convert.ToNumber(References.GetValue(expr, scope), scope);
+            var oldValue = Convert.ToNumber(References.GetValue(expr, agent), agent);
             var newValue = oldValue - 1;
-            References.PutValue(expr, new Number(newValue), scope);
+            References.PutValue(expr, new Number(newValue), agent);
             return new Number(newValue);
         }
 

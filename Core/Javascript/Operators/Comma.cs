@@ -8,9 +8,9 @@ namespace NetJS.Core.Javascript {
     public class Comma : BinaryOperator {
         public Comma() : base(1) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
-            References.GetValue(lref, scope);
-            return References.GetValue(rref, scope);
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
+            References.GetValue(lref, agent);
+            return References.GetValue(rref, agent);
         }
 
         public override string ToDebugString() {

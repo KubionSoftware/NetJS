@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class ForOf : Statement {
-        public Declaration Declaration;
+        public Node Declaration;
         public Expression Collection;
         public Block Body;
 
@@ -20,8 +20,8 @@ namespace NetJS.Core.Javascript {
                 _forOfNode = forOfNode;
             }
 
-            public override bool Start(Scope scope) {
-                var array = _forOfNode.Collection.Execute(scope);
+            public override bool Start(LexicalEnvironment lex) {
+                var array = _forOfNode.Collection.Evaluate(lex);
                 if (!(array is Array)) return false;
 
                 _array = (Array)array;
@@ -30,20 +30,20 @@ namespace NetJS.Core.Javascript {
                 return true;
             }
 
-            public override bool Before(Scope scope) {
+            public override bool Before(LexicalEnvironment lex) {
                 if (_index >= _array.List.Count) return false;
                 // TODO: better way to declare
-                scope.DeclareVariable(_forOfNode.Declaration.Declarations[0], _forOfNode.Declaration.IsConstant, DeclarationScope.Block, _array.List[_index]);
+                lex.DeclareVariable(_forOfNode.Declaration.Declarations[0], _forOfNode.Declaration.IsConstant, DeclarationScope.Block, _array.List[_index]);
                 _index++;
                 return true;
             }
 
-            public override bool After(Scope scope) {
+            public override bool After(LexicalEnvironment lex) {
                 return true;
             }
         }
 
-        public override Result Execute(Scope parent) {
+        public override Completion Execute(LexicalEnvironment parent) {
             return new ForOfExecution(this).Execute(this, parent);
         }
     }

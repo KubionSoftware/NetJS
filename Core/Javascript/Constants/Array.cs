@@ -11,8 +11,8 @@ namespace NetJS.Core.Javascript {
 
         private Object _arrayObject;
 
-        public Object GetObject(Scope scope) {
-            if (_arrayObject == null) _arrayObject = Tool.Construct("Array", scope);
+        public Object GetObject(LexicalEnvironment lex) {
+            if (_arrayObject == null) _arrayObject = Tool.Construct("Array", lex);
             return _arrayObject;
         }
 
@@ -24,8 +24,8 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public Object ToObject(Scope scope) {
-            var obj = Tool.Construct("Object", scope);
+        public Object ToObject(LexicalEnvironment lex) {
+            var obj = Tool.Construct("Object", lex);
 
             for (var i = 0; i < List.Count; i++) {
                 obj.Set(i.ToString(), List[i]);
@@ -42,7 +42,7 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public override Constant GetProperty(Constant key, Scope scope) {
+        public override Constant GetProperty(Constant key, LexicalEnvironment lex) {
             if (key is Number n) {
                 return Get((int)n.Value);
             }
@@ -58,14 +58,14 @@ namespace NetJS.Core.Javascript {
                 return new Number(List.Count);
             }
 
-            return GetObject(scope).Get(keyString);
+            return GetObject(lex).Get(keyString);
         }
 
-        public override Constant InstanceOf(Constant other, Scope scope) {
-            return GetObject(scope).InstanceOf(other, scope);
+        public override Constant InstanceOf(Constant other, LexicalEnvironment lex) {
+            return GetObject(lex).InstanceOf(other, lex);
         }
 
-        public override void SetProperty(Constant key, Constant value, Scope scope) {
+        public override void SetProperty(Constant key, Constant value, LexicalEnvironment lex) {
             if (key is Number n) {
                 var index = (int)n.Value;
                 if (index >= 0 && index < List.Count) {
@@ -78,7 +78,7 @@ namespace NetJS.Core.Javascript {
             return "[ x" + List.Count + " ]";
         }
 
-        public override Constant TypeOf(Scope scope) {
+        public override Constant TypeOf(LexicalEnvironment lex) {
             return new String("object");
         }
 

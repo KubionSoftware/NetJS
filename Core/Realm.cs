@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace NetJS.Core {
-    public class Engine {
+namespace NetJS.Core.Javascript {
+    public class Realm {
+
+        // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-code-realms
+
+        public Object GlobalObject;
+        public LexicalEnvironment GlobalEnv;
         
-        public Javascript.Scope EngineScope { get; private set; }
-        public Javascript.Object GlobalObject { get; private set; }
         private Dictionary<string, Javascript.Object> _prototypes = new Dictionary<string, Javascript.Object>();
 
         public Javascript.Object GetPrototype(string name) {
@@ -17,11 +20,12 @@ namespace NetJS.Core {
             return _prototypes[name];
         }
 
-        public Engine() {
-            EngineScope = new Javascript.Scope(this, null);
+        public Realm() {
+            CreateIntrinsics();
+
         }
 
-        public void Init() {
+        public void CreateIntrinsics() {
             // Object and Function need to be bootstrapped because they are dependent on each other
             var objectPrototype = new Javascript.Object(null);
             var functionPrototype = new Javascript.Object(objectPrototype);
@@ -71,12 +75,12 @@ namespace NetJS.Core {
                 (Func<
                     Javascript.Constant,
                     Javascript.Constant[],
-                    Javascript.Scope,
+                    Javascript.LexicalEnvironment,
                     Javascript.Constant
                 >)info.CreateDelegate(typeof(Func<
                     Javascript.Constant,
                     Javascript.Constant[],
-                    Javascript.Scope,
+                    Javascript.LexicalEnvironment,
                     Javascript.Constant
                 >)), EngineScope);
         }

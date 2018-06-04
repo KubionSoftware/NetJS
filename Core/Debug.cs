@@ -216,10 +216,10 @@ namespace NetJS.Core {
             stack.Set("count", frames.Count);
             json.Set("stack", stack);
 
-            json.Set("scopes", scopes.Select(scope => {
+            json.Set("scopes", scopes.Select(lex => {
                 var scopeJson = new Json();
-                scopeJson.Set("name", scope.Name);
-                scopeJson.Set("variables", scope.Variables);
+                scopeJson.Set("name", lex.Name);
+                scopeJson.Set("variables", lex.Variables);
                 return scopeJson;
             }));
 

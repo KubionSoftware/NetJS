@@ -8,10 +8,10 @@ namespace NetJS.Core.Javascript {
     public class Negation : UnaryRightOperator {
         public Negation() : base(14) { }
 
-        public override Constant Execute(Constant c, Scope scope) {
+        public override Constant Evaluate(Constant c, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-unary-minus-operator
 
-            var oldValue = Convert.ToNumber(References.GetValue(c, scope), scope);
+            var oldValue = Convert.ToNumber(References.GetValue(c, agent), agent);
             return new Number(-oldValue);
         }
 
@@ -25,17 +25,17 @@ namespace NetJS.Core.Javascript {
 
         public abstract double Operation(double left, double right);
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-multiplicative-operators
 
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            var lprim = Convert.ToPrimitive(lval, scope);
-            var rprim = Convert.ToPrimitive(rval, scope);
+            var lprim = Convert.ToPrimitive(lval, agent);
+            var rprim = Convert.ToPrimitive(rval, agent);
 
-            var lnum = Convert.ToNumber(lprim, scope);
-            var rnum = Convert.ToNumber(rprim, scope);
+            var lnum = Convert.ToNumber(lprim, agent);
+            var rnum = Convert.ToNumber(rprim, agent);
 
             return new Number(Operation(lnum, rnum));
         }
@@ -81,22 +81,22 @@ namespace NetJS.Core.Javascript {
     public class Addition : BinaryOperator {
         public Addition() : base(12) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-addition-operator-plus
 
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            var lprim = Convert.ToPrimitive(lval, scope);
-            var rprim = Convert.ToPrimitive(rval, scope);
+            var lprim = Convert.ToPrimitive(lval, agent);
+            var rprim = Convert.ToPrimitive(rval, agent);
 
             if (lprim is String || rprim is String) {
-                var lstr = Convert.ToString(lprim, scope);
-                var rstr = Convert.ToString(rprim, scope);
+                var lstr = Convert.ToString(lprim, agent);
+                var rstr = Convert.ToString(rprim, agent);
                 return new String(lstr + rstr);
             } else {
-                var lnum = Convert.ToNumber(lprim, scope);
-                var rnum = Convert.ToNumber(rprim, scope);
+                var lnum = Convert.ToNumber(lprim, agent);
+                var rnum = Convert.ToNumber(rprim, agent);
                 return new Number(lnum + rnum);
             }
         }
@@ -109,17 +109,17 @@ namespace NetJS.Core.Javascript {
     public class Substraction : BinaryOperator {
         public Substraction() : base(12) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+        public override Constant Evaluate(Constant lref, Constant rref, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-subtraction-operator-minus
 
-            var lval = References.GetValue(lref, scope);
-            var rval = References.GetValue(rref, scope);
+            var lval = References.GetValue(lref, agent);
+            var rval = References.GetValue(rref, agent);
 
-            var lprim = Convert.ToPrimitive(lval, scope);
-            var rprim = Convert.ToPrimitive(rval, scope);
+            var lprim = Convert.ToPrimitive(lval, agent);
+            var rprim = Convert.ToPrimitive(rval, agent);
 
-            var lnum = Convert.ToNumber(lprim, scope);
-            var rnum = Convert.ToNumber(rprim, scope);
+            var lnum = Convert.ToNumber(lprim, agent);
+            var rnum = Convert.ToNumber(rprim, agent);
 
             return new Number(lnum - rnum);
         }

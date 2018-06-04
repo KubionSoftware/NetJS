@@ -36,8 +36,8 @@ namespace NetJS {
             _dict.Clear();
         }
 
-        public Core.Javascript.Object GetObject(Scope scope) {
-            var obj = Core.Tool.Construct("Object", scope);
+        public Core.Javascript.Object GetObject(LexicalEnvironment lex) {
+            var obj = Core.Tool.Construct("Object", lex);
 
             foreach(var pair in _dict) {
                 obj.Set(pair.Key, pair.Value);

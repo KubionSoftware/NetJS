@@ -6,19 +6,19 @@ using System.Text;
 namespace NetJS.Core.API {
     class Array {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant constructor(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var length = arguments.Length == 1 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Array constructor").Value : 0;
 
             return new Javascript.Array(length);
         }
 
         [StaticFunction]
-        public static Constant isArray(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant isArray(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var o = Tool.GetArgument(arguments, 0, "Array.isArray");
             return new Javascript.Boolean(o is Javascript.Array);
         }
 
-        public static Constant forEach(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant forEach(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             if (arguments.Length != 1) {
@@ -33,13 +33,13 @@ namespace NetJS.Core.API {
                     new Javascript.Number(i),
                     array
                 };
-                callback.Call(callbackArguments, Static.Undefined, scope);
+                callback.Call(callbackArguments, Static.Undefined, lex);
             }
 
             return Static.Undefined;
         }
 
-        public static Constant push(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant push(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             array.List.AddRange(arguments);
@@ -47,7 +47,7 @@ namespace NetJS.Core.API {
             return Static.Undefined;
         }
 
-        public static Constant pop(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant pop(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
             
             if (array.List.Count == 0) return Static.Undefined;
@@ -58,7 +58,7 @@ namespace NetJS.Core.API {
             return element;
         }
 
-        public static Constant shift(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant shift(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             if (array.List.Count == 0) return Static.Undefined;
@@ -69,7 +69,7 @@ namespace NetJS.Core.API {
             return element;
         }
 
-        public static Constant unshift(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant unshift(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             array.List.InsertRange(0, arguments);
@@ -77,7 +77,7 @@ namespace NetJS.Core.API {
             return Static.Undefined;
         }
 
-        public static Constant indexOf(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant indexOf(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             var start = arguments.Length > 1 ? (int)((Javascript.Number)arguments[1]).Value : 0;
@@ -93,7 +93,7 @@ namespace NetJS.Core.API {
             return new Javascript.Number(-1);
         }
 
-        public static Constant splice(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant splice(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
             
             var start = arguments.Length > 0 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Array.splice").Value : 0;
@@ -113,7 +113,7 @@ namespace NetJS.Core.API {
             return result;
         }
 
-        public static Constant slice(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant slice(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
             
             var begin = (int)(arguments.Length > 0 ? ((Javascript.Number)arguments[0]).Value : 0);
@@ -127,7 +127,7 @@ namespace NetJS.Core.API {
             return result;
         }
 
-        public static Constant map(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant map(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             if (arguments.Length != 1) {
@@ -143,14 +143,14 @@ namespace NetJS.Core.API {
                     new Javascript.Number(i),
                     array
                 };
-                var value = callback.Call(callbackArguments, Static.Undefined, scope);
+                var value = callback.Call(callbackArguments, Static.Undefined, lex);
                 result.List.Add(value);
             }
 
             return result;
         }
 
-        public static Constant filter(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant filter(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             if (arguments.Length == 0 || arguments.Length > 2) {
@@ -169,7 +169,7 @@ namespace NetJS.Core.API {
                     array
                 };
 
-                var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], scope);
+                var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], lex);
                 if (value is Javascript.Boolean) {
                     if (((Javascript.Boolean)value).Value) {
                         result.List.Add(element);
@@ -180,7 +180,7 @@ namespace NetJS.Core.API {
             return result;
         }
 
-        public static Constant reduce(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant reduce(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             if (arguments.Length < 1) {
@@ -204,13 +204,13 @@ namespace NetJS.Core.API {
                     new Javascript.Number(i),
                     array
                 };
-                accumulator = callback.Call(callbackArguments, Static.Undefined, scope);
+                accumulator = callback.Call(callbackArguments, Static.Undefined, lex);
             }
 
             return accumulator;
         }
 
-        private static Constant checkAll(Constant _this, Constant[] arguments, Scope scope, string name, Func<bool, Constant, int, Constant> resultFunc, Constant final) {
+        private static Constant checkAll(Constant _this, Constant[] arguments, LexicalEnvironment lex, string name, Func<bool, Constant, int, Constant> resultFunc, Constant final) {
             var array = (Javascript.Array)_this;
 
             if (arguments.Length == 0 || arguments.Length > 2) {
@@ -228,7 +228,7 @@ namespace NetJS.Core.API {
                     array
                 };
 
-                var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], scope);
+                var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], lex);
                 if (value is Javascript.Boolean) {
                     var boolValue = ((Javascript.Boolean)value).Value;
                     var result = resultFunc(boolValue, element, i);
@@ -239,51 +239,51 @@ namespace NetJS.Core.API {
             return final;
         }
 
-        public static Constant some(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant some(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             return checkAll(
                 _this, 
                 arguments, 
-                scope,
+                lex,
                 "Array.some",
                 (value, element, index) => value ? new Javascript.Boolean(true) : null, 
                 new Javascript.Boolean(false)
             );
         }
 
-        public static Constant every(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant every(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             return checkAll(
                 _this, 
                 arguments, 
-                scope,
+                lex,
                 "Array.every",
                 (value, element, index) => !value ? new Javascript.Boolean(false) : null,
                 new Javascript.Boolean(true)
             );
         }
 
-        public static Constant find(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant find(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             return checkAll(
                 _this,
                 arguments,
-                scope,
+                lex,
                 "Array.find",
                 (value, element, index) => value ? element : null,
                 Javascript.Static.Undefined
             );
         }
 
-        public static Constant findIndex(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant findIndex(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             return checkAll(
                 _this,
                 arguments,
-                scope,
+                lex,
                 "Array.findIndex",
                 (value, element, index) => value ? new Javascript.Number(index) : null,
                 Javascript.Static.Undefined
             );
         }
 
-        public static Constant includes(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant includes(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             if (arguments.Length == 0 || arguments.Length > 2) {
@@ -294,7 +294,7 @@ namespace NetJS.Core.API {
             var startIndex = (int)(arguments.Length > 1 ? Tool.GetArgument<Javascript.Number>(arguments, 1, "Array.includes").Value : 0);
 
             for (int i = startIndex; i < array.List.Count; i++) {
-                var equals = Compare.AbstractEqualityComparison(array.List[i], reference, scope);
+                var equals = Compare.AbstractEqualityComparison(array.List[i], reference, lex);
                 if (equals) {
                     return new Javascript.Boolean(true);
                 }
@@ -303,7 +303,7 @@ namespace NetJS.Core.API {
             return new Javascript.Boolean(false);
         }
 
-        public static Constant sort(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant sort(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             if (arguments.Length != 1) {
@@ -321,7 +321,7 @@ namespace NetJS.Core.API {
                     var bElement = array.List[i];
 
                     var callbackArguments = new Constant[] { aElement, bElement };
-                    var value = (Javascript.Number)callback.Call(callbackArguments, Static.Undefined, scope);
+                    var value = (Javascript.Number)callback.Call(callbackArguments, Static.Undefined, lex);
 
                     if(value.Value > 0) {
                         array.List[i - 1] = bElement;
@@ -338,7 +338,7 @@ namespace NetJS.Core.API {
             return array;
         }
 
-        public static Constant join(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant join(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             var seperator = arguments.Length > 0 ? ((Javascript.String)arguments[0]).Value : ",";
@@ -349,13 +349,13 @@ namespace NetJS.Core.API {
                     result.Append(seperator);
                 }
 
-                result.Append(Convert.ToString(array.List[i], scope));
+                result.Append(Convert.ToString(array.List[i], lex));
             }
 
             return new Javascript.String(result.ToString());
         }
 
-        public static Constant reverse(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant reverse(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             array.List.Reverse();
@@ -363,7 +363,7 @@ namespace NetJS.Core.API {
             return array;
         }
 
-        public static Constant fill(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant fill(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var array = (Javascript.Array)_this;
 
             var value = Tool.GetArgument(arguments, 0, "Array.fill");
@@ -377,12 +377,12 @@ namespace NetJS.Core.API {
             return array;
         }
 
-        public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant toString(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             // Because this is actually useful
-            return JSON.stringify(Static.Undefined, new Constant[] { _this }, scope);
+            return JSON.stringify(Static.Undefined, new Constant[] { _this }, lex);
 
             // According to javascript specification
-            // return join(_this, arguments, scope);
+            // return join(_this, arguments, lex);
         }
     }
 }

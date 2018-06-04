@@ -17,20 +17,20 @@ namespace NetJS.Core.Javascript {
                 _whileNode = whileNode;
             }
 
-            public override bool Start(Scope scope) {
+            public override bool Start(LexicalEnvironment lex) {
                 return true;
             }
 
-            public override bool Before(Scope scope) {
-                return _whileNode.Check.IsTrue(scope);
+            public override bool Before(LexicalEnvironment lex) {
+                return _whileNode.Check.IsTrue(lex);
             }
 
-            public override bool After(Scope scope) {
+            public override bool After(LexicalEnvironment lex) {
                 return true;
             }
         }
 
-        public override Result Execute(Scope parent) {
+        public override Completion Execute(LexicalEnvironment parent) {
             return new WhileExecution(this).Execute(this, parent);
         }
     }

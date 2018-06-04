@@ -9,13 +9,13 @@ namespace NetJS.Core.Javascript {
     public class LogicalNot : UnaryRightOperator {
         public LogicalNot() : base(14) { }
 
-        public override Constant Execute(Scope scope) {
+        public override Constant Evaluate(Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-logical-not-operator
 
-            var expr = Right.Execute(scope);
-            var oldValue = Convert.ToBoolean(References.GetValue(expr, scope));
+            var expr = Right.Evaluate(agent);
+            var oldValue = Convert.ToBoolean(References.GetValue(expr, agent));
 
-            return new Boolean(!oldValue);
+            return Boolean.Create(!oldValue);
         }
 
         public override string ToDebugString() {
@@ -28,15 +28,15 @@ namespace NetJS.Core.Javascript {
     public class LogicalAnd : BinaryOperator {
         public LogicalAnd() : base(5) { }
 
-        public override Constant Execute(Scope scope) {
-            var lref = Left.Execute(scope);
-            var lval = References.GetValue(lref, scope);
+        public override Constant Evaluate(Agent agent) {
+            var lref = Left.Evaluate(agent);
+            var lval = References.GetValue(lref, agent);
             var lbool = Convert.ToBoolean(lval);
 
             if (!lbool) return lval;
 
-            var rref = Right.Execute(scope);
-            return References.GetValue(rref, scope);
+            var rref = Right.Evaluate(agent);
+            return References.GetValue(rref, agent);
         }
 
         public override string ToDebugString() {
@@ -47,15 +47,15 @@ namespace NetJS.Core.Javascript {
     public class LogicalOr : BinaryOperator {
         public LogicalOr() : base(4) { }
 
-        public override Constant Execute(Scope scope) {
-            var lref = Left.Execute(scope);
-            var lval = References.GetValue(lref, scope);
+        public override Constant Evaluate(Agent agent) {
+            var lref = Left.Evaluate(agent);
+            var lval = References.GetValue(lref, agent);
             var lbool = Convert.ToBoolean(lval);
 
             if (lbool) return lval;
 
-            var rref = Right.Execute(scope);
-            return References.GetValue(rref, scope);
+            var rref = Right.Evaluate(agent);
+            return References.GetValue(rref, agent);
         }
 
         public override string ToDebugString() {

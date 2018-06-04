@@ -6,17 +6,17 @@ using NetJS.Core.Javascript;
 namespace NetJS.Core.API {
     class String {
         
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant constructor(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var value = arguments.Length == 1 ? Tool.GetArgument<Javascript.String>(arguments, 0, "String constructor").Value : "";
 
             return new Javascript.String(value);
         }
 
-        public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant toString(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             return _this;
         }
 
-        public static Constant charAt(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant charAt(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var index = (Javascript.Number)arguments[0];
 
@@ -27,7 +27,7 @@ namespace NetJS.Core.API {
             }
         }
 
-        public static Constant charCodeAt(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant charCodeAt(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var index = (Javascript.Number)arguments[0];
 
@@ -38,50 +38,50 @@ namespace NetJS.Core.API {
             }
         }
 
-        public static Constant startsWith(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant startsWith(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var search = (Javascript.String)arguments[0];
 
             return new Javascript.Boolean(str.Value.StartsWith(search.Value));
         }
 
-        public static Constant endsWith(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant endsWith(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var search = (Javascript.String)arguments[0];
 
             return new Javascript.Boolean(str.Value.EndsWith(search.Value));
         }
 
-        public static Constant includes(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant includes(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var search = (Javascript.String)arguments[0];
 
             return new Javascript.Boolean(str.Value.Contains(search.Value));
         }
 
-        public static Constant indexOf(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant indexOf(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var search = (Javascript.String)arguments[0];
 
             return new Javascript.Number(str.Value.IndexOf(search.Value));
         }
 
-        public static Constant toLowerCase(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant toLowerCase(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             return new Javascript.String(str.Value.ToLower());
         }
 
-        public static Constant toUpperCase(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant toUpperCase(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             return new Javascript.String(str.Value.ToUpper());
         }
 
-        public static Constant trim(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant trim(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             return new Javascript.String(str.Value.Trim());
         }
 
-        public static Constant substr(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant substr(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var start = (int)((Javascript.Number)arguments[0]).Value;
             if (start < 0) start = str.Value.Length + start;
@@ -92,7 +92,7 @@ namespace NetJS.Core.API {
             return new Javascript.String(str.Value.Substring(start, length));
         }
 
-        public static Constant substring(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant substring(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
 
             var start = (int)((Javascript.Number)arguments[0]).Value;
@@ -113,7 +113,7 @@ namespace NetJS.Core.API {
             return new Javascript.String(str.Value.Substring(start, end - start));
         }
 
-        public static Constant split(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant split(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
 
             if(arguments.Length == 0) {
@@ -128,14 +128,14 @@ namespace NetJS.Core.API {
                         return Tool.ToArray(str.Value.Split(new string[] { separator.Value }, StringSplitOptions.None));
                     }
                 }else if(arguments[0] is Javascript.Object) {
-                    return RegExp.split(arguments[0], new Constant[] { _this }, scope);
+                    return RegExp.split(arguments[0], new Constant[] { _this }, lex);
                 }
 
                 throw new Exception("first argument of string.split must be a string or a RegExp");
             }
         }
 
-        public static Constant replace(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant replace(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
 
             if(arguments[0] is Javascript.String) {
@@ -144,25 +144,25 @@ namespace NetJS.Core.API {
 
                 return new Javascript.String(str.Value.Replace(search.Value, newValue.Value));
             } else if(arguments[0] is Javascript.Object) {
-                return RegExp.replace(arguments[0], new Constant[] { str, arguments[1] }, scope);
+                return RegExp.replace(arguments[0], new Constant[] { str, arguments[1] }, lex);
             }
 
             throw new Exception("first argument of string.replace must be a string or a RegExp");
         }
 
-        public static Constant match(Constant _this, Constant[] arguments, Scope scope) {
-            return RegExp.match(arguments[0], new Constant[] { _this }, scope);
+        public static Constant match(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            return RegExp.match(arguments[0], new Constant[] { _this }, lex);
         }
 
-        public static Constant search(Constant _this, Constant[] arguments, Scope scope) {
-            return RegExp.search(arguments[0], new Constant[] { _this }, scope);
+        public static Constant search(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            return RegExp.search(arguments[0], new Constant[] { _this }, lex);
         }
 
-        public static Constant test(Constant _this, Constant[] arguments, Scope scope) {
-            return RegExp.test(arguments[0], new Constant[] { _this }, scope);
+        public static Constant test(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            return RegExp.test(arguments[0], new Constant[] { _this }, lex);
         }
 
-        public static Constant repeat(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant repeat(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var number = (Javascript.Number)arguments[0];
 
@@ -174,7 +174,7 @@ namespace NetJS.Core.API {
             return new Javascript.String(result.ToString());
         }
 
-        public static Constant getBytes(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant getBytes(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var str = (Javascript.String)_this;
             var bytes = Encoding.Default.GetBytes(str.Value);
 

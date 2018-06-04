@@ -1,7 +1,6 @@
 ﻿using System;
 using NetJS.Core;
 using System.Web;
-using Microsoft.ClearScript.V8;
 
 namespace NetJS {
     public class JSApplication : JSStorage {
@@ -11,7 +10,7 @@ namespace NetJS {
         public API.Config Config { get; }
         public Settings Settings { get; }
 
-        public V8ScriptEngine Engine { get; }
+        public Realm Engine { get; }
 
         public XDocServices.XDocService XDocService { get; }
 
@@ -21,29 +20,27 @@ namespace NetJS {
             }
 
             Settings = new Settings(rootDir);
-            
+
             Cache = new Cache();
 
-            Engine = new V8ScriptEngine();
-
-            Engine.AddHostType(typeof(API.HTTP));
-            Engine.AddHostType(typeof(API.SQL));
-            Engine.AddHostType(typeof(API.IO));
-            Engine.AddHostType(typeof(API.Log));
-            Engine.AddHostType(typeof(API.Session));
-            Engine.AddHostType(typeof(API.XDoc));
-            Engine.AddHostType(typeof(API.Base64));
-            Engine.AddHostType(typeof(API.Buffer));
-            Engine.AddHostType(typeof(API.Windows));
-            Engine.AddHostType(typeof(API.Async));
-            Engine.AddHostType(typeof(API.DLL));
-            Engine.AddHostType(typeof(API.XML));
-            Engine.AddHostType(Microsoft.ClearScript.HostItemFlags.GlobalMembers, typeof(API.Functions));
+            Engine = new Realm();
+            Engine.Init();
+            Engine.RegisterClass(typeof(API.HTTP));
+            Engine.RegisterClass(typeof(API.SQL));
+            Engine.RegisterClass(typeof(API.IO));
+            Engine.RegisterClass(typeof(API.Log));
+            Engine.RegisterClass(typeof(API.Session));
+            Engine.RegisterClass(typeof(API.XDoc));
+            Engine.RegisterClass(typeof(API.Base64));
+            Engine.RegisterClass(typeof(API.Buffer));
+            Engine.RegisterClass(typeof(API.Windows));
+            Engine.RegisterClass(typeof(API.Async));
+            Engine.RegisterClass(typeof(API.DLL));
+            Engine.RegisterClass(typeof(API.XML));
+            Engine.RegisterFunctions(typeof(API.Functions));
 
             Connections = new Connections(Settings);
-
-            Config = new API.Config(Settings);
-            Engine.AddHostObject("Config", Config);
+            Config = new API.Config(Engine.EngineScope, Settings);
 
             XDocService = new XDocServices.XDocService();
         }

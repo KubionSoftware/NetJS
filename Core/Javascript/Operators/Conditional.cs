@@ -5,23 +5,35 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
-    public class Conditional : BinaryOperator {
+    public class Conditional : Operator {
+
+        public Expression Check;
+        public Expression TrueExpression;
+        public Expression FalseExpression;
+
+        public override bool HasLeft => Check != null;
+        public override bool HasRight => true;
+
+        public override void SetLeft(Expression left) {
+            Check = left;
+        }
+
+        public override Expression GetLeft => Check;
+
         public Conditional() : base(3) { }
 
-        public override Constant Execute(Constant lref, Constant rref, Scope scope) {
+        public override Constant Evaluate(Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-conditional-operator
 
-            var lval = Convert.ToBoolean(References.GetValue(lref, scope));
-
-            // TODO: save left and right expression instead of arguments
-            var arguments = (ArgumentList)rref;
+            var lref = Check.Evaluate(agent);
+            var lval = Convert.ToBoolean(References.GetValue(lref, agent));
 
             if (lval) {
-                var trueRef = arguments.Arguments[0].Execute(scope);
-                return References.GetValue(trueRef, scope);
+                var trueRef = TrueExpression.Evaluate(agent);
+                return References.GetValue(trueRef, agent);
             } else {
-                var falseRef = arguments.Arguments[1].Execute(scope);
-                return References.GetValue(falseRef, scope);
+                var falseRef = FalseExpression.Evaluate(agent);
+                return References.GetValue(falseRef, agent);
             }
         }
 

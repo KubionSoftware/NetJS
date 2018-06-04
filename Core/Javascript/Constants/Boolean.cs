@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class Boolean : Constant {
+
+        public static Boolean True = Boolean.Create(true);
+        public static Boolean False = Boolean.Create(false);
+
         public bool Value;
 
-        public Boolean(bool value) {
+        private Boolean(bool value) {
             Value = value;
         }
 
-        public override Constant GetProperty(Constant key, Scope scope) {
-            return Tool.Construct("Boolean", scope).Get(key.ToString());
+        public static Boolean Create(bool value) {
+            return value ? Static.True : Static.False;
         }
         
         public override string ToString() {
             return Value ? Tokens.True : Tokens.False;
-        }
-
-        public override Constant TypeOf(Scope scope) {
-            return new String("boolean");
         }
 
         public override string ToDebugString() {

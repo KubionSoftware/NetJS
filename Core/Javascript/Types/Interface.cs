@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
 
-    public class InterfaceBlueprint : Blueprint {
+    public class InterfaceBlueprint : Literal {
 
         private Interface _interface;
 
@@ -14,7 +14,7 @@ namespace NetJS.Core.Javascript {
             _interface = i;
         }
 
-        public override Constant Instantiate(Scope scope) {
+        public override Constant Instantiate(LexicalEnvironment lex) {
             return _interface;
         }
 
@@ -54,11 +54,11 @@ namespace NetJS.Core.Javascript {
             _members.Add(new Member(name, optional, type));
         }
 
-        public bool Check(Object o, Scope scope) {
+        public bool Check(Object o, LexicalEnvironment lex) {
             foreach (var member in _members) {
                 var value = o.Get(member.Name);
                 if (value is Undefined && member.Optional) continue;
-                if (!member.Type.Check(value, scope)) return false;
+                if (!member.Type.Check(value, lex)) return false;
             }
             return true;
         }

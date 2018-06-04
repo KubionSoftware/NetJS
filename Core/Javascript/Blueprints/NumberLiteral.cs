@@ -5,14 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
-    public class NumberBlueprint : Blueprint {
+    public class NumberLiteral : Literal {
         public double Value { get; }
 
-        public NumberBlueprint(double value) {
+        public NumberLiteral(double value) {
             Value = value;
         }
 
-        public override Constant Instantiate(Scope scope) {
+        public override Constant Instantiate(Agent agent) {
             return new Number(Value);
         }
 

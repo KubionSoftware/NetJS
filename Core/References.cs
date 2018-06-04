@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NetJS.Core {
+namespace NetJS.Core.Javascript {
     class References {
 
-        public static Constant GetValue(Constant v, Scope scope) {
+        public static Constant GetValue(Constant v, Agent agent) {
             if(v is Reference r) {
                 var b = r.GetBase();
 
@@ -20,21 +20,19 @@ namespace NetJS.Core {
                 if (r.IsPropertyReference()) {
                     if (r.HasPrimitiveBase()) {
                         // Assert base is not undefined or null
-                        b = Convert.ToObject(b, scope);
+                        b = Convert.ToObject(b, agent);
                     }
 
-                    return b.GetProperty(r.GetReferencedName(), scope);
-                } else {
-                    // TODO: base must be an environment record
-                    // Return ? base.GetBindingValue(GetReferencedName(V), IsStrictReference(V)) (see 8.1.1).
-                    return Static.Undefined;
+                    return ((Object)b).Get(r.GetReferencedName());
+                } else if (v is EnvironmentRecord record) {
+                    return record.GetBindingValue(r.GetReferencedName(), r.IsStrictReference());
                 }
-            } else {
-                return v;
             }
+
+            return Static.Undefined;
         }
 
-        public static void PutValue(Constant v, Constant w, Scope scope) {
+        public static Completion PutValue(Constant v, Constant w, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-putvalue
 
             if (v is Reference r) {
@@ -45,20 +43,21 @@ namespace NetJS.Core {
                         throw new ReferenceError("Can't assign value to undefined in strict mode");
                     }
 
-                    var globalObj = scope.GetGlobalObject();
-                    globalObj.SetProperty(r.GetReferencedName(), w, scope);
-                    return;
+                    var globalObj = agent.Running.GetGlobalObject();
+                    var succeeded = globalObj.Set(r.GetReferencedName(), w);
+                    return new Completion(CompletionType.Normal, Boolean.Create(succeeded));
                 } else if (r.IsPropertyReference()) {
                     if (r.HasPrimitiveBase()) {
                         // Assert base will never be undefined or null
-                        b = Convert.ToObject(b, scope);
+                        b = Convert.ToObject(b, agent);
                     }
 
                     // TODO: handle succeeded + this value
-                    b.SetProperty(r.GetReferencedName(), w, scope);
-                    return;
+                    var succeeded = ((Javascript.Object)b).Set(r.GetReferencedName(), w);
+                    return new Completion(CompletionType.Normal, Boolean.Create(succeeded));
                 } else {
-                    // TODO: environment record
+                    var record = (EnvironmentRecord)b;
+                    return record.SetMutableBinding(r.GetReferencedName(), w, r.IsStrictReference());
                 }
             } else {
                 throw new ReferenceError($"Can't assign value to {v.ToDebugString()}");
@@ -85,6 +84,52 @@ namespace NetJS.Core {
             }
 
             return argument;
+        }
+
+        public static Reference GetIdentifierReference(LexicalEnvironment lex, Constant name, bool isStrict) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-getidentifierreference
+
+            if (lex == null) {
+                return new Reference(Static.Undefined, name, isStrict);
+            }
+
+            var envRec = lex.Record;
+            var exists = envRec.HasBinding(name);
+
+            if (exists) {
+                return new Reference(envRec, name, isStrict);
+            } else {
+                var outer = lex.Outer;
+                return GetIdentifierReference(outer, name, isStrict);
+            }
+        }
+
+        public static Reference ResolveBinding(Constant name, LexicalEnvironment lex, Agent agent) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-resolvebinding
+
+            if (lex == null) lex = agent.Running.Lex;
+
+            return GetIdentifierReference(lex, name, agent.Running.IsStrict);
+        }
+
+        public static void InitializeReferencedBinding(Reference v, Constant w) {
+            var b = v.GetBase();
+            if (b is EnvironmentRecord e) {
+                e.InitializeBinding(v.GetReferencedName(), w);
+            }
+        }
+
+        public static Completion InitializeBoundName(Constant name, Constant value, LexicalEnvironment lex, Agent agent) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-identifiers-runtime-semantics-bindinginitialization
+
+            if (lex != null) {
+                var env = lex.Record;
+                env.InitializeBinding(name, value);
+                return Static.NormalCompletion;
+            } else {
+                var lhs = ResolveBinding(name, null, agent);
+                return PutValue(lhs, value, agent);
+            }
         }
     }
 }

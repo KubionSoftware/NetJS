@@ -27,7 +27,7 @@ namespace NetJS.API {
         ///     }
         /// });</code></example>
         /// <exception cref="Error">Thrown if the request failed</exception>
-        public static Constant execute(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant execute(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var connectionName = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "HTTP.execute").Value;
             string url;
             string query = "";
@@ -36,7 +36,7 @@ namespace NetJS.API {
             if (connectionName.ToLower().StartsWith("http")) {
                 url = connectionName;
             } else {
-                var application = Tool.GetFromScope<JSApplication>(scope, "__application__");
+                var application = Tool.GetFromScope<JSApplication>(lex, "__application__");
                 if (application == null) throw new InternalError("No application");
 
                 url = application.Connections.GetHttpUrl(connectionName);
@@ -51,13 +51,13 @@ namespace NetJS.API {
             if(settings != null) {
                 if (settings.Get("cookies") is Core.Javascript.Object cookies) {
                     foreach (var key in cookies.GetKeys()) {
-                        request.CookieContainer.Add(new Cookie(key, Core.Tool.ToString(cookies.Get(key), scope)));
+                        request.CookieContainer.Add(new Cookie(key, Core.Convert.ToString(cookies.Get(key), lex)));
                     }
                 }
 
                 if (settings.Get("headers") is Core.Javascript.Object headers) {
                     foreach (var key in headers.GetKeys()) {
-                        Util.HttpWebRequestExtensions.SetRawHeader(request, key, Core.Tool.ToString(headers.Get(key), scope));
+                        Util.HttpWebRequestExtensions.SetRawHeader(request, key, Core.Convert.ToString(headers.Get(key), lex));
                     }
                 }
 
@@ -83,7 +83,7 @@ namespace NetJS.API {
 
                 if (response.ContentType.ToLower() == "application/json") {
                     try {
-                        var json = Core.API.JSON.parse(_this, new[] { result }, scope);
+                        var json = Core.API.JSON.parse(_this, new[] { result }, lex);
                         return json;
                     } catch { }
                 }

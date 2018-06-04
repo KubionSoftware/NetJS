@@ -13,67 +13,67 @@ namespace NetJS.Core.Javascript {
             Value = value;
         }
 
-        public override Constant GetProperty(Constant key, Scope scope) {
-            return Tool.Construct("Number", scope).Get(key.ToString());
+        public override Constant GetProperty(Constant key, LexicalEnvironment lex) {
+            return Tool.Construct("Number", lex).Get(key.ToString());
         }
         
-        public override Constant In(Constant other, Scope scope) {
+        public override Constant In(Constant other, LexicalEnvironment lex) {
             if (other is Object obj) {
-                return new Boolean(obj.Get(Value.ToString()) is Undefined ? false : true);
+                return Boolean.Create(obj.Get(Value.ToString()) is Undefined ? false : true);
             }
 
-            return base.In(other, scope);
+            return base.In(other, lex);
         }
 
-        public override Constant BitwiseNot(Scope scope) {
+        public override Constant BitwiseNot(LexicalEnvironment lex) {
             return new Number(~(int)Value);
         }
 
-        public override Constant BitwiseAnd(Constant other, Scope scope) {
+        public override Constant BitwiseAnd(Constant other, LexicalEnvironment lex) {
             if (other is Number n) {
                 return new Number((int)Value & (int)n.Value);
             }
 
-            return base.BitwiseAnd(other, scope);
+            return base.BitwiseAnd(other, lex);
         }
 
-        public override Constant BitwiseOr(Constant other, Scope scope) {
+        public override Constant BitwiseOr(Constant other, LexicalEnvironment lex) {
             if (other is Number n) {
                 return new Number((int)Value | (int)n.Value);
             }
 
-            return base.BitwiseOr(other, scope);
+            return base.BitwiseOr(other, lex);
         }
 
-        public override Constant BitwiseXor(Constant other, Scope scope) {
+        public override Constant BitwiseXor(Constant other, LexicalEnvironment lex) {
             if (other is Number n) {
                 return new Number((int)Value ^ (int)n.Value);
             }
 
-            return base.BitwiseXor(other, scope);
+            return base.BitwiseXor(other, lex);
         }
 
-        public override Constant LeftShift(Constant other, Scope scope) {
+        public override Constant LeftShift(Constant other, LexicalEnvironment lex) {
             if (other is Number n) {
                 return new Number((int)Value << (int)n.Value);
             }
 
-            return base.LeftShift(other, scope);
+            return base.LeftShift(other, lex);
         }
 
-        public override Constant RightShift(Constant other, Scope scope) {
+        public override Constant RightShift(Constant other, LexicalEnvironment lex) {
             if (other is Number n) {
                 return new Number((int)Value >> (int)n.Value);
             }
 
-            return base.RightShift(other, scope);
+            return base.RightShift(other, lex);
         }
         
         public override string ToString() {
             return Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        public override Constant TypeOf(Scope scope) {
+        public override Constant TypeOf(LexicalEnvironment lex) {
             return new String("number");
         }
 

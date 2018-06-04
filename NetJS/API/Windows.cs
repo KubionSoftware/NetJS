@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 namespace NetJS.API {
     class Windows {
 
-        public static Constant execute(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant execute(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var command = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Windows.execute");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
 
             Process cmd = new Process();
             cmd.StartInfo.FileName = "cmd.exe";

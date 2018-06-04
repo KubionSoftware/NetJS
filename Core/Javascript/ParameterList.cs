@@ -18,5 +18,9 @@ namespace NetJS.Core.Javascript {
 
     public class ParameterList : Node {
         public IList<Parameter> Parameters = new List<Parameter>();
+
+        public int ExpectedArgumentCount() {
+            return Parameters.Count;
+        }
     }
 }

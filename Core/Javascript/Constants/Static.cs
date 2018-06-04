@@ -7,8 +7,10 @@ namespace NetJS.Core.Javascript {
         public static NaN NaN = new NaN();
         public static Infinity Infinity = new Infinity();
 
-        public static Boolean True = new Boolean(true);
-        public static Boolean False = new Boolean(false);
+        public static Boolean True = Boolean.True;
+        public static Boolean False = Boolean.False;
+
+        public static Completion NormalCompletion = new Completion(CompletionType.Normal);
     }
 
     public class Undefined : Constant {
@@ -17,7 +19,7 @@ namespace NetJS.Core.Javascript {
             return "";
         }
 
-        public override Constant TypeOf(Scope scope) {
+        public override Constant TypeOf(LexicalEnvironment lex) {
             return new String("undefined");
         }
 
@@ -32,7 +34,7 @@ namespace NetJS.Core.Javascript {
             return "null";
         }
 
-        public override Constant TypeOf(Scope scope) {
+        public override Constant TypeOf(LexicalEnvironment lex) {
             return new String("object");
         }
 
@@ -45,7 +47,7 @@ namespace NetJS.Core.Javascript {
 
         public NaN() : base(double.NaN) { }
 
-        public override Constant TypeOf(Scope scope) {
+        public override Constant TypeOf(LexicalEnvironment lex) {
             return new String("number");
         }
         
@@ -62,7 +64,7 @@ namespace NetJS.Core.Javascript {
 
         public Infinity() : base(double.PositiveInfinity) { }
 
-        public override Constant TypeOf(Scope scope) {
+        public override Constant TypeOf(LexicalEnvironment lex) {
             return new String("number");
         }
         

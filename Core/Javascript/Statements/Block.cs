@@ -6,69 +6,45 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class Block : Statement {
-        public IList<Node> Nodes = new List<Node>();
+        public StatementList StatementList;
 
-        public override Result Execute(Scope scope) {
-            var depth = scope.Depth;
+        public Block(StatementList statementList) {
+            StatementList = statementList;
+        }
 
-            foreach (var node in Nodes) {
-#if debug_enabled
-                if (Debug.BreakpointNodes.Contains(node.Id)) {
-                    Debug.SteppingLevel = scope.Depth;
-                    Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
-                } else if (Debug.SteppingInto && depth > Debug.SteppingLevel) {
-                    Debug.SteppingLevel++;
-                    Debug.SteppingInto = false;
-                    Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
-                } else if (Debug.SteppingOut && depth < Debug.SteppingLevel) {
-                    Debug.SteppingLevel--;
-                    Debug.SteppingOut = false;
-                    Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
-                } else if (Debug.SteppingOver && depth <= Debug.SteppingLevel) {
-                    Debug.SteppingLevel = depth;
-                    Debug.SteppingOver = false;
-                    Debug.Break(Debug.StopOnBreakpoint, scope.GetStackTrace(Debug.GetNodeLocation(node.Id)), scope.GetScopes());
-                }
-#endif
+        public void BlockDeclarationInstantiation(LexicalEnvironment lex, Agent agent) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-blockdeclarationinstantiation
 
-                try {
-                    if (node is Statement statement) {
-                        var result = statement.Execute(scope);
-                        if (result.Type == ResultType.None) continue;
+            var envRec = lex.Record;
 
-                        if (result.Type == ResultType.Return || result.Type == ResultType.Break || result.Type == ResultType.Throw || result.Type == ResultType.Continue) {
-#if debug_enabled
-                            if (Debug.SteppingOver && depth <= 1) {
-                                Debug.Continue();
-                            }
-#endif
-
-                            return result;
+            foreach (var statement in StatementList.List) {
+                if (statement is VariableDeclaration d && d.Scope == DeclarationScope.Block) {
+                    foreach (var dn in d.GetBoundNames()) {
+                        if (d.IsConstant) {
+                            envRec.CreateImmutableBinding(dn, true);
+                        } else {
+                            envRec.CreateMutableBinding(dn, false);
                         }
-                    } else if (node is Expression expression) {
-                        expression.Execute(scope);
                     }
-                } catch (Error e) {
-#if debug_enabled
-                    Debug.SteppingLevel = scope.Depth;
-                    var location = Debug.GetNodeLocation(node.Id);
-                    Debug.Break(Debug.StopOnException, scope.GetStackTrace(location), scope.GetScopes());
 
-                    e.AddStackTrace(location);
-#endif
-
-                    // Rethrow the error so it keeps traveling up
-                    throw;
+                    // TODO: function definitions
                 }
             }
+        }
 
-#if debug_enabled
-            if (Debug.SteppingOver && depth <= 1) {
-                Debug.Continue();
-            }
-#endif
+        public override Completion Evaluate(Agent agent) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-block-runtime-semantics-evaluation
 
-            return new Result(ResultType.None);
+            var oldEnv = agent.Running.Lex;
+            var blockEnv = new LexicalEnvironment(oldEnv);
+
+            BlockDeclarationInstantiation(blockEnv, agent);
+
+            agent.Running.Lex = blockEnv;
+            var r = StatementList.Evaluate(agent);
+            agent.Running.Lex = oldEnv;
+
+            return r;
         }
     }
 }

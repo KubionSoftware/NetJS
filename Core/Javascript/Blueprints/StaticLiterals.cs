@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
 
-    public class UndefinedBlueprint : Blueprint {
+    public class UndefinedLiteral : Literal {
 
-        public override Constant Instantiate(Scope scope) {
+        public override Constant Instantiate(Agent agent) {
             return Static.Undefined;
         }
 
@@ -17,9 +17,9 @@ namespace NetJS.Core.Javascript {
         }
     }
 
-    public class NullBlueprint : Blueprint {
+    public class NullLiteral : Literal {
 
-        public override Constant Instantiate(Scope scope) {
+        public override Constant Instantiate(Agent agent) {
             return Static.Null;
         }
 
@@ -28,9 +28,9 @@ namespace NetJS.Core.Javascript {
         }
     }
 
-    public class NaNBlueprint : Blueprint {
+    public class NaNLiteral : Literal {
 
-        public override Constant Instantiate(Scope scope) {
+        public override Constant Instantiate(Agent agent) {
             return Static.NaN;
         }
 
@@ -39,9 +39,9 @@ namespace NetJS.Core.Javascript {
         }
     }
 
-    public class InfinityBlueprint : Blueprint {
+    public class InfinityLiteral : Literal {
 
-        public override Constant Instantiate(Scope scope) {
+        public override Constant Instantiate(Agent agent) {
             return Static.Infinity;
         }
 

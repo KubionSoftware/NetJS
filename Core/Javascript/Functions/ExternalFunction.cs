@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 namespace NetJS.Core.Javascript {
     public class ExternalFunction : Function {
         public string Name;
-        public Func<Constant, Constant[], Scope, Constant> Function;
+        public Func<Constant, Constant[], LexicalEnvironment, Constant> Function;
 
-        public ExternalFunction(string name, Func<Constant, Constant[], Scope, Constant> function, Scope scope) : base(scope) {
+        public ExternalFunction(string name, Func<Constant, Constant[], LexicalEnvironment, Constant> function, LexicalEnvironment lex) : base(lex) {
             Name = name;
             Function = function;
         }
 
-        public override Constant Call(Constant[] arguments, Constant thisValue, Scope scope) {
-            var functionScope = new Scope(Scope, scope, null, ScopeType.Function, scope.Buffer);
+        public override Constant Call(Constant[] arguments, Constant thisValue, LexicalEnvironment lex) {
+            var functionScope = new LexicalEnvironment(Context, lex, null, EnvironmentType.Function, lex.Buffer);
 
             var result = Function(thisValue, arguments, functionScope);
             return result;

@@ -11,7 +11,7 @@ using NetJS;
 namespace Testing {
 
     class TestFunctions {
-        public static Constant assert(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant assert(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             Constant value = Static.Undefined;
             string message = "Could not read message";
 
@@ -19,7 +19,7 @@ namespace Testing {
                 var function = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.InternalFunction>(arguments, 0, "assert");
                 message = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.String>(arguments, 1, "assert").Value;
 
-                value = function.Call(new ArgumentList(), null, scope);
+                value = function.Call(new Constant[] { }, null, lex);
             } catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Error.WriteLine(e);
@@ -38,7 +38,7 @@ namespace Testing {
             return NetJS.Core.Javascript.Static.Undefined;
         }
 
-        public static Constant time(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant time(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             string message = "Could not read message";
 
             try {
@@ -47,7 +47,7 @@ namespace Testing {
 
                 var watch = new Stopwatch();
                 watch.Start();
-                function.Call(new ArgumentList(), null, scope);
+                function.Call(new Constant[] { }, null, lex);
                 watch.Stop();
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"{message} took {watch.ElapsedMilliseconds}ms");

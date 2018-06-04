@@ -5,38 +5,38 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
-    class ClassBlueprint : Blueprint {
-        public FunctionBlueprint Constructor;
-        public List<FunctionBlueprint> PrototypeMethods = new List<FunctionBlueprint>();
-        public List<FunctionBlueprint> StaticMethods = new List<FunctionBlueprint>();
+    class ClassLiteral : Literal {
+        public FunctionLiteral Constructor;
+        public List<FunctionLiteral> PrototypeMethods = new List<FunctionLiteral>();
+        public List<FunctionLiteral> StaticMethods = new List<FunctionLiteral>();
         public string Prototype = "Object";
 
-        public ClassBlueprint() {
+        public ClassLiteral() {
             
         }
 
-        public override Constant Instantiate(Scope scope) {
+        public override Constant Instantiate(Agent agent) {
             // If there is no constructor, create a default empty function
-            var constructor = Constructor == null ? new Javascript.InternalFunction(scope) {
+            var constructor = Constructor == null ? new Javascript.InternalFunction(agent.Running.Lex) {
                 Name = "",
                 Body = new Block() { Nodes = new List<Node>() },
-                Parameters = new ParameterList(),
+                FormalParameters = new ParameterList(),
                 Type = null
-            } : (Function)Constructor.Instantiate(scope);
+            } : (Function)Constructor.Instantiate(agent);
 
             // Create the prototype and assign it to the constructor
-            var prototype = Tool.Construct(Prototype, scope);
+            var prototype = Tool.Construct(Prototype, agent);
             constructor.Set("prototype", prototype);
             prototype.Set("constructor", constructor);
 
             // Assign prototype methods to prototype
             foreach(var method in PrototypeMethods) {
-                prototype.Set(method.Name, method.Instantiate(scope));
+                prototype.Set(method.Name, method.Instantiate(agent));
             }
 
             // Assign static methods to constructor function
             foreach (var method in StaticMethods) {
-                constructor.Set(method.Name, method.Instantiate(scope));
+                constructor.Set(method.Name, method.Instantiate(agent));
             }
 
             return constructor;

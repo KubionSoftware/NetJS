@@ -15,11 +15,11 @@ namespace NetJS.API {
         /// <param name="key">The key to get a value from</param>
         /// <returns>Value linked to key.</returns>
         /// <example><code lang="javascript">var value = Sessions.get("userID");</code></example>
-        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
-        public static Constant get(Constant _this, Constant[] arguments, Scope scope) {
+        /// <exception cref="InternalError">Thrown when no application has been found in application lex.</exception>
+        public static Constant get(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Session.get").Value;
 
-            var session = Tool.GetFromScope<JSSession>(scope, "__session__");
+            var session = Tool.GetFromScope<JSSession>(lex, "__session__");
             if (session == null) throw new InternalError("No session");
 
             var value = session.Get(key);
@@ -31,12 +31,12 @@ namespace NetJS.API {
         /// <param name="key">The key to set a value with</param>
         /// <param name="value">The value to link to the key</param>
         /// <example><code lang="javascript">Session.set("userId", user.id);</code></example>
-        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
-        public static Constant set(Constant _this, Constant[] arguments, Scope scope) {
+        /// <exception cref="InternalError">Thrown when no application has been found in application lex.</exception>
+        public static Constant set(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Session.set").Value;
             var value = Core.Tool.GetArgument(arguments, 1, "Session.set");
 
-            var session = Tool.GetFromScope<JSSession>(scope, "__session__");
+            var session = Tool.GetFromScope<JSSession>(lex, "__session__");
             if (session == null) throw new InternalError("No session");
 
             session.Set(key, value);
@@ -47,11 +47,11 @@ namespace NetJS.API {
         /// <summary>Sessions.remove takes a key and removes it from the session.</summary>
         /// <param name="key">The key to get a value from</param>
         /// <example><code lang="javascript">Sessions.remove("userId");</code></example>
-        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
-        public static Constant remove(Constant _this, Constant[] arguments, Scope scope) {
+        /// <exception cref="InternalError">Thrown when no application has been found in application lex.</exception>
+        public static Constant remove(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var key = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "Session.delete").Value;
 
-            var session = Tool.GetFromScope<JSSession>(scope, "__session__");
+            var session = Tool.GetFromScope<JSSession>(lex, "__session__");
             if (session == null) throw new InternalError("No session");
 
             session.Remove(key);
@@ -61,9 +61,9 @@ namespace NetJS.API {
 
         /// <summary>Sessions.clear removes all values from the session.</summary>
         /// <example><code lang="javascript">Sessions.clear();</code></example>
-        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
-        public static Constant clear(Constant _this, Constant[] arguments, Scope scope) {
-            var session = Tool.GetFromScope<JSSession>(scope, "__session__");
+        /// <exception cref="InternalError">Thrown when no application has been found in application lex.</exception>
+        public static Constant clear(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            var session = Tool.GetFromScope<JSSession>(lex, "__session__");
             if (session == null) throw new InternalError("No session");
 
             session.Clear();
@@ -74,12 +74,12 @@ namespace NetJS.API {
         /// <summary>Sessions.getAll returns the entire session object.</summary>
         /// <returns>Object containing all keys and values.</returns>
         /// <example><code lang="javascript">var session = Sessions.getAll();</code></example>
-        /// <exception cref="InternalError">Thrown when no application has been found in application scope.</exception>
-        public static Constant getAll(Constant _this, Constant[] arguments, Scope scope) {
-            var session = Tool.GetFromScope<JSSession>(scope, "__session__");
+        /// <exception cref="InternalError">Thrown when no application has been found in application lex.</exception>
+        public static Constant getAll(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            var session = Tool.GetFromScope<JSSession>(lex, "__session__");
             if (session == null) throw new InternalError("No session");
 
-            return session.GetObject(scope);
+            return session.GetObject(lex);
         }
     }
 }

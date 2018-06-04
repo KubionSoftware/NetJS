@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 namespace NetJS.API {
     class Async {
 
-        private static Task[] CreateTasks(Constant[] arguments, Scope scope, string name) {
+        private static Task[] CreateTasks(Constant[] arguments, LexicalEnvironment lex, string name) {
             var tasks = new Task[arguments.Length];
 
             for (var i = 0; i < arguments.Length; i++) {
                 var function = Core.Tool.GetArgument<Core.Javascript.Function>(arguments, i, name);
                 var task = new Task(() => {
-                    function.Call(new ArgumentList(), Static.Undefined, scope);
+                    function.Call(new Constant[] { }, Static.Undefined, lex);
                 });
                 task.Start();
                 tasks[i] = task;
@@ -33,8 +33,8 @@ namespace NetJS.API {
         ///     () => SQL.execute("query2"),
         ///     () => IO.writeText("big file")
         /// );</code></example>
-        public static Constant waitAll(Constant _this, Constant[] arguments, Scope scope) {
-            Task.WaitAll(CreateTasks(arguments, scope, "Async.waitAll"));
+        public static Constant waitAll(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            Task.WaitAll(CreateTasks(arguments, lex, "Async.waitAll"));
             return Static.Undefined;
         }
 
@@ -47,8 +47,8 @@ namespace NetJS.API {
         ///     () => task2(),
         ///     () => task3()
         /// );</code></example>
-        public static Constant waitAny(Constant _this, Constant[] arguments, Scope scope) {
-            Task.WaitAny(CreateTasks(arguments, scope, "Async.waitAny"));
+        public static Constant waitAny(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            Task.WaitAny(CreateTasks(arguments, lex, "Async.waitAny"));
             return Static.Undefined;
         }
 
@@ -61,15 +61,15 @@ namespace NetJS.API {
         ///     () => SQL.execute("query2"),
         ///     () => IO.writeText("big file")
         /// );</code></example>
-        public static Constant run(Constant _this, Constant[] arguments, Scope scope) {
-            CreateTasks(arguments, scope, "Async.run");
+        public static Constant run(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+            CreateTasks(arguments, lex, "Async.run");
             return Static.Undefined;
         }
 
         /// <summary>Sleeps for a given number of milliseconds.</summary>
         /// <param name="time">Milliseconds to sleep (number)</param>
         /// <example><code lang="javascript">Async.sleep(1000);</code></example>
-        public static Constant sleep(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant sleep(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var time = Core.Tool.GetArgument<Core.Javascript.Number>(arguments, 0, "Async.sleep");
             Thread.Sleep((int)time.Value);
             return Static.Undefined;

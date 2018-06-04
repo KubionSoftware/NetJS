@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace NetJS.Core.API {
     class Uint8Array {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant constructor(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var length = Tool.GetArgument<Javascript.Number>(arguments, 0, "Uint8Array constructor");
 
             return new Javascript.Uint8Array((int)length.Value);

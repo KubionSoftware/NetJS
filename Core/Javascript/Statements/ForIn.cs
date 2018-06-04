@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class ForIn : Statement {
-        public Declaration Declaration;
+        public Node Declaration;
         public Expression Collection;
         public Block Body;
 
@@ -21,9 +21,9 @@ namespace NetJS.Core.Javascript {
                 _forInNode = forInNode;
             }
 
-            public override bool Start(Scope scope) {
-                var objResult = _forInNode.Collection.Execute(scope);
-                if (objResult is Array array) objResult = array.ToObject(scope);
+            public override bool Start(LexicalEnvironment lex) {
+                var objResult = _forInNode.Collection.Evaluate(lex);
+                if (objResult is Array array) objResult = array.ToObject(lex);
                 if (!(objResult is Object)) return false;
 
                 _obj = (Object)objResult;
@@ -33,20 +33,20 @@ namespace NetJS.Core.Javascript {
                 return true;
             }
 
-            public override bool Before(Scope scope) {
+            public override bool Before(LexicalEnvironment lex) {
                 if (_index >= _keys.Length) return false;
                 // TODO: better way to declare
-                scope.DeclareVariable(_forInNode.Declaration.Declarations[0], _forInNode.Declaration.IsConstant, DeclarationScope.Block, new String(_keys[_index]));
+                lex.DeclareVariable(_forInNode.Declaration.Declarations[0], _forInNode.Declaration.IsConstant, DeclarationScope.Block, new String(_keys[_index]));
                 _index++;
                 return true;
             }
 
-            public override bool After(Scope scope) {
+            public override bool After(LexicalEnvironment lex) {
                 return true;
             }
         }
 
-        public override Result Execute(Scope parent) {
+        public override Completion Execute(LexicalEnvironment parent) {
             return new ForInExecution(this).Execute(this, parent);
         }
     }

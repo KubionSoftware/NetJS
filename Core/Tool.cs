@@ -11,25 +11,25 @@ namespace NetJS.Core {
             return array;
         }
 
-        public static Javascript.Object Construct(string name, Javascript.Scope scope, Constant[] arguments = null) {
-            var constructor = (Function)new New().Execute(new Javascript.String(name), scope);
-            var obj = constructor.Call(arguments != null ? arguments : new Constant[] { }, Static.Undefined, scope);
+        public static Javascript.Object Construct(string name, Agent agent, Constant[] arguments = null) {
+            var constructor = (Function)new New() { NewExpression = new Identifier(name) }.Evaluate(agent);
+            var obj = constructor.Call(Static.Undefined, agent, arguments != null ? arguments : new Constant[] { });
             return (Javascript.Object)obj;
         }
 
-        public static Javascript.Object Prototype(string name, Javascript.Scope scope) {
+        public static Javascript.Object Prototype(string name, Agent agent) {
             Javascript.Object obj = null;
             try {
-                obj = scope.Engine.GetPrototype(name);
+                obj = agent.Running.Realm.GetPrototype(name);
             } catch {
-                if(scope.GetVariable(name) is Javascript.Object ob) {
+                if(References.GetValue(new Identifier(name).Evaluate(agent), agent) is Javascript.Object ob) {
                     obj = ob;
                 } else {
                     throw new Javascript.InternalError($"Could not get prototype of '{name}'");
                 }
             }
             
-            var prototype = obj.Get("prototype");
+            var prototype = obj.Get(new Javascript.String("prototype"));
             if (prototype is Javascript.Object o) {
                 return o;
             }
@@ -37,8 +37,25 @@ namespace NetJS.Core {
             throw new Javascript.InternalError($"Could not get prototype of '{name}'");
         }
 
-        public static bool IsType(Javascript.Object obj, Javascript.Object prototype) {
-            return obj.__proto__ == prototype.Get<Javascript.Object>("prototype");
+        public static bool IsType(Constant o, Constant c) {
+            if (o is Javascript.Object oo) {
+                if (c is Javascript.Object co) {
+                    var p = co.Get(new Javascript.String("prototype"));
+                    if (p is Javascript.Object po) {
+                        while (true) {
+                            oo = oo.GetPrototypeOf();
+                            if (oo == null) return false;
+                            if (Compare.SameValue(po, oo)) return true;
+                        }
+                    } else {
+                        throw new TypeError("Prototype is not an object");
+                    }
+                } else {
+                    throw new TypeError("Right-hand side of instanceof operator must be an object");
+                }
+            } else {
+                return false;
+            }
         }
 
         public static string NormalizePath(string path) {

@@ -13,12 +13,12 @@ namespace NetJS.Core.Javascript {
             _expressions = expressions;
         }
 
-        public override Result Execute(Scope scope) {
+        public override Completion Execute(LexicalEnvironment lex) {
             foreach (var expression in _expressions) {
-                scope.Buffer.Append(expression.Execute(scope).ToString());
+                lex.Buffer.Append(expression.Evaluate(lex).ToString());
             }
 
-            return new Result(ResultType.None);
+            return Static.NormalCompletion;
         }
     }
 }

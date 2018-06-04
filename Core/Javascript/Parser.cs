@@ -43,13 +43,12 @@ namespace NetJS.Core.Javascript {
             };
 
             _expressions = new Dictionary<string, Func<Expression, Expression>> {
-                { Tokens.True, (l) => new BooleanBlueprint(true) },
-                { Tokens.False, (l) => new BooleanBlueprint(false) },
-                { Tokens.Null, (l) => new NullBlueprint() },
-                { Tokens.Undefined, (l) => new UndefinedBlueprint() },
-                { Tokens.NotANumber, (l) => new NaNBlueprint() },
-                { Tokens.Infinity, (l) => new InfinityBlueprint() },
-                { Tokens.New, (l) => new New() },
+                { Tokens.True, (l) => new BooleanLiteral(true) },
+                { Tokens.False, (l) => new BooleanLiteral(false) },
+                { Tokens.Null, (l) => new NullLiteral() },
+                { Tokens.Undefined, (l) => new UndefinedLiteral() },
+                { Tokens.NotANumber, (l) => new NaNLiteral() },
+                { Tokens.Infinity, (l) => new InfinityLiteral() },
                 { Tokens.Add, (l) => new Addition() },
                 { Tokens.Substract, (l) => {
                     if(l == null) {
@@ -109,7 +108,8 @@ namespace NetJS.Core.Javascript {
                 { Tokens.ArrayOpen, (l) => {
                     return IsVariable(LastExpression(l)) ? (Expression)ParseArrayAccess() : ParseArray();
                 } },
-                { Tokens.Conditional, (l) => ParseConditional() }
+                { Tokens.Conditional, (l) => ParseConditional() },
+                { Tokens.New, (l) => ParseNew() }
             };
 
             _stopTokens = new HashSet<string>() {
@@ -138,7 +138,7 @@ namespace NetJS.Core.Javascript {
             Debug.RemoveNodes(_fileId);
 #endif
 
-            var result = ParseStatements();
+            var result = new Block(ParseStatements());
             result = Optimizer.Optimize(result);
             return result;
         }
@@ -153,8 +153,8 @@ namespace NetJS.Core.Javascript {
             return error;
         }
 
-        public Block ParseStatements(int maxStatements = -1) {
-            var list = new Block();
+        public StatementList ParseStatements(int maxStatements = -1) {
+            var list = new List<Statement>();
 
             while (_index < _tokens.Count) {
                 var token = _tokens[_index];
@@ -177,7 +177,7 @@ namespace NetJS.Core.Javascript {
                     node.RegisterDebug(GetLocation(startIndex));
 #endif
 
-                    list.Nodes.Add(node);
+                    list.Add(node);
                 } else {
                     // Try to parse as an expression
                     var startIndex = _index;
@@ -188,17 +188,17 @@ namespace NetJS.Core.Javascript {
                             throw CreateError($"Did not expect token '{token.Content}' while parsing statement");
                         }
                     } else {
-                        list.Nodes.Add(expression);
+                        list.Add(new ExpressionStatement(expression));
                     }
                 }
 
-                if(maxStatements != -1 && list.Nodes.Count >= maxStatements) {
+                if(maxStatements != -1 && list.Count >= maxStatements) {
                     // Break if the maximum number of statements is reached
                     break;
                 }
             }
 
-            return list;
+            return new StatementList(list);
         }
 
         // Advances the index and returns the next token that is not a whitespace or comment
@@ -279,16 +279,16 @@ namespace NetJS.Core.Javascript {
         }
 
         // Parses a variable declaration
-        public Declaration ParseDeclaration() {
+        public VariableDeclaration ParseDeclaration() {
             var token = Next("parse declaration");
             if (!(token.Is(Tokens.Var) || token.Is(Tokens.Let) || token.Is(Tokens.Const))) {
                 throw CreateError($"Invalid declaration token '{token}'");
             }
 
-            var scope = token.Is(Tokens.Var) ? DeclarationScope.Function : DeclarationScope.Block;
+            var lex = token.Is(Tokens.Var) ? DeclarationScope.Function : DeclarationScope.Block;
             var constant = token.Is(Tokens.Const);
 
-            var result = new Declaration(scope, constant);
+            var result = new VariableDeclaration(lex, constant);
 
             while (true) {
                 var name = Next("variable name").Content;
@@ -305,12 +305,12 @@ namespace NetJS.Core.Javascript {
                     Skip(Tokens.Assign);
                     expression = ParseExpression();
 
-                    if(expression is FunctionBlueprint function) {
+                    if(expression is FunctionLiteral function) {
                         function.Name = name;
                     }
                 }
 
-                result.Declarations.Add(new Declaration.DeclarationVariable(name, type, expression));
+                result.Declarations.Add(new VariableDeclaration.DeclarationVariable(name, type, expression));
 
                 if (!Peek().Is(Tokens.Sequence)) {
                     break;
@@ -341,7 +341,7 @@ namespace NetJS.Core.Javascript {
         }
 
         public bool IsVariable(Expression expression) {
-            return expression is KeyBlueprint || expression is Access || expression is New || expression is FunctionBlueprint || expression is ArgumentList;
+            return expression is Identifier || expression is Access || expression is New || expression is FunctionLiteral || expression is ArgumentList;
         }
 
         public void CombineExpression(ref Expression left, Expression expression) {
@@ -433,12 +433,12 @@ namespace NetJS.Core.Javascript {
                         _index++;
                         continue;
                     } else if (token.Type == Token.Group.String) {
-                        CombineExpression(ref left, new StringBlueprint(token.Content));
+                        CombineExpression(ref left, new StringLiteral(token.Content));
                         _index++;
                     } else if (token.Type == Token.Group.Template) {
                         CombineExpression(ref left, ParseTemplate());
                     } else if (token.Type == Token.Group.Number) {
-                        CombineExpression(ref left, new NumberBlueprint(Double.Parse(token.Content, CultureInfo.InvariantCulture)));
+                        CombineExpression(ref left, new NumberLiteral(Double.Parse(token.Content, CultureInfo.InvariantCulture)));
                         _index++;
                     } else if (_expressions.ContainsKey(token.Content)) {
                         CombineExpression(ref left, _expressions[token.Content](left));
@@ -458,7 +458,7 @@ namespace NetJS.Core.Javascript {
                     } else if (_statements.ContainsKey(token.Content)) {
                         break;
                     } else {
-                        CombineExpression(ref left, ParseKey(token.Content));
+                        CombineExpression(ref left, ParseIdentifier(token.Content));
                     }
                     
                     previousNewLine = false;
@@ -489,7 +489,7 @@ namespace NetJS.Core.Javascript {
             return left;
         }
 
-        public Expression ParseKey(string content) {
+        public Expression ParseIdentifier(string content) {
             _index++;
 
             if (Peek().Is(Tokens.ArrowFunction)) {
@@ -497,7 +497,7 @@ namespace NetJS.Core.Javascript {
                 parameters.Parameters.Add(new Parameter(content, new AnyType()));
                 return ParseArrowFunction(parameters);
             } else {
-                return new KeyBlueprint(content);
+                return new Identifier(content);
             }
         }
 
@@ -593,18 +593,16 @@ namespace NetJS.Core.Javascript {
 
             var flags = valid ? Next("regex flags").Content : "";
 
-            return new Call() {
-                Left = new New() {
-                    Right = new KeyBlueprint("RegExp")
-                },
-                Right = new ArgumentList(
-                    new StringBlueprint(buffer),
-                    new StringBlueprint(flags)
+            return new New() {
+                NewExpression = new Identifier("RegExp"),
+                Arguments = new ArgumentList(
+                    new StringLiteral(buffer),
+                    new StringLiteral(flags)
                 )
             };
         }
 
-        public NumberBlueprint ParseNumber() {
+        public NumberLiteral ParseNumber() {
             var token = _tokens[_index];
             var s = token.Content;
             
@@ -622,7 +620,7 @@ namespace NetJS.Core.Javascript {
 
             double value;
             if(double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value)) {
-                return new NumberBlueprint(value);
+                return new NumberLiteral(value);
             } else {
                 throw CreateError("Invalid number '" + s + "'");
             }
@@ -635,12 +633,12 @@ namespace NetJS.Core.Javascript {
 
         public Expression ParseTemplate() {
             var expressions = ParseTemplateExpressions();
-            if (expressions.Count == 0) return new StringBlueprint("");
+            if (expressions.Count == 0) return new StringLiteral("");
 
             Expression result = expressions[0];
             for (var i = 1; i < expressions.Count; i++) {
-                if (result is StringBlueprint rs && expressions[i] is StringBlueprint es) {
-                    result = new StringBlueprint(rs.Value + es.Value);
+                if (result is StringLiteral rs && expressions[i] is StringLiteral es) {
+                    result = new StringLiteral(rs.Value + es.Value);
                 } else {
                     result = new Addition() { Left = result, Right = expressions[i] };
                 }
@@ -665,7 +663,7 @@ namespace NetJS.Core.Javascript {
 
                     Skip(Token.Group.ExpressionEnd);
                 } else if(next.Type == Token.Group.String) {
-                    parts.Add(new StringBlueprint(next.Content));
+                    parts.Add(new StringLiteral(next.Content));
                 }
             }
 
@@ -679,7 +677,7 @@ namespace NetJS.Core.Javascript {
             var check = ParseExpression();
             Skip(Tokens.GroupClose);
 
-            var body = ParseBlock();
+            var body = ParseBlockOrStatement();
 
             return new While() { Check = check, Body = body };
         }
@@ -687,7 +685,7 @@ namespace NetJS.Core.Javascript {
         public DoWhile ParseDoWhile() {
             Skip(Tokens.Do);
 
-            var body = ParseBlock();
+            var body = ParseBlockOrStatement();
 
             Skip(Tokens.While);
 
@@ -698,20 +696,24 @@ namespace NetJS.Core.Javascript {
             return new DoWhile() { Check = check, Body = body };
         }
 
-        public Block ParseBlock() {
+        public Statement ParseBlockOrStatement() {
             if (Peek().Is(Tokens.BlockOpen)) {
-                Skip(Tokens.BlockOpen);
-                var body = ParseStatements();
-                Skip(Tokens.BlockClose);
-
-                return body;
+                return ParseBlock();
             } else {
-                var statement = ParseStatements(1);
+                var statementList = ParseStatements(1);
                 if (Peek().Is(Tokens.ExpressionEnd)) {
                     Skip(Tokens.ExpressionEnd);
                 }
-                return statement;
+                return statementList.List[0];
             }
+        }
+
+        public Block ParseBlock() {
+            Skip(Tokens.BlockOpen);
+            var statementList = ParseStatements();
+            Skip(Tokens.BlockClose);
+
+            return new Block(statementList);
         }
 
         public Statement ParseFor() {
@@ -728,75 +730,64 @@ namespace NetJS.Core.Javascript {
                 var action = ParseExpression();
                 Skip(Tokens.GroupClose);
 
-                return new For() { Declaration = declaration, Check = check, Action = action, Body = ParseBlock() };
+                return new For() { First = declaration, Second = check, Third = action, Stmt = ParseBlockOrStatement() };
             } else if (peek.Is(Tokens.ForIn)) {
                 Skip(Tokens.ForIn);
                 var collection = ParseExpression();
                 Skip(Tokens.GroupClose);
 
-                return new ForIn() { Declaration = declaration, Collection = collection, Body = ParseBlock() };
+                return new ForIn() { Declaration = declaration, Collection = collection, Body = ParseBlockOrStatement() };
             } else if (peek.Is(Tokens.ForOf)) {
                 Skip(Tokens.ForOf);
                 var collection = ParseExpression();
                 Skip(Tokens.GroupClose);
 
-                return new ForOf() { Declaration = declaration, Collection = collection, Body = ParseBlock() };
+                return new ForOf() { Declaration = declaration, Collection = collection, Body = ParseBlockOrStatement() };
             }
 
             throw CreateError("Incorrect for loop");
         }
 
-        public If.IfBlock ParseIfPart() {
+        public If ParseIf() {
             Skip(Tokens.If);
             Skip(Tokens.GroupOpen);
 
-            var check = ParseExpression();
+            var result = new If();
+
+            result.Test = ParseExpression();
 
             Skip(Tokens.GroupClose);
 
-            var body = ParseBlock();
+            result.TrueStmt = ParseBlockOrStatement();
 
-            return new If.IfBlock(check, body);
-        }
-
-        public If ParseIf() {
-            var result = new If();
-            result.Ifs.Add(ParseIfPart());
-
-            while (Peek().Is(Tokens.Else)) {
+            if (Peek().Is(Tokens.Else)) {
                 Skip(Tokens.Else);
-
-                if (Peek().Is(Tokens.If)) {
-                    result.Ifs.Add(ParseIfPart());
-                } else {
-                    result.Else = ParseBlock();
-                }
+                result.FalseStmt = ParseBlockOrStatement();
             }
 
             return result;
         }
 
-        public If ParseSwitch() {
+        public Switch ParseSwitch() {
             Skip(Tokens.Switch);
 
             Skip(Tokens.GroupOpen);
-            var reference = ParseExpression();
+            var test = ParseExpression();
             Skip(Tokens.GroupClose);
 
             Skip(Tokens.BlockOpen);
 
-            var result = new If();
+            var clauses = new List<CaseClause>();
 
             while (Peek().Is(Tokens.Case)) {
                 Skip(Tokens.Case);
                 var value = ParseExpression();
-                var check = new Equals() { Left = reference, Right = value };
 
                 Skip(Tokens.CaseSeperator);
 
                 var body = ParseStatements();
 
-                result.Ifs.Add(new If.IfBlock(check, body));
+                clauses.Add(new CaseClause() { Expression = value, StatementList = body });
             }
 
             if (Peek().Is(Tokens.Default)) {
@@ -805,12 +796,12 @@ namespace NetJS.Core.Javascript {
 
                 var body = ParseStatements();
 
-                result.Else = body;
+                clauses.Add(new CaseClause() { IsDefault = true, StatementList = body });
             }
 
             Skip(Tokens.BlockClose);
 
-            return result;
+            return new Switch() { Test = test, Block = new CaseBlock() { Clauses = clauses } };
         }
 
         public Access ParseArrayAccess() {
@@ -823,7 +814,7 @@ namespace NetJS.Core.Javascript {
             return new Access(false) { Right = value };
         }
 
-        public ArrayBlueprint ParseArray() {
+        public ArrayLiteral ParseArray() {
             var list = new List<Expression>();
 
             Skip(Tokens.ArrayOpen);
@@ -845,10 +836,10 @@ namespace NetJS.Core.Javascript {
 
             Skip(Tokens.ArrayClose);
 
-            return new ArrayBlueprint(list);
+            return new ArrayLiteral(list);
         }
 
-        public ObjectBlueprint ParseObject() {
+        public ObjectLiteral ParseObject() {
             var blueprints = new Dictionary<string, Expression>();
 
             Skip(Tokens.BlockOpen);
@@ -876,7 +867,7 @@ namespace NetJS.Core.Javascript {
 
             Skip(Tokens.BlockClose);
 
-            return new ObjectBlueprint(blueprints);
+            return new ObjectLiteral(blueprints);
         }
 
         public ParameterList ParseParameters() {
@@ -919,7 +910,7 @@ namespace NetJS.Core.Javascript {
             return list;
         }
 
-        public FunctionBlueprint ParseFunction(string name) {
+        public FunctionLiteral ParseFunction(string name) {
             var parameters = ParseParameters();
 
             Type type = null;
@@ -927,9 +918,9 @@ namespace NetJS.Core.Javascript {
                 type = ParseType();
             }
 
-            var body = ParseBlock();
+            var body = ParseBlockOrStatement();
 
-            var function = new FunctionBlueprint(name, type, parameters, body);
+            var function = new FunctionLiteral(name, type, parameters, body);
             return function;
         }
 
@@ -945,8 +936,8 @@ namespace NetJS.Core.Javascript {
             var name = Next("function name");
             var function = ParseFunction(name.Content);
             
-            var declaration = new Declaration(DeclarationScope.Global, false);
-            declaration.Declarations.Add(new Declaration.DeclarationVariable(name.Content, new AnyType(), function));
+            var declaration = new VariableDeclaration(DeclarationScope.Global, false);
+            declaration.Declarations.Add(new VariableDeclaration.DeclarationVariable(name.Content, new AnyType(), function));
 
             return declaration;
         }
@@ -955,7 +946,7 @@ namespace NetJS.Core.Javascript {
             Skip(Tokens.Class);
 
             var className = Next("class name");
-            var classBlueprint = new ClassBlueprint();
+            var classBlueprint = new ClassLiteral();
 
             if (Peek().Is(Tokens.Extends)) {
                 Skip(Tokens.Extends);
@@ -984,8 +975,8 @@ namespace NetJS.Core.Javascript {
 
             Skip(Tokens.BlockClose);
 
-            var declaration = new Declaration(DeclarationScope.Global, false);
-            declaration.Declarations.Add(new Declaration.DeclarationVariable(className.Content, new AnyType(), classBlueprint));
+            var declaration = new VariableDeclaration(DeclarationScope.Global, false);
+            declaration.Declarations.Add(new VariableDeclaration.DeclarationVariable(className.Content, new AnyType(), classBlueprint));
 
             return declaration;
         }
@@ -1046,28 +1037,39 @@ namespace NetJS.Core.Javascript {
 
         public Conditional ParseConditional() {
             Skip(Tokens.Conditional);
-
-            var arguments = new List<Expression>();
-            arguments.Add(ParseExpression());
+            
+            var trueExpression = ParseExpression();
             Skip(Tokens.ConditionalSeperator);
-            arguments.Add(ParseExpression());
+            var falseExpression = ParseExpression();
 
-            return new Conditional() { Right = new ArgumentList(arguments.ToArray()) };
+            return new Conditional() { TrueExpression = trueExpression, FalseExpression = falseExpression };
         }
 
-        public FunctionBlueprint ParseArrowFunction(ParameterList parameters) {
+        public New ParseNew() {
+            Skip(Tokens.New);
+
+            var newExpression = ParseExpression();
+            
+            if(newExpression is Call call) {
+                return new New() { NewExpression = call.Left, Arguments = (ArgumentList)call.Right };
+            } else {
+                return new New() { NewExpression = newExpression, Arguments = new ArgumentList() };
+            }
+        }
+
+        public FunctionLiteral ParseArrowFunction(ParameterList parameters) {
             Skip(Tokens.ArrowFunction);
 
             Block body;
 
             if (Peek().Is(Tokens.BlockOpen)) {
-                body = ParseBlock();
+                body = ParseBlockOrStatement();
             } else {
                 body = new Block();
                 body.Nodes.Add(new Return() { Expression = ParseExpression() });
             }
 
-            return new FunctionBlueprint("", null, parameters, body);
+            return new FunctionLiteral("", null, parameters, body);
         }
 
         public static Type ParseType(string type) {
@@ -1091,7 +1093,7 @@ namespace NetJS.Core.Javascript {
             }
         }
 
-        public Declaration ParseInterfaceDeclaration() {
+        public Node ParseInterfaceDeclaration() {
             Skip(Tokens.Interface);
 
             var name = Next("interface name");
@@ -1119,8 +1121,8 @@ namespace NetJS.Core.Javascript {
 
             Skip(Tokens.BlockClose);
             
-            var declaration = new Declaration(DeclarationScope.Global, false);
-            declaration.Declarations.Add(new Declaration.DeclarationVariable(name.Content, new AnyType(), new InterfaceBlueprint(i)));
+            var declaration = new VariableDeclaration(DeclarationScope.Global, false);
+            declaration.Declarations.Add(new VariableDeclaration.DeclarationVariable(name.Content, new AnyType(), new InterfaceBlueprint(i)));
 
             return declaration;
         }

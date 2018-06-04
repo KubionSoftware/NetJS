@@ -5,18 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
-    public class StringBlueprint : Blueprint {
+    public class StringLiteral : Literal {
         public string Value { get; private set; }
 
-        public StringBlueprint(string value) {
+        public StringLiteral(string value) {
             Value = value;
         }
 
-        public void Combine(StringBlueprint other) {
+        public void Combine(StringLiteral other) {
             Value += other.Value;
         }
 
-        public override Constant Instantiate(Scope scope) {
+        public override Constant Instantiate(Agent agent) {
             return new String(Value);
         }
 

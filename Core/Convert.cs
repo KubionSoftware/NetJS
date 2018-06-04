@@ -5,14 +5,14 @@ using System.Collections.Generic;
 namespace NetJS.Core {
     public static class Convert {
 
-        public static Constant JsonToValue(object value, Scope scope) {
+        public static Constant JsonToValue(object value, Agent agent) {
             if (value is Dictionary<string, object> dict) {
-                return JsonToObject(dict, scope);
+                return JsonToObject(dict, agent);
             } else if (value is List<object> list) {
                 var array = new Javascript.Array();
                 
                 for (int i = 0; i < list.Count; i++) {
-                    array.List.Add(JsonToValue(list[i], scope));
+                    array.List.Add(JsonToValue(list[i], agent));
                 }
 
                 return array;
@@ -31,15 +31,15 @@ namespace NetJS.Core {
             return Static.Undefined;
         }
 
-        public static Constant JsonToObject(Dictionary<string, object> json, Scope scope) {
-            var obj = new Javascript.Object(Tool.Construct("Object", scope));
+        public static Constant JsonToObject(Dictionary<string, object> json, Agent agent) {
+            var obj = new Javascript.Object(Tool.Construct("Object", agent));
             foreach (var key in json.Keys) {
-                obj.Set(key, JsonToValue(json[key], scope));
+                obj.Set(new Javascript.String(key), JsonToValue(json[key], agent));
             }
             return obj;
         }
 
-        public static object ValueToJson(Constant value, Scope scope) {
+        public static object ValueToJson(Constant value) {
             if (value is Javascript.String s) {
                 return s.Value;
             } else if (value is Javascript.Number n) {
@@ -51,20 +51,20 @@ namespace NetJS.Core {
             } else if (value is Javascript.Array array) {
                 var list = new List<object>();
                 for (var i = 0; i < array.List.Count; i++) {
-                    list.Add(ValueToJson(array.List[i], scope));
+                    list.Add(ValueToJson(array.List[i]));
                 }
                 return list;
             } else if (value is Javascript.Object obj) {
-                return ObjectToJson(obj, scope);
+                return ObjectToJson(obj);
             }
 
             return null;
         }
 
-        public static Dictionary<string, object> ObjectToJson(Javascript.Object obj, Scope scope) {
+        public static Dictionary<string, object> ObjectToJson(Javascript.Object obj) {
             var json = new Dictionary<string, object>();
-            foreach (var key in obj.GetKeys()) {
-                json[key] = ValueToJson(obj.Get(key), scope);
+            foreach (var key in obj.OwnPropertyKeys()) {
+                json[key.ToString()] = ValueToJson(obj.Get(key));
             }
             return json;
         }
@@ -80,7 +80,7 @@ namespace NetJS.Core {
             return Math.Round(span.TotalMilliseconds);
         }
 
-        public static string ToString(Constant value, Scope scope) {
+        public static string ToString(Constant value, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-tostring
 
             switch (value) {
@@ -97,9 +97,9 @@ namespace NetJS.Core {
                 case Javascript.Symbol sy:
                     break;
                 case Javascript.Object o:
-                    var method = o.GetProperty(new Javascript.String("toString"), scope);
+                    var method = o.Get(new Javascript.String("toString"));
                     if (method is Function f) {
-                        var result = f.Call(new Constant[] { }, o, scope);
+                        var result = f.Call(o, agent);
 
                         if (result is Javascript.String rs) {
                             return rs.Value;
@@ -111,19 +111,19 @@ namespace NetJS.Core {
             throw new TypeError($"Could not convert '{value.ToDebugString()}' to string");
         }
 
-        public static Constant ToPrimitive(Constant value, Scope scope) {
+        public static Constant ToPrimitive(Constant value, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-toprimitive
 
             if (value is Javascript.Object o) {
-                var valueOf = o.GetProperty(new Javascript.String("valueOf"), scope);
+                var valueOf = o.Get(new Javascript.String("valueOf"));
                 if (valueOf is Function vf) {
-                    var result = vf.Call(new Constant[] { }, o, scope);
+                    var result = vf.Call(o, agent);
                     if (!(result is Javascript.Object)) return result;
                 }
 
-                var toString = o.GetProperty(new Javascript.String("toString"), scope);
+                var toString = o.Get(new Javascript.String("toString"));
                 if (toString is Function sf) {
-                    var result = sf.Call(new Constant[] { }, o, scope);
+                    var result = sf.Call(o, agent);
                     if (!(result is Javascript.Object)) return result;
                 }
 
@@ -133,7 +133,7 @@ namespace NetJS.Core {
             return value;
         }
 
-        public static double ToNumber(Constant value, Scope scope) {
+        public static double ToNumber(Constant value, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-tonumber
 
             switch (value) {
@@ -154,8 +154,8 @@ namespace NetJS.Core {
                 case Javascript.Symbol sy:
                     break;
                 case Javascript.Object o:
-                    var primitive = ToPrimitive(o, scope);
-                    return ToNumber(primitive, scope);
+                    var primitive = ToPrimitive(o, agent);
+                    return ToNumber(primitive, agent);
             }
 
             throw new TypeError($"Could not convert '{value.ToDebugString()}' to number");
@@ -184,7 +184,7 @@ namespace NetJS.Core {
             throw new TypeError($"Could not convert '{value.ToDebugString()}' to boolean");
         }
 
-        public static Javascript.Object ToObject(Constant value, Scope scope) {
+        public static Javascript.Object ToObject(Constant value, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-toobject
 
             switch (value) {
@@ -193,13 +193,13 @@ namespace NetJS.Core {
                 case Javascript.Null nu:
                     break;
                 case Javascript.Boolean b:
-                    return Tool.Construct("Boolean", scope, new[] { b });
+                    return Tool.Construct("Boolean", agent, new[] { b });
                 case Javascript.Number n:
-                    return Tool.Construct("Number", scope, new[] { n });
+                    return Tool.Construct("Number", agent, new[] { n });
                 case Javascript.String s:
-                    return Tool.Construct("String", scope, new[] { s });
+                    return Tool.Construct("String", agent, new[] { s });
                 case Javascript.Symbol sy:
-                    return Tool.Construct("Symbol", scope, new[] { sy });
+                    return Tool.Construct("Symbol", agent, new[] { sy });
                 case Javascript.Object o:
                     return o;
             }
@@ -207,14 +207,40 @@ namespace NetJS.Core {
             throw new TypeError($"Could not convert '{value.ToDebugString()}' to object");
         }
 
-        public static Constant ToPropertyKey(Constant argument, Scope scope) {
+        public static Constant ToPropertyKey(Constant argument, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-topropertykey
 
-            var key = ToPrimitive(argument, scope);
+            var key = ToPrimitive(argument, agent);
 
             if (key is Symbol) return key;
 
-            return new Javascript.String(ToString(key, scope));
+            return new Javascript.String(ToString(key, agent));
+        }
+
+        public static int ToInt32(Constant argument, Agent agent) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-toint32
+
+            var number = ToNumber(argument, agent);
+            if (double.IsNaN(number) || double.IsInfinity(number)) return 0;
+
+            var i = (int)Math.Floor(Math.Abs(number));
+            var int32bit = i % (int)Math.Pow(2, 32);
+            if (int32bit > Math.Pow(2, 31)) {
+                return int32bit - (int)Math.Pow(2, 32);
+            } else {
+                return int32bit;
+            }
+        }
+
+        public static int ToUint32(Constant argument, Agent agent) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-touint32
+
+            var number = ToNumber(argument, agent);
+            if (double.IsNaN(number) || double.IsInfinity(number)) return 0;
+
+            var i = (int)Math.Floor(Math.Abs(number));
+            var int32bit = i % (int)Math.Pow(2, 32);
+            return int32bit;
         }
     }
 }

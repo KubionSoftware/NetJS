@@ -18,11 +18,11 @@ namespace NetJS.Core.Javascript {
             Right = right;
         }
 
-        public override Constant Execute(Scope scope) {
-            return Execute(Right.Execute(scope), scope);
+        public override Constant Evaluate(Agent agent) {
+            return Evaluate(Right.Evaluate(agent), agent);
         }
 
-        public virtual Constant Execute(Constant c, Scope scope) {
+        public virtual Constant Evaluate(Constant c, Agent agent) {
             throw new Exception("This operator cannot be called");
         }
     }

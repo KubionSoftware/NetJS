@@ -14,10 +14,10 @@ namespace NetJS.Core.Javascript {
             IsKey = isKey;
         }
 
-        public override Constant Execute(Constant baseReference, Constant propertyNameReference, Scope scope) {
+        public override Constant Evaluate(Constant baseReference, Constant propertyNameReference, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-property-accessors
 
-            var baseValue = References.GetValue(baseReference, scope);
+            var baseValue = References.GetValue(baseReference, agent);
 
             if (IsKey) {
                 var propertyNameString = ((Javascript.String)propertyNameReference).Value;
@@ -26,10 +26,10 @@ namespace NetJS.Core.Javascript {
                 // TODO: strict mode
                 return new Reference(bv, new String(propertyNameString), false);
             } else {
-                var propertyNameValue = References.GetValue(propertyNameReference, scope);
+                var propertyNameValue = References.GetValue(propertyNameReference, agent);
 
                 var bv = References.RequireObjectCoercible(baseValue);
-                var propertyKey = Convert.ToPropertyKey(propertyNameValue, scope);
+                var propertyKey = Convert.ToPropertyKey(propertyNameValue, agent);
 
                 // TODO: strict mode
                 return new Reference(bv, propertyKey, false);

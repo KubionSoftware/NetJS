@@ -6,35 +6,27 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class If : Statement {
-        public class IfBlock {
-            public Expression Check;
-            public Block Body;
 
-            public IfBlock(Expression check, Block body) {
-                Check = check;
-                Body = body;
-            }
-        }
+        public Expression Test;
+        public Statement TrueStmt;
+        public Statement FalseStmt;
 
-        public List<IfBlock> Ifs = new List<IfBlock>();
-        public Block Else;
+        public override Completion Evaluate(Agent agent) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-if-statement
 
-        public override Result Execute(Scope parent) {
-            foreach (var ifNode in Ifs) {
-                if (ifNode.Check.IsTrue(parent)) {
-                    var scope = new Scope(parent, parent, this, ScopeType.Block, parent.Buffer);
-                    var result = ifNode.Body.Execute(scope);
-                    return result;
-                }
+            var exprRef = Test.Evaluate(agent);
+            var exprValue = Convert.ToBoolean(References.GetValue(exprRef, agent));
+
+            Completion stmtCompletion;
+            if (exprValue) {
+                stmtCompletion = TrueStmt.Evaluate(agent);
+            } else if (FalseStmt != null) {
+                stmtCompletion = FalseStmt.Evaluate(agent);
+            } else {
+                return Static.NormalCompletion;
             }
 
-            if (Else != null) {
-                var scope = new Scope(parent, parent, this, ScopeType.Block, parent.Buffer);
-                var result = Else.Execute(scope);
-                return result;
-            }
-
-            return new Result(ResultType.None, Static.Undefined);
+            return Completion.UpdateEmpty(stmtCompletion, Static.Undefined);
         }
     }
 }

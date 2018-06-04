@@ -13,26 +13,26 @@ namespace NetJS {
         public string RunTemplate(string template, Core.Javascript.Object arguments, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
             try {
                 if (arguments == null) {
-                    arguments = Core.Tool.Construct("Object", application.Engine.GlobalScope);
+                    arguments = Core.Tool.Construct("Object", application.Engine.EngineScope);
                 }
 
-                var scope = new Scope(application.Engine.GlobalScope, null, null, ScopeType.Function, new StringBuilder());
-                scope.DeclareVariable("__application__", Core.Javascript.DeclarationScope.Function, true, new Foreign(application));
-                scope.DeclareVariable("__session__", Core.Javascript.DeclarationScope.Function, true, new Foreign(session));
+                var lex = new LexicalEnvironment(application.Engine.EngineScope, null, null, EnvironmentType.Function, new StringBuilder());
+                lex.DeclareVariable("__application__", Core.Javascript.DeclarationScope.Function, true, new Foreign(application));
+                lex.DeclareVariable("__session__", Core.Javascript.DeclarationScope.Function, true, new Foreign(session));
 
-                NetJS.API.XDoc.SetXDocInfo(new API.XDoc.XDocInfo() { AppCache = null, SVCache = svCache }, scope);
+                NetJS.API.XDoc.SetXDocInfo(new API.XDoc.XDocInfo() { AppCache = null, SVCache = svCache }, lex);
 
                 // TODO: better way to forward session
                 var result = API.Functions.include(
                     Static.Undefined,
                     new Constant[] { new Core.Javascript.String(template), arguments },
-                    scope
+                    lex
                 );
 
                 if (result is Core.Javascript.String s) {
                     return s.Value;
                 } else {
-                    return scope.Buffer.ToString();
+                    return lex.Buffer.ToString();
                 }
             } catch (Error e) {
                 return e.ToString();
@@ -69,9 +69,9 @@ namespace NetJS {
             try {
                 Core.Javascript.Constant arguments;
                 if (data.Length == 0) {
-                    arguments = Core.Tool.Construct("Object", application.Engine.GlobalScope);
+                    arguments = Core.Tool.Construct("Object", application.Engine.EngineScope);
                 } else {
-                    arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.GlobalScope);
+                    arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.EngineScope);
                 }
 
                 if (arguments is Core.Javascript.Object a) {

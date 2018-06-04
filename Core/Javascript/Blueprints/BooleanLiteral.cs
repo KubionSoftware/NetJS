@@ -5,15 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
-    public class BooleanBlueprint : Blueprint {
+    public class BooleanLiteral : Literal {
         public bool Value { get; }
 
-        public BooleanBlueprint(bool value) {
+        public BooleanLiteral(bool value) {
             Value = value;
         }
 
-        public override Constant Instantiate(Scope scope) {
-            return new Boolean(Value);
+        public override Constant Instantiate(Agent agent) {
+            return Boolean.Create(Value);
         }
 
         public override string ToDebugString() {

@@ -21,17 +21,17 @@ namespace NetJS.Core.Javascript {
 
                 // TODO: Convert all static access to references
                 
-            } else if (expression is FunctionBlueprint function) {
+            } else if (expression is FunctionLiteral function) {
                 function.Body = Optimize(function.Body);
-            } else if (expression is ClassBlueprint c) {
-                c.Constructor = (FunctionBlueprint)Optimize(c.Constructor);
+            } else if (expression is ClassLiteral c) {
+                c.Constructor = (FunctionLiteral)Optimize(c.Constructor);
 
                 for (var i = 0; i < c.PrototypeMethods.Count; i++) {
-                    c.PrototypeMethods[i] = (FunctionBlueprint)Optimize(c.PrototypeMethods[i]);
+                    c.PrototypeMethods[i] = (FunctionLiteral)Optimize(c.PrototypeMethods[i]);
                 }
 
                 for (var i = 0; i < c.StaticMethods.Count; i++) {
-                    c.StaticMethods[i] = (FunctionBlueprint)Optimize(c.StaticMethods[i]);
+                    c.StaticMethods[i] = (FunctionLiteral)Optimize(c.StaticMethods[i]);
                 }
             } else if (expression is ArgumentList a) {
                 for (var i = 0; i < a.Arguments.Length; i++) {
@@ -48,7 +48,7 @@ namespace NetJS.Core.Javascript {
             } else if (node is Block block) {
                 return Optimize(block);
             } else if (node is For forNode) {
-                forNode.Body = Optimize(forNode.Body);
+                forNode.Stmt = Optimize(forNode.Stmt);
             } else if (node is While whileNode) {
                 whileNode.Body = Optimize(whileNode.Body);
             } else if (node is ForOf forOfNode) {
@@ -64,7 +64,7 @@ namespace NetJS.Core.Javascript {
                 tryNode.TryBody = Optimize(tryNode.TryBody);
                 tryNode.CatchBody = Optimize(tryNode.CatchBody);
                 tryNode.FinallyBody = Optimize(tryNode.FinallyBody);
-            } else if (node is Declaration declaration) {
+            } else if (node is Node declaration) {
                 foreach (var dec in declaration.Declarations) {
                     dec.Expression = Optimize(dec.Expression);
                 }

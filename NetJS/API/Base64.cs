@@ -11,7 +11,7 @@ namespace NetJS.API {
         /// <param name="base64">The string to decode</param>
         /// <returns>Returns the decoded string.</returns>
         /// <example><code lang="javascript">var decoded = Base64.decode("TWFuIGlzIGRpc3Rpbmd1aXNoZWQ=");</code></example>
-        public static Constant decode(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant decode(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var value = ((Core.Javascript.String)arguments[0]).Value;
             return new Core.Javascript.String(Util.Base64.Decode(value));
         }
@@ -20,7 +20,7 @@ namespace NetJS.API {
         /// <param name="s">The string to encode</param>
         /// <returns>Returns the encoded string.</returns>
         /// <example><code lang="javascript">var encoded = Base64.encode("Man is distinguished");</code></example>
-        public static Constant encode(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant encode(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var value = ((Core.Javascript.String)arguments[0]).Value;
             return new Core.Javascript.String(Util.Base64.Encode(value));
         }

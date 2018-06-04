@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace NetJS.Core.API {
     class RegExp {
 
-        public static Javascript.Constant constructor(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
+        public static Javascript.Constant constructor(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.LexicalEnvironment lex) {
             var thisObject = (Javascript.Object)_this;
 
             thisObject.Set("source", (Javascript.String)arguments[0]);
@@ -34,7 +34,7 @@ namespace NetJS.Core.API {
             return options;
         }
 
-        public static Javascript.Constant match(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
+        public static Javascript.Constant match(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.LexicalEnvironment lex) {
             var exp = (Javascript.Object)_this;
             var str = ((Javascript.String)arguments[0]).Value;
             var source = ((Javascript.String)exp.Get("source")).Value;
@@ -69,13 +69,13 @@ namespace NetJS.Core.API {
             return Tool.ToArray(result);
         }
 
-        public static Javascript.Constant test(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
+        public static Javascript.Constant test(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.LexicalEnvironment lex) {
             if (arguments[0] is Javascript.Undefined) arguments[0] = new Javascript.String("");
 
-            return new Javascript.Boolean(!(match(_this, arguments, scope) is Javascript.Null));
+            return new Javascript.Boolean(!(match(_this, arguments, lex) is Javascript.Null));
         }
 
-        public static Javascript.Constant replace(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
+        public static Javascript.Constant replace(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.LexicalEnvironment lex) {
             var exp = (Javascript.Object)_this;
             var str = (Javascript.String)arguments[0];
             var replacement = (Javascript.String)arguments[1];
@@ -87,7 +87,7 @@ namespace NetJS.Core.API {
             return new Javascript.String(regex.Replace(str.Value, replacement.Value, (exp.Get<Javascript.Boolean>("global")).Value ? -1 : 1));
         }
 
-        public static Javascript.Constant search(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
+        public static Javascript.Constant search(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.LexicalEnvironment lex) {
             var exp = (Javascript.Object)_this;
             var str = (Javascript.String)arguments[0];
             var source = ((Javascript.String)exp.Get("source")).Value;
@@ -102,7 +102,7 @@ namespace NetJS.Core.API {
             }
         }
 
-        public static Javascript.Constant split(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.Scope scope) {
+        public static Javascript.Constant split(Javascript.Constant _this, Javascript.Constant[] arguments, Javascript.LexicalEnvironment lex) {
             var exp = (Javascript.Object)_this;
             var str = (Javascript.String)arguments[0];
             var source = ((Javascript.String)exp.Get("source")).Value;

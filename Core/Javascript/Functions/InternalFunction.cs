@@ -6,32 +6,21 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core.Javascript {
     public class InternalFunction : Function {
-        public string Name;
-        public Type Type;
-        public ParameterList Parameters;
-        public Block Body;
 
-        public InternalFunction(Scope scope) : base(scope) { }
+        public InternalFunction(Object proto) : base(proto) { }
 
-        public override Constant Call(Constant[] arguments, Constant thisValue, Scope scope) {
-            // TODO: store function node
-            var functionScope = new Scope(Scope, scope, Body, ScopeType.Function, scope.Buffer);
+        public override Constant Call(Constant thisArgument, Agent agent, Constant[] argumentsList = null) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-call
 
-            functionScope.DeclareVariable("this", DeclarationScope.Function, true, thisValue);
-
-            for (var i = 0; i < arguments.Length && i < Parameters.Parameters.Count; i++) {
-                var value = arguments[i];
-                functionScope.DeclareVariable(Parameters.Parameters[i].Name, DeclarationScope.Function, false, value, Parameters.Parameters[i].Type);
+            if (FunctionKind == "classConstructor") {
+                throw new TypeError("Can't call a class constructor");
             }
 
-            var result = Body.Execute(functionScope).Constant;
-            if (Type != null) {
-                if (!Type.Check(result, scope)) {
-                    throw new TypeError($"Function cannot return value of type '{result.GetType()}', must return '{Type}'");
-                }
-            }
+            var callerContext = agent.Running;
+            var calleeContext = PrepareForOrdinaryCall(null, agent);
 
-            return result;
+            OrdinaryCallBindThis(calleeContext, thisArgument, agent);
+            var result = 
         }
     }
 }

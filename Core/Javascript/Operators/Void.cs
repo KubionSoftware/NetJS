@@ -8,8 +8,8 @@ namespace NetJS.Core.Javascript {
     public class Void : UnaryRightOperator {
         public Void() : base(14) { }
 
-        public override Constant Execute(Constant expr, Scope scope) {
-            References.GetValue(expr, scope);
+        public override Constant Evaluate(Constant expr, Agent agent) {
+            References.GetValue(expr, agent);
             return Static.Undefined;
         }
 

@@ -19,11 +19,11 @@ namespace NetJS.API
         /// <param name = "file">A filename (string)</param>
         /// <param name = "content">The text to be written (string)</param>
         /// <example><code lang="javascript">IO.writeText("data.json", "Hello World!");</code></example>
-        public static Constant writeText(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant writeText(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.writeText");
             var content = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.writeText");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var file = GetFile(application, name);
 
             try {
@@ -39,11 +39,11 @@ namespace NetJS.API
         /// <param name = "file">A filename</param>
         /// <param name = "content">The bytes to be written (Uint8Array)</param>
         /// <example><code lang="javascript">IO.writeBytes("image.png", bytes);</code></example>
-        public static Constant writeBytes(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant writeBytes(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.writeBytes");
             var content = Core.Tool.GetArgument<Core.Javascript.Uint8Array>(arguments, 1, "IO.writeBytes");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var file = GetFile(application, name);
 
             try {
@@ -59,10 +59,10 @@ namespace NetJS.API
         /// <param name= "file">A filename to read from (string)</param>
         /// <returns>The content of the file (string)</returns>
         /// <example><code lang="javascript">var text = IO.readText("data.json");</code></example>
-        public static Constant readText(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant readText(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.readText");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var file = GetFile(application, name);
             
             try {
@@ -76,10 +76,10 @@ namespace NetJS.API
         /// <param name= "file">A filename to read from (string)</param>
         /// <returns>The binary content of the file (Uint8Array)</returns>
         /// <example><code lang="javascript">var bytes = IO.readBytes("image.png");</code></example>
-        public static Constant readBytes(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant readBytes(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.readBytes");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var file = GetFile(application, name);
 
             try {
@@ -92,10 +92,10 @@ namespace NetJS.API
         /// <summary>Deletes a file.</summary>
         /// <param name= "file">A filename to delete</param>
         /// <example><code lang="javascript">IO.deleteFile("data.json");</code></example>
-        public static Constant deleteFile(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant deleteFile(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.delete");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var file = GetFile(application, name);
 
             try {
@@ -110,11 +110,11 @@ namespace NetJS.API
         /// <param name= "source">The file to copy</param>
         /// <param name= "destination">The file to copy to</param>
         /// <example><code lang="javascript">IO.copyFile("a.txt", "b.txt");</code></example>
-        public static Constant copyFile(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant copyFile(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var a = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.copy");
             var b = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.copy");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var fileA = GetFile(application, a);
             var fileB = GetFile(application, b);
 
@@ -130,11 +130,11 @@ namespace NetJS.API
         /// <param name= "source">The source location</param>
         /// <param name= "destination">The destination</param>
         /// <example><code lang="javascript">IO.moveFile("a.txt", "files/b.txt");</code></example>
-        public static Constant moveFile(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant moveFile(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var a = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.moveFile");
             var b = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.moveFile");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var fileA = GetFile(application, a);
             var fileB = GetFile(application, b);
 
@@ -150,11 +150,11 @@ namespace NetJS.API
         /// <param name= "source">The source location</param>
         /// <param name= "destination">The destination</param>
         /// <example><code lang="javascript">IO.moveDirectory("files", "documents/files");</code></example>
-        public static Constant moveDirectory(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant moveDirectory(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var a = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.moveDirectory");
             var b = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "IO.moveDirectory");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var dirA = GetFile(application, a);
             var dirB = GetFile(application, b);
 
@@ -169,14 +169,14 @@ namespace NetJS.API
         /// <summary>Get all files in a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var files = IO.getFiles("documents");</code></example>
-        public static Constant getFiles(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant getFiles(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var dir = GetFile(application, name);
 
             try {
-                return Core.Tool.ToArray(System.IO.Directory.GetFiles(dir), scope);
+                return Core.Tool.ToArray(System.IO.Directory.GetFiles(dir));
             } catch {
                 throw new IOError($"Could not get files from directory '{dir}'");
             }
@@ -185,14 +185,14 @@ namespace NetJS.API
         /// <summary>Get all directories in a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var directories = IO.getDirectories("documents");</code></example>
-        public static Constant getDirectories(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant getDirectories(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getDirectories");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var dir = GetFile(application, name);
 
             try {
-                return Core.Tool.ToArray(System.IO.Directory.GetDirectories(dir), scope);
+                return Core.Tool.ToArray(System.IO.Directory.GetDirectories(dir));
             } catch {
                 throw new IOError($"Could not get directories from directory '{dir}'");
             }
@@ -201,10 +201,10 @@ namespace NetJS.API
         /// <summary>Checks if the file exists.</summary>
         /// <param name= "file">The file path</param>
         /// <example><code lang="javascript">var exists = IO.fileExists("name.txt");</code></example>
-        public static Constant fileExists(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant fileExists(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var file = GetFile(application, name);
 
             try {
@@ -217,10 +217,10 @@ namespace NetJS.API
         /// <summary>Checks if the directory exists.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var exists = IO.directoryExists("documents");</code></example>
-        public static Constant directoryExists(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant directoryExists(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var dir = GetFile(application, name);
 
             try {
@@ -233,10 +233,10 @@ namespace NetJS.API
         /// <summary>Creates a new directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">IO.createDirectory("documents");</code></example>
-        public static Constant createDirectory(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant createDirectory(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var dir = GetFile(application, name);
 
             try {
@@ -250,10 +250,10 @@ namespace NetJS.API
         /// <summary>Deletes a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">IO.deleteDirectory("documents");</code></example>
-        public static Constant deleteDirectory(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant deleteDirectory(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
             var name = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "IO.getFiles");
 
-            var application = Tool.GetApplication(scope);
+            var application = Tool.GetApplication(lex);
             var dir = GetFile(application, name);
 
             try {
