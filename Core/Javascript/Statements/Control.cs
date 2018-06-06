@@ -30,8 +30,10 @@ namespace NetJS.Core.Javascript {
     public class Throw : Statement {
         public Expression Expression;
 
-        public override Result Execute(Scope scope) {
-            return new Result(ResultType.Throw, Expression.Execute(scope));
+        public override Result Execute(Scope scope){
+            var value = Expression.Execute(scope);
+            var message = Tool.ToString(value, scope);
+            throw new Error(message);
         }
     }
 }
