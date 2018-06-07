@@ -75,6 +75,7 @@ namespace Testing{
             var countSuccesful = 0;
             var countTotal = 0;
             var countUndefined = 0;
+            var countFailed = 0;
             List<string> answer = new List<string>();
             List<File> allFiles = GetFiles();
             
@@ -87,24 +88,18 @@ namespace Testing{
                     answer.Add(myTest.GetCsv(level));
                     if (myTest.implemented.Count < 1) {
                         if (myTest.useNonStrict) {
-                            if (myTest.nonStrictOutput.Length < 1) {
+                            if (myTest.nonStrictResult) {
                                 countSuccesful++;
                             }
-
-                            countTotal++;
-                        }
-
-                        if (myTest.useStrict) {
-                            if (myTest.strictOutput != null && myTest.strictOutput.Length < 1) {
-                                countSuccesful++;
+                            else {
+                                countFailed++;
                             }
-
-                            countTotal++;
                         }
                     }
                     else {
                         countUndefined++;
                     }
+                    countTotal++;
                 }
                 else {
                     answer.Add("");
@@ -114,10 +109,9 @@ namespace Testing{
             answer.Add("total tests:," + countTotal);
             answer.Add("succesful," + countSuccesful);
             answer.Add("not implemented," + countUndefined);
-            var countFailed = countTotal - (countSuccesful + countUndefined);
             answer.Add("failed," + countFailed);
             answer.Add("");
-            double pSuccesful = (double) Math.Round((double) countSuccesful * 100 / countTotal, 2);
+            double pSuccesful = Math.Round((double) countSuccesful * 100 / countTotal, 2);
             var pUndefined = Math.Round((double) countUndefined * 100 / countTotal, 2);
             var pFailed = Math.Round((double) countFailed * 100 / countTotal, 2);
             answer.Add("%succesful," + pSuccesful);
@@ -162,7 +156,7 @@ namespace Testing{
         public bool useNonStrict = false;
         private List<string> include;
         public string strictOutput;
-        public string nonStrictOutput;
+        public string nonStrictOutput = "";
         private string information;
         private YamlNode es5id;
         private YamlNode description;
@@ -170,16 +164,17 @@ namespace Testing{
         private YamlNode negativePhase;
         private YamlNode negativeType;
         private List<string> flags;
-        public List<string> implemented = new List<String>();
+        public List<string> implemented = new List<string>();
         public string nonStrictTime;
         private static string test;
+        public bool nonStrictResult = false;
 
         public Test(File file){
             this.path = file.name.Replace("\\", "/");
             splittedPath = path.Split('/');
             this.name = splittedPath[splittedPath.Length - 1];
             useNonStrict = true;
-            var excludeWords = new[] {"negative", "includes", "onlyStrict", "async","print", "$262", "createRealm", "detachArrayBuffer", "evalScript", "global", "IsHTMLDDA", "document.all", "agent"};
+            var excludeWords = new[] {"onlyStrict", "async","print", "$262", "createRealm", "detachArrayBuffer", "evalScript", "global", "IsHTMLDDA", "document.all", "agent"};
 
             var readText = System.IO.File.ReadAllText(path);
             foreach (var word in excludeWords) {
@@ -190,7 +185,6 @@ namespace Testing{
 
             if (implemented.Count < 1) {
                 var configRGX = new Regex(@"(?<=\/\*---)[\w\W]+(?=---\*\/)");
-//            Console.WriteLine(name);
                 var match = configRGX.Match(readText);
                 if (match.Value != "") {
                     var yaml = new YamlStream();
@@ -208,7 +202,8 @@ namespace Testing{
                         YamlNode tempInclude = null;
                         mapping.Children.TryGetValue("includes", out tempInclude);
                         if (tempInclude != null) {
-                            include = tempInclude.ToString().Split(new char[] {','}).ToList();
+//                            Console.WriteLine(tempInclude);
+                            include = tempInclude.ToString().Split(new char[] {' '}).ToList();
                         }
 
                         YamlNode tempFlag = null;
@@ -274,17 +269,49 @@ namespace Testing{
 
         public void Execute(JSApplication application, JSService service, JSSession session){
             if (implemented.Count < 1) {
-                Console.WriteLine("executed: " + path);
+                Console.WriteLine("executing: " + path);
                 var watch = new Stopwatch();
                 watch.Start();
-                nonStrictOutput = service.RunTemplate(path, "{}", ref application, ref session);
+                var preTestOutput = "";
+                if (include != null) {
+                    foreach (var preTest in include) {
+                        if (preTest.Contains(".js")) {
+                            var preTestPath = System.IO.Path.GetFullPath("../../test/src/262/harness/" + preTest.Replace(",", "")).Replace('\\', '/');
+                            Console.WriteLine("preTest: " + preTestPath);
+                            preTestOutput += service.RunTemplate(preTestPath, "{}", ref application, ref session);
+                        }
+                    }
+                }
+                var testOutput = service.RunTemplate(path, "{}", ref application, ref session);
                 watch.Stop();
+
+                if (negative != null && negativeType != null && negativeType.ToString().Length > 0) {
+                    var splitOutput = testOutput.Split(' ');
+                    var comparewith = "";
+                    if (splitOutput.Length > 1) {
+                        comparewith = splitOutput[0] + splitOutput[1][0].ToString().ToUpper() +
+                                      splitOutput[1].Substring(1);
+//                            Console.WriteLine(comparewith);
+                    }
+                    if (comparewith.Contains(negativeType.ToString())) {
+                        nonStrictResult = true;
+                    }
+                } else if (testOutput.Length < 1) {
+                    nonStrictResult = true;
+                }
+
+                if (preTestOutput.Length > 0) {
+                    nonStrictOutput += "preTest: " + preTestOutput + " | " ;
+                }
+
+                nonStrictOutput += testOutput;
                 var stringTime = Math.Round(watch.Elapsed.TotalMilliseconds, 2).ToString().Split('.');
                 var timeDecimal = "00";
                 if (stringTime.Length == 2) {
                     timeDecimal = (Int32.Parse(stringTime[1]) * 6 / 10).ToString();
                 }
-                nonStrictTime = stringTime[0] + ":" + timeDecimal;
+                nonStrictTime = stringTime[0] + "." + timeDecimal;
+//                Console.WriteLine(nonStrictTime);
             }
         }
 
@@ -309,19 +336,14 @@ namespace Testing{
 
                 answer += name;
                 if (implemented.Count < 1) {
-                    var succesfull = false;
-                    if (negative != null) {
-                        if (nonStrictOutput.StartsWith(negativeType.ToString())) {
-                            succesfull = true;
-                        }
-                    }
-                    else {
-                        succesfull = (nonStrictOutput.Length <= 0);
+                    var preOutput = "";
+                    if (negative != null&& negativeType != null) {
+                        preOutput = "[negative:" + negativeType.ToString() + "] ";
                     }
                     
                     var rgx4 = new Regex(@"([\r\n])+");
-
-                    answer += "," + succesfull + "," + nonStrictTime + "," + "\"" + rgx4.Replace(nonStrictOutput, " ") + "\"";
+                    
+                    answer += "," + nonStrictResult + "," + nonStrictTime + "," + "\"" + rgx4.Replace(preOutput.Replace('"', '\'') + nonStrictOutput.Replace('"', '\''), " ") + "\"";
                 }
                 else {
                     answer += "," + "undefined" + ",," +
