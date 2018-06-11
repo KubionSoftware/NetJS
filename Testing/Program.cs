@@ -81,12 +81,18 @@ namespace Testing{
                     NumFailed = 0;
                     NumSuccess = 0;
 
+                    var recursiveFindWatch = new Stopwatch();
+                    recursiveFindWatch.Start();
+                    
                     Directory root = new Directory("test", 1);
                     root = root.Walkthrough(System.IO.Path.GetFullPath("../../test/src/262/test" +
 //                                                                       "/language" +
 //                                                                       "/white-space" +
                                                                        ""));
 
+                    recursiveFindWatch.Stop();
+                    Console.WriteLine("tests collected in(s): " + recursiveFindWatch.Elapsed.TotalSeconds);
+                    
                     var watch = new Stopwatch();
                     watch.Start();
 
@@ -103,18 +109,14 @@ namespace Testing{
 
                     watch.Stop();
                     var time = watch.Elapsed;
-                    output += "\nElapsedTime (hh:mm:ss):," + time.ToString(@"hh\:mm\:ss");
-                    Console.WriteLine(output);
+                    output += "\nElapsed Retrieval Time(mm:ss):," + recursiveFindWatch.Elapsed.ToString(@"mm\:ss");
+                    output += "\nElapsed Execution & Formatting Time (mm:ss):," + time.ToString(@"mm\:ss");
+//                    Console.WriteLine(output);
+                    Console.WriteLine("Elapsed Retrieval Time(mm:ss):" + recursiveFindWatch.Elapsed.ToString(@"mm\:ss"));
+                    Console.WriteLine("Elapsed Execution & Formatting Time (mm:ss):" + time.ToString(@"mm\:ss"));
                     System.IO.File.WriteAllText(@"C:\Users\Mitch\ProjectWorkspace\Kubion\NetJS\Testing\test\test.csv",
                         output);
 
-                    Console.ForegroundColor = NumFailed == 0 ? ConsoleColor.Green : ConsoleColor.Red;
-                    Console.WriteLine($"Completed test with {NumFailed} failures and {NumSuccess} successes");
-
-
-                    Console.ForegroundColor = ConsoleColor.White;
-
-                    Console.WriteLine("Time: " + watch.ElapsedMilliseconds + "ms");
 
                     Console.ReadLine();
                 }
