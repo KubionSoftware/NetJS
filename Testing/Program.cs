@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NetJS.Core.Javascript;
-using NetJS.Core;
 using System.Diagnostics;
-using System.IO;
 using NetJS;
 
-namespace Testing{
+namespace Testing {
     class TestFunctions{
         public static Constant assert(Constant _this, Constant[] arguments, Scope scope){
             Constant value = Static.Undefined;
@@ -68,67 +64,109 @@ namespace Testing{
     class Program{
         public static int NumFailed = 0;
         public static int NumSuccess = 0;
+        public static List<Test> AllTests;
+        public static int TestCount = 0;
+
 
         static void Main(string[] args){
             try {
                 var service = new JSService();
                 var application = new JSApplication("../../test/");
 
-//                application.Engine.RegisterFunctions(typeof(TestFunctions));
+                NumFailed = 0;
+                NumSuccess = 0;
 
+                var recursiveFindWatch = new Stopwatch();
+                recursiveFindWatch.Start();
 
-                while (true) {
-                    NumFailed = 0;
-                    NumSuccess = 0;
-
-                    var recursiveFindWatch = new Stopwatch();
-                    recursiveFindWatch.Start();
-                    
-                    Directory root = new Directory("test", 1);
-                    root = root.Walkthrough(System.IO.Path.GetFullPath("../../test/src/262/test" +
-//                                                                       "/language" +
+                Directory root = new Directory("test", 1);
+                root = root.Walkthrough(System.IO.Path.GetFullPath("../../test/src/262/test" +
+//                                                                   "/language" +
 //                                                                       "/white-space" +
-                                                                       ""));
+                                                                   ""), null);
+                Console.WriteLine("Got all files!");
 
-                    recursiveFindWatch.Stop();
-                    Console.WriteLine("tests collected in(s): " + recursiveFindWatch.Elapsed.TotalSeconds);
-                    
-                    var watch = new Stopwatch();
-                    watch.Start();
+                recursiveFindWatch.Stop();
+//                Console.WriteLine("tests collected in(s): " + recursiveFindWatch.Elapsed.TotalSeconds);
 
-                    var session = new JSSession();
-                    service.RunTemplate("262/harness/sta.js", "{}", ref application, ref session);
-                    service.RunTemplate("262/harness/assert.js", "{}", ref application, ref session);
+                var session = new JSSession();
 
-                    var output = root.ToCSV(System.IO.Path.GetFullPath("../../test/src/262/test" +
-//                                                                       "/language" +
-//                                                                       "/white-space" +
-                                                                       ""), root.GetHighestLevel(root) + 1, service,
-                        application, session);
+                AllTests = root.Tests;
 
+                var executeWatch = new Stopwatch();
+                executeWatch.Start();
 
-                    watch.Stop();
-                    var time = watch.Elapsed;
-                    output += "\nElapsed Retrieval Time(mm:ss):," + recursiveFindWatch.Elapsed.ToString(@"mm\:ss");
-                    output += "\nElapsed Execution & Formatting Time (mm:ss):," + time.ToString(@"mm\:ss");
-//                    Console.WriteLine(output);
-                    Console.WriteLine("Elapsed Retrieval Time(mm:ss):" + recursiveFindWatch.Elapsed.ToString(@"mm\:ss"));
-                    Console.WriteLine("Elapsed Execution & Formatting Time (mm:ss):" + time.ToString(@"mm\:ss"));
-                    System.IO.File.WriteAllText(@"C:\Users\Mitch\ProjectWorkspace\Kubion\NetJS\Testing\test\test.csv",
-                        output);
-
-
-                    Console.ReadLine();
+                var taskList = new List<Task>();
+                for (var i = 0; i < System.Environment.ProcessorCount; i++) {
+                    taskList.Add(Task.Factory.StartNew(ExecuteWorker));
                 }
+
+                Task.WaitAll(taskList.ToArray());
+
+                executeWatch.Stop();
+                var watch = new Stopwatch();
+                watch.Start();
+
+                var output = root.ToCSV(root.GetHighestLevel(root) + 1);
+//                Console.WriteLine(output);
+
+
+                watch.Stop();
+                output += "\nElapsed Retrieval Time(mm:ss):," + recursiveFindWatch.Elapsed.ToString(@"mm\:ss");
+                output += "\nElapsed Creation & Execution Time (mm:ss):," + executeWatch.Elapsed.ToString(@"mm\:ss");
+                output += "\nElapsed Formatting Time (mm:ss):," + watch.Elapsed.ToString(@"mm\:ss");
+
+                Console.WriteLine("Elapsed Retrieval Time(mm:ss):" + recursiveFindWatch.Elapsed.ToString(@"mm\:ss"));
+                Console.WriteLine(
+                    "Elapsed Creation & executionTime (mm:ss):" + executeWatch.Elapsed.ToString(@"mm\:ss"));
+                Console.WriteLine("Elapsed Formatting Time (mm:ss):" + watch.Elapsed.ToString(@"mm\:ss"));
+                System.IO.File.WriteAllText(@"C:\Users\Mitch\ProjectWorkspace\Kubion\NetJS\Testing\test\test.csv",
+                    output);
+
+
+                Console.ReadLine();
             }
             catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.Red;
 
                 Console.WriteLine("Error in NetJS: ");
+                System.IO.File.WriteAllText(@"C:\Users\Mitch\ProjectWorkspace\Kubion\NetJS\Testing\test\error.txt",
+                    e.Message.ToString());
                 Console.WriteLine(e);
             }
 
             Console.ReadLine();
+        }
+
+        private static void ExecuteWorker(){
+            var service = new JSService();
+            var session = new JSSession();
+            var application = new JSApplication("../../test/");
+
+            service.RunTemplate("262/harness/sta.js", "{}", ref application, ref session);
+            service.RunTemplate("262/harness/assert.js", "{}", ref application, ref session);
+
+            while (true) {
+                Test myTest = null;
+
+                lock (AllTests) {
+                    if (TestCount < AllTests.Count) {
+                        myTest = AllTests[TestCount];
+                        TestCount++;
+                        if(TestCount % 1000 == 0) {
+                            Console.WriteLine("We are at number: " + TestCount);
+                        }
+                    }
+                    else {
+                        return;
+                    }
+                }
+
+                if (myTest == null) continue;
+                myTest.Initialize();
+                myTest.Execute(application, service, session);
+                
+            }
         }
     }
 }

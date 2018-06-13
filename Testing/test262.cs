@@ -13,33 +13,52 @@ namespace Testing{
         private string name;
         private List<Directory> Directories;
         private int level;
+        public int maxThreads = 4;
+        public int usedThread = 0;
 
-        private List<Test> Files;
+        private List<string> Files;
+        public List<Test> Tests = new List<Test>();
 
         public Directory(string s, int level){
             name = s;
             this.level = level;
             Directories = new List<Directory>();
-            Files = new List<Test>();
+            Files = new List<string>();
         }
 
-        public Directory Walkthrough(string path){
-            foreach (var file in System.IO.Directory.GetFiles(path)) {
-                
-                var f = new Test(file);
-                Console.WriteLine("found test: " + f.path);
-                Files.Add(f);
+        public Directory Walkthrough(string path, Directory root){
+            var myRoot = root ?? this;
+            var allFiles = System.IO.Directory.GetFiles(path);
+            foreach (var file in allFiles) {
+//                Console.WriteLine("found test: " + file);
+                Files.Add(file);
+                myRoot.Files.Add(file);
+                var test = new Test(file);
+                myRoot.Tests.Add(test);
+            }
+
+            if (allFiles.Length > 0) {
+                myRoot.Files.Add(null);
+                myRoot.Tests.Add(null);
             }
 
             foreach (var dir in System.IO.Directory.GetDirectories(path)) {
                 var dirPath = dir.Split('\\');
                 var subDirectory = new Directory(dirPath[dirPath.Length - 1], level + 1);
-                Directories.Add(subDirectory.Walkthrough(dir));
+                Directories.Add(subDirectory.Walkthrough(dir, myRoot));
             }
 
             return this;
         }
 
+        public void ExecuteTests(JSApplication application, JSService service, JSSession session){
+            foreach (var test in Tests) {
+                if (test == null) continue;
+                test.Initialize();
+                test.Execute(application, service, session);
+            }
+        }
+        
         public int GetHighestLevel(Directory d){
             var level = this.level;
             if (d == null) return level;
@@ -56,25 +75,24 @@ namespace Testing{
 
             return level;
         }
-
-        public string ToCSV(string basePath, int level, JSService service, JSApplication application,
-            JSSession session){
+        
+        public string ToCSV(int level){
             var countSuccesful = 0;
             var countTotal = 0;
             var countUndefined = 0;
             var countFailed = 0;
-            var answer = new List<string>();
-            var allFiles = GetFiles();
-            
-            answer.Add("FOLDER" + new StringBuilder().Insert(0, ",SUBFOLDER", level-2) + ", FILE, RESULT, TIME (ms), OUTPUT");
+            var answer = new List<string> {
+                "FOLDER" + new StringBuilder().Insert(0, ",SUBFOLDER", level - 2) + ", FILE, RESULT, TIME (ms), OUTPUT"
+            };
 
-            foreach (var file in allFiles) {
-                if (file != null) {
-                    file.Execute(application, service, session);
-                    answer.Add(file.GetCsv(level));
-                    if (file.implemented.Count < 1) {
-                        if (file.useNonStrict) {
-                            if (file.nonStrictResult) {
+
+            foreach (var test in Tests) {
+                if (test != null) {
+//                    test.Execute(application, service, session);
+                    answer.Add(test.GetCsv(level));
+                    if (test.implemented.Count < 1) {
+                        if (test.useNonStrict) {
+                            if (test.nonStrictResult) {
                                 countSuccesful++;
                             }
                             else {
@@ -106,24 +124,6 @@ namespace Testing{
             
             return string.Join("\r\n", answer);
         }
-
-        private IEnumerable<Test> GetFiles(){
-            var answer = new List<Test>();
-            foreach (var file in Files) {
-                answer.Add(file);
-            }
-
-            if (Files.Count > 0 && Directories.Count > 0) {
-                answer.Add(null);
-            }
-
-            foreach (var directory in Directories) {
-                answer.AddRange(directory.GetFiles());
-                answer.Add(null);
-            }
-
-            return answer;
-        }
     }
 
     public class Test{
@@ -148,10 +148,13 @@ namespace Testing{
 
         public Test(string filePath){
             path = filePath.Replace('\\', '/');
+        }
+
+        public void Initialize(){
             splittedPath = path.Split('/');
             name = splittedPath[splittedPath.Length - 1];
             useNonStrict = true;
-            var excludeWords = new[] {"onlyStrict", "async","print", "$262", "createRealm", "detachArrayBuffer", "evalScript", "global.", "IsHTMLDDA", "document.all", "agent"};
+            var excludeWords = new[] {"onlyStrict","print", "$262", "createRealm", "detachArrayBuffer", "evalScript", "global.", "IsHTMLDDA", "document.all", "agent"};
 
             var readText = File.ReadAllText(path);
             foreach (var word in excludeWords) {
@@ -228,7 +231,6 @@ namespace Testing{
 
         public void Execute(JSApplication application, JSService service, JSSession session){
             if (implemented.Count >= 1) return;
-            Console.WriteLine("executing: " + path);
             var watch = new Stopwatch();
             watch.Start();
             var preTestOutput = "";
@@ -236,10 +238,11 @@ namespace Testing{
                 foreach (var preTest in include) {
                     if (!preTest.Contains(".js")) continue;
                     var preTestPath = Path.GetFullPath("../../test/src/262/harness/" + preTest.Replace(",", "")).Replace('\\', '/');
-                    Console.WriteLine("preTest: " + preTestPath);
+                    // Console.WriteLine("preTest: " + preTestPath);
                     preTestOutput += service.RunTemplate(preTestPath, "{}", ref application, ref session);
                 }
             }
+            // Console.WriteLine("executing: " + path);
             var testOutput = service.RunTemplate(path, "{}", ref application, ref session);
             watch.Stop();
 
@@ -270,6 +273,7 @@ namespace Testing{
             nonStrictTime = stringTime[0] + "." + timeDecimal;
         }
 
+        
         public string GetCsv(int level){
             var answer = "";
             if (!useNonStrict) return answer;
