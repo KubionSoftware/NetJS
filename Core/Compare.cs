@@ -1,4 +1,4 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace NetJS.Core {
                 px = Convert.ToPrimitive(x, agent);
             }
 
-            if(px is Javascript.String sx && py is Javascript.String sy) {
+            if(px is String sx && py is String sy) {
                 if (sy.Value.StartsWith(sx.Value)) return RelationalComparisonResult.False;
                 if (sx.Value.StartsWith(sy.Value)) return RelationalComparisonResult.True;
 
@@ -60,24 +60,24 @@ namespace NetJS.Core {
             if (x is Null && y is Undefined) return true;
             if (x is Undefined && y is Null) return true;
 
-            if (x is Number nx && y is Javascript.String) {
+            if (x is Number nx && y is String) {
                 return AbstractEqualityComparison(nx, new Number(Convert.ToNumber(y, agent)), agent);
             }
-            if (x is Javascript.String && y is Number ny) {
+            if (x is String && y is Number ny) {
                 return AbstractEqualityComparison(new Number(Convert.ToNumber(x, agent)), ny, agent);
             }
 
-            if (x is Javascript.Boolean) {
+            if (x is Boolean) {
                 return AbstractEqualityComparison(new Number(Convert.ToNumber(x, agent)), y, agent);
             }
-            if (y is Javascript.Boolean) {
+            if (y is Boolean) {
                 return AbstractEqualityComparison(x, new Number(Convert.ToNumber(y, agent)), agent);
             }
 
-            if (y is Javascript.Object && (x is Javascript.String || x is Javascript.Number || x is Javascript.Symbol)) {
+            if (y is Object && (x is String || x is Number || x is Symbol)) {
                 return AbstractEqualityComparison(x, Convert.ToPrimitive(y, agent), agent);
             }
-            if (x is Javascript.Object && (y is Javascript.String || y is Javascript.Number || y is Javascript.Symbol)) {
+            if (x is Object && (y is String || y is Number || y is Symbol)) {
                 return AbstractEqualityComparison(Convert.ToPrimitive(x, agent), y, agent);
             }
 
@@ -110,15 +110,15 @@ namespace NetJS.Core {
             if (x is Undefined) return true;
             if (x is Null) return true;
 
-            if (x is Javascript.String sx && y is Javascript.String sy) {
+            if (x is String sx && y is String sy) {
                 return sx.Value == sy.Value;
             }
 
-            if (x is Javascript.Boolean bx && y is Javascript.Boolean by) {
+            if (x is Boolean bx && y is Boolean by) {
                 return bx.Value == by.Value;
             }
 
-            if (x is Javascript.Symbol syx && y is Javascript.Symbol syy) {
+            if (x is Symbol syx && y is Symbol syy) {
                 return syx == syy;
             }
 

@@ -1,47 +1,50 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 
 namespace NetJS.Core {
     public class Tool {
 
-        public static Javascript.Array ToArray(IEnumerable<string> strings) {
-            var array = new Javascript.Array();
-            foreach (var s in strings) array.List.Add(new Javascript.String(s));
+        public static Array ToArray(IEnumerable<string> strings, Agent agent) {
+            var array = new Array(0, agent);
+            foreach (var s in strings) array.Add(new String(s));
             return array;
         }
 
-        public static Javascript.Object Construct(string name, Agent agent, Constant[] arguments = null) {
-            var constructor = (Function)new New() { NewExpression = new Identifier(name) }.Evaluate(agent);
-            var obj = constructor.Call(Static.Undefined, agent, arguments != null ? arguments : new Constant[] { });
-            return (Javascript.Object)obj;
+        public static Object Construct(string name, Agent agent, Expression[] arguments = null) {
+            var objRef = new New() {
+                NewExpression = new Identifier(name),
+                Arguments = arguments != null ? new ArgumentList(arguments) : new ArgumentList()
+            }.Evaluate(agent);
+            var objVal = References.GetValue(objRef, agent);
+            return (Object)objVal;
         }
 
-        public static Javascript.Object Prototype(string name, Agent agent) {
-            Javascript.Object obj = null;
+        public static Object Prototype(string name, Agent agent) {
+            Object obj = null;
             try {
                 obj = agent.Running.Realm.GetPrototype(name);
             } catch {
-                if(References.GetValue(new Identifier(name).Evaluate(agent), agent) is Javascript.Object ob) {
+                if(References.GetValue(new Identifier(name).Evaluate(agent), agent) is Object ob) {
                     obj = ob;
                 } else {
-                    throw new Javascript.InternalError($"Could not get prototype of '{name}'");
+                    throw new InternalError($"Could not get prototype of '{name}'");
                 }
             }
             
-            var prototype = obj.Get(new Javascript.String("prototype"));
-            if (prototype is Javascript.Object o) {
+            var prototype = obj.Get(new String("prototype"));
+            if (prototype is Object o) {
                 return o;
             }
 
-            throw new Javascript.InternalError($"Could not get prototype of '{name}'");
+            throw new InternalError($"Could not get prototype of '{name}'");
         }
 
         public static bool IsType(Constant o, Constant c) {
-            if (o is Javascript.Object oo) {
-                if (c is Javascript.Object co) {
-                    var p = co.Get(new Javascript.String("prototype"));
-                    if (p is Javascript.Object po) {
+            if (o is Object oo) {
+                if (c is Object co) {
+                    var p = co.Get(new String("prototype"));
+                    if (p is Object po) {
                         while (true) {
                             oo = oo.GetPrototypeOf();
                             if (oo == null) return false;
@@ -82,14 +85,14 @@ namespace NetJS.Core {
         public static T GetArgument<T>(Constant[] arguments, int index, string context, bool required = true) where T: Constant {
             if (index >= arguments.Length) {
                 if (required) {
-                    throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+                    throw new InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
                 } else {
                     return default(T);
                 }
             }
 
             var argument = arguments[index];
-            if (!(argument is T)) throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+            if (!(argument is T)) throw new InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
 
             return (T)argument;
         }

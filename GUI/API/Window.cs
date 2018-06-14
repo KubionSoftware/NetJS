@@ -1,5 +1,5 @@
 ﻿using NetJS.Core.API;
-using NetJS.Core.Javascript;
+using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,13 +11,13 @@ using System.Windows.Forms;
 namespace NetJS.GUI.API {
     class Window {
 
-        private static void HandleMouseEvent(MouseEventArgs e, Core.Javascript.Object thisObject, string eventName, LexicalEnvironment lex) {
+        private static void HandleMouseEvent(MouseEventArgs e, Core.Object thisObject, string eventName, Agent agent) {
             if (thisObject.Get(eventName) is Function f) {
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     new Number(e.X),
                     new Number(e.Y)
-                );
-                f.Call(callbackArguments, Static.Undefined, lex);
+                };
+                f.Call(Static.Undefined, agent, callbackArguments);
             }
         }
 
@@ -30,41 +30,41 @@ namespace NetJS.GUI.API {
             }
         }
 
-        private static void HandleKeyEvent(KeyEventArgs e, Core.Javascript.Object thisObject, string eventName, LexicalEnvironment lex) {
+        private static void HandleKeyEvent(KeyEventArgs e, Core.Object thisObject, string eventName, Agent agent) {
             if (thisObject.Get(eventName) is Function f) {
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     new Number(e.KeyValue),
-                    new Core.Javascript.String(GetChar(e).ToString())
-                );
-                f.Call(callbackArguments, Static.Undefined, lex);
+                    new Core.String(GetChar(e).ToString())
+                };
+                f.Call(Static.Undefined, agent, callbackArguments);
             }
         }
 
-        public static Constant constructor(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var thisObject = (Core.Javascript.Object)_this;
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            var thisObject = (Core.Object)_this;
 
-            var options = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.Object>(arguments, 0, "Window.create");
+            var options = NetJS.Core.Tool.GetArgument<NetJS.Core.Object>(arguments, 0, "Window.create");
 
             int width = 800, height = 600;
-            if (options.Has("width")) width = (int)options.Get<Number>("width").Value;
-            if (options.Has("height")) height = (int)options.Get<Number>("height").Value;
+            if (options.HasProperty(new Core.String("width"))) width = (int)(options.Get("width") as Number).Value;
+            if (options.HasProperty(new Core.String("height"))) height = (int)(options.Get("height") as Number).Value;
 
             var form = new Form();
             form.ClientSize = new Size(width, height);
             form.Name = "";
             form.Visible = true;
 
-            form.MouseMove += (sender, e) => HandleMouseEvent(e, thisObject, "onmousemove", lex);
-            form.MouseClick += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseclick", lex);
-            form.MouseUp += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseup", lex);
-            form.MouseDown += (sender, e) => HandleMouseEvent(e, thisObject, "onmousedown", lex);
+            form.MouseMove += (sender, e) => HandleMouseEvent(e, thisObject, "onmousemove", agent);
+            form.MouseClick += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseclick", agent);
+            form.MouseUp += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseup", agent);
+            form.MouseDown += (sender, e) => HandleMouseEvent(e, thisObject, "onmousedown", agent);
             
-            form.KeyUp += (sender, e) => HandleKeyEvent(e, thisObject, "onkeyup", lex);
-            form.KeyDown += (sender, e) => HandleKeyEvent(e, thisObject, "onkeydown", lex);
+            form.KeyUp += (sender, e) => HandleKeyEvent(e, thisObject, "onkeyup", agent);
+            form.KeyDown += (sender, e) => HandleKeyEvent(e, thisObject, "onkeydown", agent);
 
             form.FormClosed += (sender, e) => {
                 if (thisObject.Get("onclose") is Function f) {
-                    f.Call(new ArgumentList(), Static.Undefined, lex);
+                    f.Call(Static.Undefined, agent);
                 }
             };
 
@@ -77,13 +77,13 @@ namespace NetJS.GUI.API {
         }
 
         [StaticFunction]
-        public static Constant doEvents(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+        public static Constant doEvents(Constant _this, Constant[] arguments, Agent agent) {
             Application.DoEvents();
             return Static.Undefined;
         }
 
         [StaticFunction]
-        public static Constant exit(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+        public static Constant exit(Constant _this, Constant[] arguments, Agent agent) {
             Environment.Exit(0);
             return Static.Undefined;
         }

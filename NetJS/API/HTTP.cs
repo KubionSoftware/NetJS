@@ -1,4 +1,4 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -27,8 +27,8 @@ namespace NetJS.API {
         ///     }
         /// });</code></example>
         /// <exception cref="Error">Thrown if the request failed</exception>
-        public static Constant execute(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var connectionName = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 0, "HTTP.execute").Value;
+        public static Constant execute(Constant _this, Constant[] arguments, Agent agent) {
+            var connectionName = Core.Tool.GetArgument<Core.String>(arguments, 0, "HTTP.execute").Value;
             string url;
             string query = "";
             int settingsIndex = 1;
@@ -36,38 +36,36 @@ namespace NetJS.API {
             if (connectionName.ToLower().StartsWith("http")) {
                 url = connectionName;
             } else {
-                var application = Tool.GetFromScope<JSApplication>(lex, "__application__");
-                if (application == null) throw new InternalError("No application");
-
+                var application = (agent as NetJSAgent).Application;
                 url = application.Connections.GetHttpUrl(connectionName);
 
-                query = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 1, "HTTP.execute").Value;
+                query = Core.Tool.GetArgument<Core.String>(arguments, 1, "HTTP.execute").Value;
                 settingsIndex++;
             }
 
             var request = WebRequest.CreateHttp(url + query);
 
-            var settings = Core.Tool.GetArgument<Core.Javascript.Object>(arguments, settingsIndex, "HTTP.execute", false);
+            var settings = Core.Tool.GetArgument<Core.Object>(arguments, settingsIndex, "HTTP.execute", false);
             if(settings != null) {
-                if (settings.Get("cookies") is Core.Javascript.Object cookies) {
-                    foreach (var key in cookies.GetKeys()) {
-                        request.CookieContainer.Add(new Cookie(key, Core.Convert.ToString(cookies.Get(key), lex)));
+                if (settings.Get("cookies") is Core.Object cookies) {
+                    foreach (var key in cookies.OwnPropertyKeys()) {
+                        request.CookieContainer.Add(new Cookie(key.ToString(), Core.Convert.ToString(cookies.Get(key), agent)));
                     }
                 }
 
-                if (settings.Get("headers") is Core.Javascript.Object headers) {
-                    foreach (var key in headers.GetKeys()) {
-                        Util.HttpWebRequestExtensions.SetRawHeader(request, key, Core.Convert.ToString(headers.Get(key), lex));
+                if (settings.Get("headers") is Core.Object headers) {
+                    foreach (var key in headers.OwnPropertyKeys()) {
+                        Util.HttpWebRequestExtensions.SetRawHeader(request, key.ToString(), Core.Convert.ToString(headers.Get(key), agent));
                     }
                 }
 
-                if (settings.Get("method") is Core.Javascript.String method) {
+                if (settings.Get("method") is Core.String method) {
                     request.Method = method.Value;
                 } else { 
                     request.Method = "GET";
                 }
 
-                if (settings.Get("content") is Core.Javascript.String content) {
+                if (settings.Get("content") is Core.String content) {
                     var writer = new StreamWriter(request.GetRequestStream(), Encoding.Default);
                     writer.Write(content);
                     writer.Close();
@@ -78,12 +76,12 @@ namespace NetJS.API {
                 var response = request.GetResponse();
 
                 var reader = new StreamReader(response.GetResponseStream(), Encoding.Default);
-                var result = new Core.Javascript.String(reader.ReadToEnd());
+                var result = new Core.String(reader.ReadToEnd());
                 reader.Close();
 
                 if (response.ContentType.ToLower() == "application/json") {
                     try {
-                        var json = Core.API.JSON.parse(_this, new[] { result }, lex);
+                        var json = Core.API.JSONAPI.parse(_this, new[] { result }, agent);
                         return json;
                     } catch { }
                 }

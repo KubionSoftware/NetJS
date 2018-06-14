@@ -1,6 +1,6 @@
 ﻿using System;
-using NetJS.Core;
 using System.Web;
+using NetJS.Core;
 
 namespace NetJS {
     public class JSApplication : JSStorage {
@@ -10,7 +10,7 @@ namespace NetJS {
         public API.Config Config { get; }
         public Settings Settings { get; }
 
-        public Realm Engine { get; }
+        public Realm Realm { get; }
 
         public XDocServices.XDocService XDocService { get; }
 
@@ -23,24 +23,24 @@ namespace NetJS {
 
             Cache = new Cache();
 
-            Engine = new Realm();
-            Engine.Init();
-            Engine.RegisterClass(typeof(API.HTTP));
-            Engine.RegisterClass(typeof(API.SQL));
-            Engine.RegisterClass(typeof(API.IO));
-            Engine.RegisterClass(typeof(API.Log));
-            Engine.RegisterClass(typeof(API.Session));
-            Engine.RegisterClass(typeof(API.XDoc));
-            Engine.RegisterClass(typeof(API.Base64));
-            Engine.RegisterClass(typeof(API.Buffer));
-            Engine.RegisterClass(typeof(API.Windows));
-            Engine.RegisterClass(typeof(API.Async));
-            Engine.RegisterClass(typeof(API.DLL));
-            Engine.RegisterClass(typeof(API.XML));
-            Engine.RegisterFunctions(typeof(API.Functions));
+            Realm = new Realm();
+
+            Realm.RegisterClass(typeof(API.HTTP), "HTTP");
+            Realm.RegisterClass(typeof(API.SQL), "SQL");
+            Realm.RegisterClass(typeof(API.IO), "IO");
+            Realm.RegisterClass(typeof(API.Log), "Log");
+            Realm.RegisterClass(typeof(API.Session), "Session");
+            Realm.RegisterClass(typeof(API.XDoc), "XDoc");
+            Realm.RegisterClass(typeof(API.Base64), "Base64");
+            Realm.RegisterClass(typeof(API.Buffer), "Buffer");
+            Realm.RegisterClass(typeof(API.Windows), "Windows");
+            Realm.RegisterClass(typeof(API.Async), "Async");
+            Realm.RegisterClass(typeof(API.DLL), "DLL");
+            Realm.RegisterClass(typeof(API.XML), "XML");
+            Realm.RegisterFunctions(typeof(API.Functions));
 
             Connections = new Connections(Settings);
-            Config = new API.Config(Engine.EngineScope, Settings);
+            Config = new API.Config(Realm.GetAgent(), Settings);
 
             XDocService = new XDocServices.XDocService();
         }

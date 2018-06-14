@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using NetJS.Core.Javascript;
+using NetJS.Core;
 
 namespace NetJS {
     public class Cache {
@@ -14,7 +14,7 @@ namespace NetJS {
 
         private class SourceFile {
             public DateTime LastModified;
-            public Block Node;
+            public ScriptRecord Script;
             public SourceType Type;
         }
 
@@ -28,25 +28,25 @@ namespace NetJS {
             return path;
         }
 
-        public Block GetFile(string name, JSApplication application) {
+        public ScriptRecord GetScript(string name, JSApplication application) {
             var path = GetPath(name, application);
             var key = Core.Tool.NormalizePath(path);
 
             if (Files.ContainsKey(key)) {
                 var modified = System.IO.File.GetLastWriteTime(path);
                 if (modified > Files[key].LastModified) {
-                    Files[key] = LoadFile(path);
+                    Files[key] = LoadFile(path, application.Realm);
                 }
 
-                return Files[key].Node;
+                return Files[key].Script;
             } else {
-                var sourceFile = LoadFile(path);
+                var sourceFile = LoadFile(path, application.Realm);
                 Files[key] = sourceFile;
-                return sourceFile.Node;
+                return sourceFile.Script;
             }
         }
 
-        private SourceFile LoadFile(string path) {
+        private SourceFile LoadFile(string path, Realm realm) {
             string source;
             DateTime lastModified;
 
@@ -57,28 +57,19 @@ namespace NetJS {
                 throw new IOError($"Could not find file '{path}'");
             }
 
-            if (path.EndsWith(".js") || path.EndsWith(".ts")) {
-                var fileId = Core.Debug.GetFileId(path);
-                var tokens = new Lexer(source, fileId).Lex();
-                var parser = new Parser(fileId, tokens);
+            var fileId = Core.Debug.GetFileId(path);
 
+            if (path.EndsWith(".js")) {
                 return new SourceFile() {
                     LastModified = lastModified,
-                    Node = parser.Parse(),
+                    Script = ScriptRecord.ParseScript(source, realm, fileId),
                     Type = SourceType.Javascript
                 };
             } else {
-                var fileId = Core.Debug.GetFileId(path);
-                var tokens = new Lexer("`" + source + "`", fileId).Lex();
-                var parser = new Parser(fileId, tokens);
-                File file = parser.ParseFile();
-
                 return new SourceFile() {
                     LastModified = lastModified,
-                    Node = new Block() {
-                        Nodes = new List<Node>() { file }
-                    },
-                    Type = SourceType.Other
+                    Script = ScriptRecord.ParseScript("`" + source + "`", realm, fileId),
+                    Type = SourceType.Javascript
                 };
             }
         }

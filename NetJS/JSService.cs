@@ -2,37 +2,59 @@
 using System.Linq;
 using System.Text;
 using System.Web;
-using NetJS.Core.Javascript;
-using NetJS.Core.API;
 using NetJS.Core;
+using NetJS.Core.API;
 
 namespace NetJS { 
     public class JSService {
 
-        // Every template is executed via this function
-        public string RunTemplate(string template, Core.Javascript.Object arguments, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
+        public string RunCode(string code, ref JSApplication application, ref JSSession session) {
             try {
+                var agent = new NetJSAgent(application.Realm) {
+                    Application = application,
+                    Session = session
+                };
+
+                var script = ScriptRecord.ParseScript(code, application.Realm, -1);
+                var result = script.Evaluate(agent);
+
+                if (result.Value is Core.String s) {
+                    return s.Value;
+                } else {
+                    return agent.Running.Buffer.ToString();
+                }
+            } catch (Error e) {
+                return e.ToString();
+            } catch (Exception e) {
+                return "System error - " + e.ToString();
+            }
+        }
+
+        // Every template is executed via this function
+        public string RunTemplate(string template, Core.Object arguments, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
+            try {
+                var agent = new NetJSAgent(application.Realm) {
+                    Application = application,
+                    Session = session
+                };
+
                 if (arguments == null) {
-                    arguments = Core.Tool.Construct("Object", application.Engine.EngineScope);
+                    arguments = Core.Tool.Construct("Object", agent);
                 }
 
-                var lex = new LexicalEnvironment(application.Engine.EngineScope, null, null, EnvironmentType.Function, new StringBuilder());
-                lex.DeclareVariable("__application__", Core.Javascript.DeclarationScope.Function, true, new Foreign(application));
-                lex.DeclareVariable("__session__", Core.Javascript.DeclarationScope.Function, true, new Foreign(session));
-
-                NetJS.API.XDoc.SetXDocInfo(new API.XDoc.XDocInfo() { AppCache = null, SVCache = svCache }, lex);
+                NetJS.API.XDoc.SetXDocInfo(new API.XDoc.XDocInfo() { AppCache = null, SVCache = svCache }, agent);
 
                 // TODO: better way to forward session
                 var result = API.Functions.include(
                     Static.Undefined,
-                    new Constant[] { new Core.Javascript.String(template), arguments },
-                    lex
+                    new Constant[] { new Core.String(template), arguments },
+                    agent
                 );
 
-                if (result is Core.Javascript.String s) {
+                if (result is Core.String s) {
                     return s.Value;
                 } else {
-                    return lex.Buffer.ToString();
+                    return agent.Running.Buffer.ToString();
                 }
             } catch (Error e) {
                 return e.ToString();
@@ -67,14 +89,14 @@ namespace NetJS {
 
         public string RunTemplate(string template, string data, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
             try {
-                Core.Javascript.Constant arguments;
+                Core.Constant arguments;
                 if (data.Length == 0) {
-                    arguments = Core.Tool.Construct("Object", application.Engine.EngineScope);
+                    arguments = Core.Tool.Construct("Object", application.Realm.GetAgent());
                 } else {
-                    arguments = JSON.parse(null, new[] { new Core.Javascript.String(data) }, application.Engine.EngineScope);
+                    arguments = JSONAPI.parse(null, new[] { new Core.String(data) }, application.Realm.GetAgent());
                 }
 
-                if (arguments is Core.Javascript.Object a) {
+                if (arguments is Core.Object a) {
                     return RunTemplate(template, a, ref application, ref session, ref svCache);
                 }
             } catch { }
@@ -82,7 +104,7 @@ namespace NetJS {
             return "invalid arguments (must be valid json)";
         }
 
-        public string RunTemplate(string template, Core.Javascript.Object arguments, ref JSApplication application) {
+        public string RunTemplate(string template, Core.Object arguments, ref JSApplication application) {
             if(application == null) {
                 application = new JSApplication();
             }
@@ -92,7 +114,7 @@ namespace NetJS {
             return RunTemplate(template, arguments, ref application, ref session);
         }
 
-        public string RunTemplate(string template, Core.Javascript.Object arguments, ref JSApplication application, ref JSSession session) {
+        public string RunTemplate(string template, Core.Object arguments, ref JSApplication application, ref JSSession session) {
             if (application == null) {
                 application = new JSApplication();
             }

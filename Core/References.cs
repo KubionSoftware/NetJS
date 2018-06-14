@@ -1,20 +1,22 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NetJS.Core.Javascript {
+namespace NetJS.Core {
     class References {
 
         public static Constant GetValue(Constant v, Agent agent) {
-            if(v is Reference r) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-getvalue
+
+            if (v is Reference r) {
                 var b = r.GetBase();
 
                 if (r.IsUnresolvableReference()) {
                     // TODO: error message
-                    throw new ReferenceError("Can't get value of undefined");
+                    throw new ReferenceError(r.GetReferencedName().ToDebugString() + " is undefined");
                 }
 
                 if (r.IsPropertyReference()) {
@@ -24,12 +26,15 @@ namespace NetJS.Core.Javascript {
                     }
 
                     return ((Object)b).Get(r.GetReferencedName());
-                } else if (v is EnvironmentRecord record) {
+                } else if (b is ExoticConstant e) {
+                    return e.GetProperty(r.GetReferencedName(), agent);
+                } else {
+                    var record = (EnvironmentRecord)b;
                     return record.GetBindingValue(r.GetReferencedName(), r.IsStrictReference());
                 }
+            } else {
+                return v;
             }
-
-            return Static.Undefined;
         }
 
         public static Completion PutValue(Constant v, Constant w, Agent agent) {
@@ -53,8 +58,11 @@ namespace NetJS.Core.Javascript {
                     }
 
                     // TODO: handle succeeded + this value
-                    var succeeded = ((Javascript.Object)b).Set(r.GetReferencedName(), w);
+                    var succeeded = ((Object)b).Set(r.GetReferencedName(), w);
                     return new Completion(CompletionType.Normal, Boolean.Create(succeeded));
+                } else if (b is ExoticConstant e) {
+                    e.SetProperty(r.GetReferencedName(), w, agent);
+                    return Static.NormalCompletion;
                 } else {
                     var record = (EnvironmentRecord)b;
                     return record.SetMutableBinding(r.GetReferencedName(), w, r.IsStrictReference());
@@ -113,9 +121,13 @@ namespace NetJS.Core.Javascript {
         }
 
         public static void InitializeReferencedBinding(Reference v, Constant w) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-initializereferencedbinding
+
             var b = v.GetBase();
             if (b is EnvironmentRecord e) {
                 e.InitializeBinding(v.GetReferencedName(), w);
+            } else {
+                throw new Error("Base of reference is not an environment record");
             }
         }
 
@@ -130,6 +142,11 @@ namespace NetJS.Core.Javascript {
                 var lhs = ResolveBinding(name, null, agent);
                 return PutValue(lhs, value, agent);
             }
+        }
+
+        public static Constant ResolvethisBinding(Agent agent) {
+            var envRec = agent.Running.GetThisEnvironment();
+            return envRec.GetThisBinding();
         }
     }
 }

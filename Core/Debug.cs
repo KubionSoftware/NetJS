@@ -131,7 +131,7 @@ namespace NetJS.Core {
             return new Location(-1, -1);
         }
 
-        public static string Message(Javascript.Node node, string message) {
+        public static string Message(Node node, string message) {
             // can be slow because it only happens on an error, which should be almost never :)
             var location = GetNodeLocation(node.Id);
             var file = GetFileName(location.FileId);

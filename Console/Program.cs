@@ -24,7 +24,7 @@ namespace NetJS.Console {
             var service = new JSService();
             var session = new JSSession();
 
-            application.Engine.RegisterClass(typeof(API.Console));
+            application.Realm.RegisterClass(typeof(API.Console), "Console");
 
             service.RunTemplate(application.Settings.Startup, data, ref application, ref session);
 

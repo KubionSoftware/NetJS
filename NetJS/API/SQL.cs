@@ -1,9 +1,9 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using String = NetJS.Core.Javascript.String;
+using String = NetJS.Core.String;
 
 namespace NetJS.API {
     /// <summary>SQL class contains basic methods for communicating with SQL databases configured in the config.</summary>
@@ -26,16 +26,26 @@ namespace NetJS.API {
     /// SQL.execute(db, query);</code></example>
     class SQL {
 
-        public static Constant escape(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var value = ((Core.Javascript.String)arguments[0]).Value;
-            return new Core.Javascript.String(Util.SQL.Escape(value));
+        /// <summary>Escapes a string to use in an SQL query.</summary>
+        /// <param name="s">Value to escape (string)</param>
+        /// <returns>The escaped string.</returns>
+        /// <example><code lang="javascript">var escaped = SQL.escape(username);</code></example>
+        public static Constant escape(Constant _this, Constant[] arguments, Agent agent) {
+            var value = ((Core.String)arguments[0]).Value;
+            return new Core.String(Util.SQL.Escape(value));
         }
 
-        public static Constant format(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var query = ((Core.Javascript.String)arguments[0]).Value;
-            var data = ((Core.Javascript.Object)arguments[1]);
+        /// <summary>Creates an escaped SQL query string with parameters.</summary>
+        /// <param name="query">Template query (string)</param>
+        /// <param name="parameters">Parameters (object)</param>
+        /// <returns>The generated query (string)</returns>
+        /// <example><code lang="javascript">var query = SQL.format("SELECT * FROM Users WHERE Name = {name};", {name: "Alex Jones"});
+        /// // SELECT * FROM Users Where Name = 'Alex Jones';</code></example>
+        public static Constant format(Constant _this, Constant[] arguments, Agent agent) {
+            var query = ((Core.String)arguments[0]).Value;
+            var data = ((Core.Object)arguments[1]);
 
-            foreach(var key in data.GetKeys()) {
+            foreach(var key in data.OwnPropertyKeys()) {
                 var value = data.Get(key);
                 string stringValue = null;
 
@@ -52,7 +62,7 @@ namespace NetJS.API {
                 query = query.Replace("{" + key + "}", stringValue);
             }
 
-            return new Core.Javascript.String(query);
+            return new Core.String(query);
         }
 
         /// <summary>SQL.execute takes a connectionName and a query, executes the query and returns the result if the query is a SELECT statement.</summary>
@@ -60,51 +70,53 @@ namespace NetJS.API {
         /// <param name="query">The query to be executed</param>
         /// <returns>the result if the query is a SELECT statement.</returns>
         /// <example><code lang="javascript">var id = SQL.execute("NETDB", "SELECT * FROM users;");</code></example>
-        /// <exception cref="InternalError">Thrown when no application can be found in application lex.</exception>
         /// <exception cref="Error">Thrown when an error has been found while executing the query.</exception>
-        public static Constant execute(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var connectionName = ((Core.Javascript.String)arguments[0]).Value;
+        public static Constant execute(Constant _this, Constant[] arguments, Agent agent) {
+            var connectionName = ((Core.String)arguments[0]).Value;
 
-            var application = Tool.GetFromScope<JSApplication>(lex, "__application__");
-            if (application == null) throw new InternalError("No application");
+            var application = (agent as NetJSAgent).Application;
             var connection = application.Connections.GetSqlConnection(connectionName);
 
-            var query = ((Core.Javascript.String)arguments[1]).Value;
+            var query = ((Core.String)arguments[1]).Value;
 
             try {
                 if (query.Trim().ToUpper().StartsWith("SELECT")) {
                     var rows = Util.SQL.Get(connection, query, new SqlParameter[] { });
 
-                    var result = new Core.Javascript.Array();
+                    var result = new Core.Array(0, agent);
 
                     foreach (var row in rows) {
-                        var rowObject = Core.Tool.Construct("Object", lex);
+                        var rowObject = Core.Tool.Construct("Object", agent);
                         foreach (var key in row.Keys) {
                             var value = row[key];
                             if (value is string s) {
-                                rowObject.Set(key, new Core.Javascript.String(s));
+                                rowObject.Set(key, new Core.String(s));
                             } else if (value is int i) {
-                                rowObject.Set(key, new Core.Javascript.Number(i));
+                                rowObject.Set(key, new Core.Number(i));
                             } else if (value is double d) {
-                                rowObject.Set(key, new Core.Javascript.Number(d));
+                                rowObject.Set(key, new Core.Number(d));
                             } else if (value is bool b) {
-                                rowObject.Set(key, new Core.Javascript.Boolean(b));
+                                rowObject.Set(key, Core.Boolean.Create(b));
                             } else if (value is byte bt) {
-                                rowObject.Set(key, new Core.Javascript.Number(bt));
+                                rowObject.Set(key, new Core.Number(bt));
                             } else if (value is Int16 i16) {
-                                rowObject.Set(key, new Core.Javascript.Number(i16));
+                                rowObject.Set(key, new Core.Number(i16));
                             } else if (value is Decimal dc) {
-                                rowObject.Set(key, new Core.Javascript.Number((double)dc));
+                                rowObject.Set(key, new Core.Number((double)dc));
                             } else if (value is DateTime date) {
-                                rowObject.Set(key, new Core.Javascript.Date(date));
+                                var dateObj = Tool.Construct("Date", agent);
+
+                                // TODO: don't hardcode this key
+                                dateObj.Set("__date__", new Foreign(date));
+                                rowObject.Set(key, dateObj);
                             } else if (value is DBNull) {
-                                rowObject.Set(key, Core.Javascript.Static.Null);
+                                rowObject.Set(key, Core.Static.Null);
                             } else {
-                                rowObject.Set(key, new Core.Javascript.String("Unkown type - " + value.GetType()));
+                                rowObject.Set(key, new Core.String("Unkown type - " + value.GetType()));
                             }
                         }
 
-                        result.List.Add(rowObject);
+                        result.Add(rowObject);
                     }
 
                     return result;

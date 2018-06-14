@@ -1,4 +1,4 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,8 +36,8 @@ namespace NetJS {
             _dict.Clear();
         }
 
-        public Core.Javascript.Object GetObject(LexicalEnvironment lex) {
-            var obj = Core.Tool.Construct("Object", lex);
+        public Core.Object GetObject(Agent agent) {
+            var obj = Core.Tool.Construct("Object", agent);
 
             foreach(var pair in _dict) {
                 obj.Set(pair.Key, pair.Value);

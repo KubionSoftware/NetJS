@@ -1,4 +1,4 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,11 +10,11 @@ using System.Windows.Forms;
 namespace NetJS.GUI.API {
     class Graphics {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var thisObject = (Core.Javascript.Object)_this;
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            var thisObject = (Core.Object)_this;
 
-            var window = Core.Tool.GetArgument<Core.Javascript.Object>(arguments, 0, "Graphics constructor");
-            var form = (Form)window.Get<Foreign>("form").Value;
+            var window = Core.Tool.GetArgument<Core.Object>(arguments, 0, "Graphics constructor");
+            var form = (Form)(window.Get("form") as Foreign).Value;
             var graphics = form.CreateGraphics();
 
             thisObject.Set("graphics", new Foreign(graphics));
@@ -27,14 +27,14 @@ namespace NetJS.GUI.API {
         }
 
         private static Brush GetBrush(Constant[] arguments, int index, string context) {
-            var hex = Core.Tool.GetArgument<Core.Javascript.String>(arguments, index, context).Value;
+            var hex = Core.Tool.GetArgument<Core.String>(arguments, index, context).Value;
             var color = ColorTranslator.FromHtml(hex);
             var brush = new SolidBrush(color);
             return brush;
         }
 
         private static Pen GetPen(Constant[] arguments, int index, string context) {
-            var hex = Core.Tool.GetArgument<Core.Javascript.String>(arguments, index, context).Value;
+            var hex = Core.Tool.GetArgument<Core.String>(arguments, index, context).Value;
             var color = ColorTranslator.FromHtml(hex);
             var pen = new Pen(color);
             return pen;
@@ -55,40 +55,40 @@ namespace NetJS.GUI.API {
         }
 
         private static System.Drawing.Graphics GetGraphics(Constant _this) {
-            var jsGraphics = ((Core.Javascript.Object)_this).Get<Foreign>("bufferGraphics");
+            var jsGraphics = ((Core.Object)_this).Get("bufferGraphics") as Foreign;
             var graphics = (System.Drawing.Graphics)jsGraphics.Value;
             return graphics;
         }
 
-        public static Constant fillRect(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+        public static Constant fillRect(Constant _this, Constant[] arguments, Agent agent) {
             var rect = GetRectangle(arguments, "Graphics.fillRect");
             var brush = GetBrush(arguments, 4, "Graphics.fillRect");
             GetGraphics(_this).FillRectangle(brush, rect);
             return Static.Undefined;
         }
 
-        public static Constant drawRect(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+        public static Constant drawRect(Constant _this, Constant[] arguments, Agent agent) {
             var rect = GetRectangle(arguments, "Graphics.drawRect");
             var pen = GetPen(arguments, 4, "Graphics.drawRect");
             GetGraphics(_this).DrawRectangle(pen, rect);
             return Static.Undefined;
         }
 
-        public static Constant fillEllipse(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+        public static Constant fillEllipse(Constant _this, Constant[] arguments, Agent agent) {
             var rect = GetRectangle(arguments, "Graphics.fillEllipse");
             var brush = GetBrush(arguments, 4, "Graphics.fillEllipse");
             GetGraphics(_this).FillEllipse(brush, rect);
             return Static.Undefined;
         }
 
-        public static Constant drawEllipse(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+        public static Constant drawEllipse(Constant _this, Constant[] arguments, Agent agent) {
             var rect = GetRectangle(arguments, "Graphics.drawEllipse");
             var pen = GetPen(arguments, 4, "Graphics.drawEllipse");
             GetGraphics(_this).DrawEllipse(pen, rect);
             return Static.Undefined;
         }
 
-        public static Constant drawLine(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+        public static Constant drawLine(Constant _this, Constant[] arguments, Agent agent) {
             var from = GetPoint(arguments, "Graphics.drawLine");
             var to = GetPoint(arguments, "Graphics.drawLine", 2);
             var pen = GetPen(arguments, 4, "Graphics.drawLine");
@@ -96,19 +96,19 @@ namespace NetJS.GUI.API {
             return Static.Undefined;
         }
 
-        public static Constant drawString(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
+        public static Constant drawString(Constant _this, Constant[] arguments, Agent agent) {
             var point = GetPoint(arguments, "Graphics.drawString");
-            var s = Core.Tool.GetArgument<Core.Javascript.String>(arguments, 2, "Graphics.drawString").Value;
+            var s = Core.Tool.GetArgument<Core.String>(arguments, 2, "Graphics.drawString").Value;
             var brush = GetBrush(arguments, 3, "Graphics.drawString");
             GetGraphics(_this).DrawString(s, new Font("Arial", 16f), brush, point);
             return Static.Undefined;
         }
 
-        public static Constant update(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var jsGraphics = ((Core.Javascript.Object)_this).Get<Foreign>("graphics");
+        public static Constant update(Constant _this, Constant[] arguments, Agent agent) {
+            var jsGraphics = ((Core.Object)_this).Get("graphics") as Foreign;
             var graphics = (System.Drawing.Graphics)jsGraphics.Value;
 
-            var jsBuffer = ((Core.Javascript.Object)_this).Get<Foreign>("buffer");
+            var jsBuffer = ((Core.Object)_this).Get("buffer") as Foreign;
             var buffer = (Bitmap)jsBuffer.Value;
 
             graphics.DrawImage(buffer, 0, 0);

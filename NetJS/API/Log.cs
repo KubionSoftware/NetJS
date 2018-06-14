@@ -1,4 +1,4 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 
 namespace NetJS.API {
@@ -9,12 +9,10 @@ namespace NetJS.API {
         /// <param name="log">The log that needs to be written</param>
         /// <example><code lang="javascript">Log.write("Hello world!");</code></example>
         /// <exception cref="InternalError">Thrown when there is no application in the application lex.</exception>
-        public static Constant write(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var message = Core.Convert.ToString(arguments[0], lex);
+        public static Constant write(Constant _this, Constant[] arguments, Agent agent) {
+            var message = Core.Convert.ToString(arguments[0], agent);
 
-            var application = Tool.GetFromScope<JSApplication>(lex, "__application__");
-            if (application == null) throw new InternalError("No application");
-            
+            var application = (agent as NetJSAgent).Application;
             var file = application.Settings.Root + application.Settings.Log;
 
             try {

@@ -1,19 +1,28 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Globalization;
 
 namespace NetJS.Core.API {
 
-    class Number {
+    class NumberAPI {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            var value = arguments.Length == 1 ? Tool.GetArgument<Javascript.Number>(arguments, 0, "Number constructor").Value : 0;
+        private const string Primitive = "[[PrimitiveValue]]";
 
-            return new Javascript.Number(value);
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            var value = arguments.Length == 1 ? Tool.GetArgument<Number>(arguments, 0, "Number constructor") : new Number(0);
+            var obj = _this as Object;
+            obj.Set(Primitive, value);
+            return _this;
         }
 
-        public static Constant toString(Constant _this, Constant[] arguments, LexicalEnvironment lex) {
-            return new Javascript.String(((Javascript.Number)_this).Value.ToString(CultureInfo.InvariantCulture));
+        public static Number GetNumber(Constant _this) {
+            if (_this is Number s) return s;
+            return (_this as Object).Get(Primitive) as Number;
+        }
+
+        public static Constant toString(Constant _this, Constant[] arguments, Agent agent) {
+            var num = GetNumber(_this);
+            return new String(num.Value.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

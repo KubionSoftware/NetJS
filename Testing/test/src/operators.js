@@ -29,9 +29,9 @@ assert(() => obj.x == obj.x, "Object.property == Object.property");
 assert(() => !!obj, "Object");
 assert(() => obj != true, "Object != true");
 
-var x = 3;
+x = 3;
 assert(() => !!x, "Defined variable == true");
-assert(() => !undefinedVariable, "Undefined variable == false");
+assert(() => typeof undefinedVariable == "undefined", "Undefined variable == false");
 
 assert(() => !(""), "Empty string == false");
 assert(() => !!("x"), "Not empty string == true");
@@ -62,19 +62,19 @@ assert(() => 3 * (5 + 2) == 21, "Number group before multiply");
 assert(() => (2 + 4) / (1 + 2) == 2, "multiple groups");
 assert(() => (2 * (2 + 1)) * (((3 + 1) * 2) / 2) == 24, "Number groups in groups");
 
-var x = 0;
+x = 0;
 assert(() => x++ == 0, "Number postfix increment");
 assert(() => x == 1, "Number postfix increment");
 
-var x = 0;
+x = 0;
 assert(() => x-- == 0, "Number postfix decrement");
 assert(() => x == -1, "Number postfix decrement");
 
-var x = 0;
+x = 0;
 assert(() => ++x == 1, "Number prefix increment");
 assert(() => x == 1, "Number prefix increment");
 
-var x = 0;
+x = 0;
 assert(() => --x == -1, "Number prefix decrement");
 assert(() => x == -1, "Number prefix decrement");
 
@@ -157,7 +157,7 @@ assert(() => !([] instanceof Function), "[] not instance of Function");
 
 // In
 
-var obj = {x: 3};
+obj = {x: 3};
 assert(() => "x" in obj, "Property in Object");
 assert(() => !("y" in obj), "Property not in Object");
 
