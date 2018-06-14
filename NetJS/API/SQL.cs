@@ -80,7 +80,8 @@ namespace NetJS.API {
             var query = ((Core.String)arguments[1]).Value;
 
             try {
-                if (query.Trim().ToUpper().StartsWith("SELECT")) {
+                // TODO: Always return result for now, because of insert, then select possibility
+                if (true /*query.Trim().ToUpper().StartsWith("SELECT")*/) {
                     var rows = Util.SQL.Get(connection, query, new SqlParameter[] { });
 
                     var result = new Core.Array(0, agent);
