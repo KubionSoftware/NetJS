@@ -6,6 +6,8 @@ using System.Diagnostics;
 using NetJS;
 
 namespace Testing {
+    
+    
     class TestFunctions{
         public static Constant assert(Constant _this, Constant[] arguments, Scope scope){
             Constant value = Static.Undefined;
@@ -64,22 +66,21 @@ namespace Testing {
     class Program{
         public static int NumFailed = 0;
         public static int NumSuccess = 0;
-        public static List<Test> AllTests;
-        public static int TestCount = 0;
+        private static List<Test> _allTests;
+        private static int _testCount = 0;
+        private static int _benchmarkRounds = 1;
+        private static List<double> _benchmarkResults = new List<double>();
 
 
         static void Main(string[] args){
             try {
-                var service = new JSService();
-                var application = new JSApplication("../../test/");
-
                 NumFailed = 0;
                 NumSuccess = 0;
 
                 var recursiveFindWatch = new Stopwatch();
                 recursiveFindWatch.Start();
 
-                Directory root = new Directory("test", 1);
+                var root = new Directory("test", 1);
                 root = root.Walkthrough(System.IO.Path.GetFullPath("../../test/src/262/test" +
 //                                                                   "/language" +
 //                                                                       "/white-space" +
@@ -87,28 +88,35 @@ namespace Testing {
                 Console.WriteLine("Got all files!");
 
                 recursiveFindWatch.Stop();
-//                Console.WriteLine("tests collected in(s): " + recursiveFindWatch.Elapsed.TotalSeconds);
 
-                var session = new JSSession();
-
-                AllTests = root.Tests;
-
+                _allTests = root.Tests;
                 var executeWatch = new Stopwatch();
-                executeWatch.Start();
+                
 
-                var taskList = new List<Task>();
-                for (var i = 0; i < System.Environment.ProcessorCount; i++) {
-                    taskList.Add(Task.Factory.StartNew(ExecuteWorker));
+                var rounds = 0;
+                while (_benchmarkRounds > rounds) {
+                    Console.WriteLine("Round: " + (rounds+1));
+                    executeWatch.Restart();
+
+                    var taskList = new List<Task>();
+                    for (var i = 0; i < Environment.ProcessorCount; i++) {
+                        taskList.Add(Task.Factory.StartNew(ExecuteWorker));
+                    }
+
+                    Task.WaitAll(taskList.ToArray());
+
+                    executeWatch.Stop();
+                    _testCount = 0;
+                    _benchmarkResults.Add(executeWatch.Elapsed.TotalSeconds);
+                    rounds++;
+                    Console.WriteLine(
+                        "Elapsed Creation & executionTime (mm:ss):" + executeWatch.Elapsed.ToString(@"mm\:ss"));
                 }
-
-                Task.WaitAll(taskList.ToArray());
-
-                executeWatch.Stop();
+                
                 var watch = new Stopwatch();
                 watch.Start();
 
                 var output = root.ToCSV(root.GetHighestLevel(root) + 1);
-//                Console.WriteLine(output);
 
 
                 watch.Stop();
@@ -117,13 +125,16 @@ namespace Testing {
                 output += "\nElapsed Formatting Time (mm:ss):," + watch.Elapsed.ToString(@"mm\:ss");
 
                 Console.WriteLine("Elapsed Retrieval Time(mm:ss):" + recursiveFindWatch.Elapsed.ToString(@"mm\:ss"));
-                Console.WriteLine(
-                    "Elapsed Creation & executionTime (mm:ss):" + executeWatch.Elapsed.ToString(@"mm\:ss"));
                 Console.WriteLine("Elapsed Formatting Time (mm:ss):" + watch.Elapsed.ToString(@"mm\:ss"));
                 System.IO.File.WriteAllText(@"C:\Users\Mitch\ProjectWorkspace\Kubion\NetJS\Testing\test\test.csv",
                     output);
 
+                var totalExecutionTime = 0.0;
+                foreach (var result in _benchmarkResults) {
+                    totalExecutionTime += result;
+                }
 
+                Console.WriteLine("Avarage Execution time: " + totalExecutionTime / _benchmarkResults.Count);
                 Console.ReadLine();
             }
             catch (Exception e) {
@@ -131,10 +142,11 @@ namespace Testing {
 
                 Console.WriteLine("Error in NetJS: ");
                 System.IO.File.WriteAllText(@"C:\Users\Mitch\ProjectWorkspace\Kubion\NetJS\Testing\test\error.txt",
-                    e.Message.ToString());
+                    e.Message);
                 Console.WriteLine(e);
             }
 
+            
             Console.ReadLine();
         }
 
@@ -147,14 +159,14 @@ namespace Testing {
             service.RunTemplate("262/harness/assert.js", "{}", ref application, ref session);
 
             while (true) {
-                Test myTest = null;
+                Test myTest;
 
-                lock (AllTests) {
-                    if (TestCount < AllTests.Count) {
-                        myTest = AllTests[TestCount];
-                        TestCount++;
-                        if(TestCount % 1000 == 0) {
-                            Console.WriteLine("We are at number: " + TestCount);
+                lock (_allTests) {
+                    if (_testCount < _allTests.Count) {
+                        myTest = _allTests[_testCount];
+                        _testCount++;
+                        if(_testCount % 3000 == 0) {
+                            Console.WriteLine("We are at number: " + _testCount);
                         }
                     }
                     else {

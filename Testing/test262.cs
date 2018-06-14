@@ -10,42 +10,40 @@ using YamlDotNet.RepresentationModel;
 
 namespace Testing{
     public class Directory{
-        private string name;
-        private List<Directory> Directories;
-        private int level;
-        public int maxThreads = 4;
-        public int usedThread = 0;
+        private List<Directory> _directories;
+        private readonly int _level;
 
-        private List<string> Files;
+        private List<string> _files;
         public List<Test> Tests = new List<Test>();
 
         public Directory(string s, int level){
-            name = s;
-            this.level = level;
-            Directories = new List<Directory>();
-            Files = new List<string>();
+            this._level = level;
+            _directories = new List<Directory>();
+            _files = new List<string>();
         }
 
         public Directory Walkthrough(string path, Directory root){
             var myRoot = root ?? this;
             var allFiles = System.IO.Directory.GetFiles(path);
             foreach (var file in allFiles) {
-//                Console.WriteLine("found test: " + file);
-                Files.Add(file);
-                myRoot.Files.Add(file);
+#if DEBUG
+                Console.WriteLine("found test: " + file);
+                #endif
+                _files.Add(file);
+                myRoot._files.Add(file);
                 var test = new Test(file);
                 myRoot.Tests.Add(test);
             }
 
             if (allFiles.Length > 0) {
-                myRoot.Files.Add(null);
+                myRoot._files.Add(null);
                 myRoot.Tests.Add(null);
             }
 
             foreach (var dir in System.IO.Directory.GetDirectories(path)) {
                 var dirPath = dir.Split('\\');
-                var subDirectory = new Directory(dirPath[dirPath.Length - 1], level + 1);
-                Directories.Add(subDirectory.Walkthrough(dir, myRoot));
+                var subDirectory = new Directory(dirPath[dirPath.Length - 1], _level + 1);
+                _directories.Add(subDirectory.Walkthrough(dir, myRoot));
             }
 
             return this;
@@ -58,24 +56,24 @@ namespace Testing{
                 test.Execute(application, service, session);
             }
         }
-        
+
         public int GetHighestLevel(Directory d){
-            var level = this.level;
+            var level = this._level;
             if (d == null) return level;
-            foreach (var directory in d.Directories) {
+            foreach (var directory in d._directories) {
                 var newlevel = directory.GetHighestLevel(this);
                 if (newlevel > level) {
                     level = newlevel;
                 }
             }
 
-            if (d.level > level) {
-                level = d.level;
+            if (d._level > level) {
+                level = d._level;
             }
 
             return level;
         }
-        
+
         public string ToCSV(int level){
             var countSuccesful = 0;
             var countTotal = 0;
@@ -90,9 +88,9 @@ namespace Testing{
                 if (test != null) {
 //                    test.Execute(application, service, session);
                     answer.Add(test.GetCsv(level));
-                    if (test.implemented.Count < 1) {
-                        if (test.useNonStrict) {
-                            if (test.nonStrictResult) {
+                    if (test.Implemented.Count < 1) {
+                        if (test.UseNonStrict) {
+                            if (test.NonStrictResult) {
                                 countSuccesful++;
                             }
                             else {
@@ -103,6 +101,7 @@ namespace Testing{
                     else {
                         countUndefined++;
                     }
+
                     countTotal++;
                 }
                 else {
@@ -121,49 +120,55 @@ namespace Testing{
             answer.Add("%succesful," + pSuccesful);
             answer.Add("%undefined," + pUndefined);
             answer.Add("%failed," + pFailed);
-            
+
             return string.Join("\r\n", answer);
         }
     }
 
     public class Test{
-        public string path;
-        private string[] splittedPath;
-        private string name;
-        private bool useStrict;
-        public bool useNonStrict;
-        private List<string> include;
-        public string strictOutput;
-        private string nonStrictOutput = "";
-        private string information;
-        private YamlNode es5id;
-        private YamlNode description;
-        private YamlNode negative;
-        private YamlNode negativePhase;
-        private YamlNode negativeType;
-        private List<string> flags;
-        public List<string> implemented = new List<string>();
-        private string nonStrictTime;
-        public bool nonStrictResult;
+        private readonly string _path;
+        private string[] _splittedPath;
+        private string _name;
+        private bool _useStrict;
+        public bool UseNonStrict;
+        private List<string> _include;
+        public string StrictOutput;
+        private string _nonStrictOutput = "";
+        private string _information;
+        private YamlNode _es5Id;
+        private YamlNode _description;
+        private YamlNode _negative;
+        private YamlNode _negativePhase;
+        private YamlNode _negativeType;
+        private List<string> _flags;
+        public List<string> Implemented = new List<string>();
+        private string _nonStrictTime;
+        public bool NonStrictResult;
+        private bool _useAsync = false;
+        private string _code;
 
         public Test(string filePath){
-            path = filePath.Replace('\\', '/');
+            _path = filePath.Replace('\\', '/');
         }
 
         public void Initialize(){
-            splittedPath = path.Split('/');
-            name = splittedPath[splittedPath.Length - 1];
-            useNonStrict = true;
-            var excludeWords = new[] {"onlyStrict","print", "$262", "createRealm", "detachArrayBuffer", "evalScript", "global.", "IsHTMLDDA", "document.all", "agent"};
+            _splittedPath = _path.Split('/');
+            _name = _splittedPath[_splittedPath.Length - 1];
+            UseNonStrict = true;
+            var excludeWords = new[] {
+                "print(", "$262", "createRealm", "detachArrayBuffer", "evalScript", "global.", "IsHTMLDDA",
+                "document.all", "agent"
+            };
 
-            var readText = File.ReadAllText(path);
+            var readText = File.ReadAllText(_path);
+            
             foreach (var word in excludeWords) {
                 if (readText.Contains(word)) {
-                    implemented.Add(word);
+                    Implemented.Add(word);
                 }
             }
 
-            if (implemented.Count >= 1) return;
+            if (Implemented.Count >= 1) return;
             var configRGX = new Regex(@"(?<=\/\*---)[\w\W]+(?=---\*\/)");
             var match = configRGX.Match(readText);
             if (match.Value == "") return;
@@ -174,29 +179,29 @@ namespace Testing{
             if (yaml.Documents.Count <= 0) return;
             var mapping = (YamlMappingNode) yaml.Documents[0].RootNode;
 
-            mapping.Children.TryGetValue("description", out description);
-            mapping.Children.TryGetValue("es5id", out es5id);
-            mapping.Children.TryGetValue("negative", out negative);
+            mapping.Children.TryGetValue("description", out _description);
+            mapping.Children.TryGetValue("es5id", out _es5Id);
+            mapping.Children.TryGetValue("negative", out _negative);
             mapping.Children.TryGetValue("includes", out var tempInclude);
             if (tempInclude != null) {
-                include = tempInclude.ToString().Split(' ').ToList();
+                _include = tempInclude.ToString().Split(' ').ToList();
             }
 
             mapping.Children.TryGetValue("flags", out var tempFlag);
             if (tempFlag != null) {
-                flags = tempFlag.ToString().Split(',').ToList();
+                _flags = tempFlag.ToString().Split(',').ToList();
             }
 
-            if (negative != null) {
+            if (_negative != null) {
                 var into = "";
-                foreach (var node in negative.AllNodes) {
+                foreach (var node in _negative.AllNodes) {
                     switch (@into) {
                         case "phase":
-                            negativePhase = node;
+                            _negativePhase = node;
                             break;
 
                         case "type":
-                            negativeType = node;
+                            _negativeType = node;
                             break;
                     }
 
@@ -204,110 +209,138 @@ namespace Testing{
                 }
             }
 
-            if (flags != null && flags.Count > 0) {
-                foreach (var flag in flags) {
+            if (_flags != null && _flags.Count > 0) {
+                foreach (var flag in _flags) {
                     switch (flag) {
-                        case "onlyStrict":
-                            useStrict = true;
+                        case "[ onlyStrict ]":
+                            _useStrict = true;
+                            Implemented.Add("onlyStrict");
                             break;
-                        case "noStrict":
-                            useNonStrict = true;
+                        case "[ noStrict ]":
+                            UseNonStrict = true;
                             break;
-                        case "module":
-                            useNonStrict = true;
+                        case "[ module ]":
+                            UseNonStrict = true;
                             break;
-                        case "raw":
-                            useNonStrict = true;
+                        case "[ raw ]":
+                            UseNonStrict = true;
+                            break;
+                        case "[ async ]":
+                            UseNonStrict = true;
+                            _useAsync = true;
                             break;
                     }
                 }
             }
             else {
-                useNonStrict = true;
-                useStrict = true;
+                UseNonStrict = true;
+                _useStrict = true;
             }
         }
 
 
         public void Execute(JSApplication application, JSService service, JSSession session){
-            if (implemented.Count >= 1) return;
+            if (Implemented.Count >= 1) return;
             var watch = new Stopwatch();
             watch.Start();
             var preTestOutput = "";
-            if (include != null) {
-                foreach (var preTest in include) {
+            if (_include != null) {
+                foreach (var preTest in _include) {
                     if (!preTest.Contains(".js")) continue;
-                    var preTestPath = Path.GetFullPath("../../test/src/262/harness/" + preTest.Replace(",", "")).Replace('\\', '/');
-                    // Console.WriteLine("preTest: " + preTestPath);
+                    var preTestPath = Path.GetFullPath("../../test/src/262/harness/" + preTest.Replace(",", ""))
+                        .Replace('\\', '/');
+#if DEBUG
+                     Console.WriteLine("preTest: " + preTestPath);
+                    #endif
                     preTestOutput += service.RunTemplate(preTestPath, "{}", ref application, ref session);
                 }
             }
-            // Console.WriteLine("executing: " + path);
-            var testOutput = service.RunTemplate(path, "{}", ref application, ref session);
+#if DEBUG
+             Console.WriteLine("executing: " + _path);
+            #endif
+            
+            var templateWatch = new Stopwatch();
+            templateWatch.Start();
+            var testOutput = service.RunTemplate(_path, "{}", ref application, ref session);
+            templateWatch.Stop();
+
             watch.Stop();
 
-            if (negative != null && negativeType != null && negativeType.ToString().Length > 0) {
+            if (_negative != null && _negativeType != null && _negativeType.ToString().Length > 0) {
                 var splitOutput = testOutput.Split(' ');
                 var comparewith = "";
                 if (splitOutput.Length > 1) {
                     comparewith = splitOutput[0] + splitOutput[1][0].ToString().ToUpper() +
                                   splitOutput[1].Substring(1);
                 }
-                if (comparewith.Contains(negativeType.ToString())) {
-                    nonStrictResult = true;
+
+                if (comparewith.Contains(_negativeType.ToString())) {
+                    NonStrictResult = true;
                 }
-            } else if (testOutput.Length < 1) {
-                nonStrictResult = true;
             }
+            else if (testOutput.Length < 1) {
+                NonStrictResult = true;
+            }
+
+            if (_useAsync && templateWatch.ElapsedMilliseconds > 75) {
+                NonStrictResult = false;
+                _nonStrictOutput += "Async timeout fail | ";
+            }
+            
 
             if (preTestOutput.Length > 0) {
-                nonStrictOutput += "preTest: " + preTestOutput + " | " ;
+                _nonStrictOutput += "preTest: " + preTestOutput + " | ";
             }
 
-            nonStrictOutput += testOutput;
+            _nonStrictOutput += testOutput;
             var stringTime = Math.Round(watch.Elapsed.TotalMilliseconds, 2).ToString().Split('.');
             var timeDecimal = "00";
             if (stringTime.Length == 2) {
                 timeDecimal = (int.Parse(stringTime[1]) * 6 / 10).ToString();
             }
-            nonStrictTime = stringTime[0] + "." + timeDecimal;
+
+            _nonStrictTime = stringTime[0] + "." + timeDecimal;
         }
 
-        
+
         public string GetCsv(int level){
             var answer = "";
-            if (!useNonStrict) return answer;
+            if (!UseNonStrict) return answer;
             var fullpath = Path.GetFullPath("../../test/src/262/test");
             var splitpath = fullpath.Length + 1;
             var dirPathSplitted = fullpath.Split('\\');
             level = level + dirPathSplitted.Length;
 
-            var dirPath = string.Join(",", splittedPath, 0, splittedPath.Length - 1);
+            var dirPath = string.Join(",", _splittedPath, 0, _splittedPath.Length - 1);
             answer += dirPath.Substring(splitpath);
 
-            if (level > splittedPath.Length - 1) {
-                answer += new string(',', (level - splittedPath.Length)+1);
+            if (level > _splittedPath.Length - 1) {
+                answer += new string(',', (level - _splittedPath.Length) + 1);
             }
             else {
                 answer += ",";
             }
 
 
-            answer += name;
-            if (implemented.Count < 1) {
+            answer += _name;
+            if (Implemented.Count < 1) {
                 var preOutput = "";
-                if (negative != null&& negativeType != null) {
-                    preOutput = "[negative:" + negativeType + "] ";
+                if (_negative != null && _negativeType != null) {
+                    preOutput = "[negative:" + _negativeType + "] ";
                 }
-                    
+
                 var rgx4 = new Regex(@"([\r\n])+");
-                    
-                answer += "," + nonStrictResult + "," + nonStrictTime + "," + "\"" + rgx4.Replace(preOutput.Replace('"', '\'') + nonStrictOutput.Replace('"', '\''), " ") + "\"," + path.Replace('/', '\\');
+
+                answer += "," + NonStrictResult + "," + _nonStrictTime + "," + "\"" +
+                          rgx4.Replace(preOutput.Replace('"', '\'') + _nonStrictOutput.Replace('"', '\''), " ") + "\"," +
+                          _path.Replace('/', '\\');
             }
             else {
                 answer += "," + "undefined" + ",," +
-                          "\"the following features are not implemented: " + string.Join(",", implemented.ToArray()) + "\"," + path.Replace('/', '\\');
+                          "\"the following features are not implemented: " + string.Join(",", Implemented.ToArray()) +
+                          "\"," + _path.Replace('/', '\\');
             }
+
             return answer;
         }
     }
