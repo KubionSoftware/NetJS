@@ -121,7 +121,7 @@ namespace Testing {
 
                 Console.WriteLine("Elapsed Retrieval Time(mm:ss):" + recursiveFindWatch.Elapsed.ToString(@"mm\:ss"));
                 Console.WriteLine("Elapsed Formatting Time (mm:ss):" + watch.Elapsed.ToString(@"mm\:ss"));
-                System.IO.File.WriteAllText(@"C:\Users\Mitch\ProjectWorkspace\Kubion\NetJS\Testing\test\test.csv",
+                System.IO.File.WriteAllText(@"../../test\test.csv",
                     output);
 
                 var totalExecutionTime = 0.0;
@@ -136,7 +136,7 @@ namespace Testing {
                 Console.ForegroundColor = ConsoleColor.Red;
 
                 Console.WriteLine("Error in NetJS: ");
-                System.IO.File.WriteAllText(@"C:\Users\Mitch\ProjectWorkspace\Kubion\NetJS\Testing\test\error.txt",
+                System.IO.File.WriteAllText(@"../../test\error.txt",
                     e.Message);
                 Console.WriteLine(e);
             }
