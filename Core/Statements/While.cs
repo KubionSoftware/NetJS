@@ -16,6 +16,9 @@ namespace NetJS.Core {
             var labelSet = new List<string>();
 
             Constant v = Static.Undefined;
+            
+            bool isSafe = agent.IsSafe;
+            int i = 0;
 
             while (true) {
                 var exprRef = Check.Evaluate(agent);
@@ -26,7 +29,7 @@ namespace NetJS.Core {
                 }
 
                 var stmtResult = Body.Evaluate(agent);
-                if (!LoopContinues(stmtResult, labelSet)) {
+                if (!LoopContinues(stmtResult, labelSet, ref i, isSafe)) {
                     return Completion.UpdateEmpty(stmtResult, v);
                 }
 

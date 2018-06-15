@@ -498,6 +498,9 @@ namespace NetJS.Core {
                 parameters.Parameters.Add(new Parameter(content, new AnyType()));
                 return ParseArrowFunction(parameters);
             } else {
+                if (content.StartsWith("//")) {
+                    Console.Write("WRONG");
+                }
                 return new Identifier(content);
             }
         }

@@ -68,7 +68,7 @@ namespace NetJS {
             } else {
                 return new SourceFile() {
                     LastModified = lastModified,
-                    Script = ScriptRecord.ParseScript("`" + source + "`", realm, fileId),
+                    Script = ScriptRecord.ParseTemplate(source, realm, fileId),
                     Type = SourceType.Javascript
                 };
             }

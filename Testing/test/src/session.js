@@ -18,4 +18,4 @@ assert(() => Session.get("Hello") == undefined, "Session.get for clear check");
 
 // multiple data types
 Session.set("Object", {first:"Hello", second:"World!"});
-assert(() => Session.get("Object").first == "Hello" && Session.get("Object").second, "Session.get for Objects");
+assert(() => Session.get("Object").first == "Hello" && Session.get("Object").second == "World!", "Session.get for Objects");

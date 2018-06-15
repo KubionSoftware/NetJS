@@ -15,7 +15,11 @@ namespace NetJS.Core {
 
         public override Completion Evaluate(Agent agent) {
             foreach (var expression in _expressions) {
-                agent.Running.Buffer.Append(expression.Evaluate(agent).ToString());
+                var reference = expression.Evaluate(agent);
+                var value = References.GetValue(reference, agent);
+                if (value is Undefined) continue;
+                var str = Convert.ToString(value, agent);
+                agent.Running.Buffer.Append(str);
             }
 
             return Static.NormalCompletion;

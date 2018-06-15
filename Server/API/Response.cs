@@ -26,8 +26,8 @@ namespace NetJS.Server.API {
             var cookie = new HttpCookie(key, value);
 
             if (options != null) {
-                if(options.Get("expires") is Core.Date date) {
-                    cookie.Expires = date.Value;
+                if(Core.Tool.GetDate(options.Get("expires"), out DateTime date)) {
+                    cookie.Expires = date;
                 }
 
                 if (options.Get("path") is Core.String path) {

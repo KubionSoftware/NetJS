@@ -5,7 +5,7 @@ using System.Globalization;
 namespace NetJS.Core.API {
     class DateAPI {
 
-        private const string Primitive = "[[PrimitiveValue]]";
+        public const string Primitive = "[[PrimitiveValue]]";
 
         public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
             DateTime date;

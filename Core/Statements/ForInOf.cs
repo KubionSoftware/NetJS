@@ -85,6 +85,9 @@ namespace NetJS.Core {
             // TODO: labelSet
             var labelSet = new List<string>();
 
+            bool isSafe = agent.IsSafe;
+            int i = 0;
+
             var iterator = HeadEvaluation(agent);
             if (iterator.IsAbrupt()) return iterator;
 
@@ -119,7 +122,7 @@ namespace NetJS.Core {
                     var result = Body.Evaluate(agent);
                     agent.Running.Lex = oldEnv;
 
-                    if (!LoopContinues(result, labelSet)) {
+                    if (!LoopContinues(result, labelSet, ref i, isSafe)) {
                         if (Kind == IterationKind.Enumerate) {
                             return Completion.UpdateEmpty(result, v);
                         } else {

@@ -4,80 +4,80 @@
         <name>Server</name>
     </assembly>
     <members>
-        <member name="M:NetJS.Server.API.Request.getCookie(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getCookie(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Reads a cookie.</summary>
             <param name="name">The name of the cookie (string)</param>
             <returns>The cookie value (string)</returns>
             <example><code lang="javascript">var ssid = Request.getCookie("SSID");</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getCookies(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getCookies(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Reads all cookies.</summary>
             <returns>An object with the keys being the cookie names and the values the cookie values</returns>
             <example><code lang="javascript">var cookies = Response.getCookies();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getHeader(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getHeader(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Reads a request header.</summary>
             <param name="name">The name of the header (string)</param>
             <returns>The header value (string)</returns>
             <example><code lang="javascript">var acceptedTypes = Request.getHeader("Accept");</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getHeaders(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getHeaders(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Reads all headers.</summary>
             <returns>An object with the keys being the header names and the values the header values</returns>
             <example><code lang="javascript">var headers = Request.getHeaders();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getUrl(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getUrl(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets the requested URL</summary>
             <returns>The url (string)</returns>
             <example><code lang="javascript">var url = Request.getUrl();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getPath(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getPath(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets the requested path</summary>
             <returns>The path (string[])</returns>
             <example><code lang="javascript">var path = Request.getPath();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getParameter(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getParameter(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets a parameter from the query part of the url</summary>
             <param name="name">The name of the parameter (string)</param>
             <returns>The value (string)</returns>
             <example><code lang="javascript">var value = Request.getParameter("q");</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getParameters(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getParameters(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets all parameters from the query part of the url</summary>
             <returns>An object with the keys being the parameter names and the values being the parameter values (string)</returns>
             <example><code lang="javascript">var parameters = Request.getParameters();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getContent(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getContent(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets the content of the request</summary>
             <returns>The content (string)</returns>
             <example><code lang="javascript">var content = Request.getContent();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getEncoding(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getEncoding(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets the encoding of the request content</summary>
             <returns>The web name (registered with IANA) of the encoding (string)</returns>
             <example><code lang="javascript">var encoding = Request.getEncoding();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getMethod(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getMethod(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets the method of the request</summary>
             <returns>The method (string)</returns>
             <example><code lang="javascript">var method = Request.getMethod();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.isSecure(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.isSecure(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Checks if the request is secure (via HTTPS)</summary>
             <returns>If the request is secure (boolean)</returns>
             <example><code lang="javascript">var secure = Request.isSecure();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getForm(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getForm(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets the form content of the request</summary>
             <returns>An object with the keys being the field names and the values being the field values</returns>
             <example><code lang="javascript">var form = Request.getForm();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getSessionId(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getSessionId(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets the sessionId from IIS</summary>
             <returns>The session id, a unique string for each different session</returns>
             <example><code lang="javascript">var sessionId = Request.getSessionId();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getUser(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getUser(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets information about the user IP and agent</summary>
             <returns>An object with {
                 ip: "192.0.168.2",
@@ -85,12 +85,12 @@
             }</returns>
             <example><code lang="javascript">var user = Request.getUser();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getFileCount(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getFileCount(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets the number of files in the request</summary>
             <returns>The file count (number)</returns>
             <example><code lang="javascript">var fileCount = Request.getFileCount();</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.getFile(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.getFile(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Gets a file from the request</summary>
             <param name="index">The index of the file (number)</param>
             <returns>An object with: {
@@ -101,13 +101,13 @@
             }</returns>
             <example><code lang="javascript">var file = Request.getFile(0);</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Request.saveFile(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Request.saveFile(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Saves a file to disk</summary>
             <param name="index">The index of the file (number)</param>
             <param name="name">The name of the new file (string)</param>
             <example><code lang="javascript">Request.saveFile(0, "image.png");</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.setCookie(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.setCookie(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Writes a cookie.</summary>
             <param name="name">The name of the cookie (string)</param>
             <param name="value">The value to set (string)</param>
@@ -118,43 +118,43 @@
                 httpOnly: false
             });</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.removeCookie(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.removeCookie(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Removes a cookie.</summary>
             <param name="name">The name of the cookie (string)</param>
             <example><code lang="javascript">Response.removeCookie("SSID")</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.setHeader(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.setHeader(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Writes an header.</summary>
             <param name="name">The name of the header (string)</param>
             <param name="value">The value to set (string)</param>
             <example><code lang="javascript">Response.setHeader("Content-Type", "application/json");</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.removeHeader(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.removeHeader(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Removes an header.</summary>
             <param name="name">The name of the header (string)</param>
             <example><code lang="javascript">Response.removeHeader("ApplicationID")</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.sendBytes(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.sendBytes(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Sends an array of bytes and exits the execution immediately</summary>
             <param name="bytes">The bytes to send (Uint8Array)</param>
             <example><code lang="javascript">Request.sendBytes(bytes);</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.sendFile(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.sendFile(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Sends an file and exits the execution immediately</summary>
             <param name="name">The name of the file (string)</param>
             <example><code lang="javascript">Request.sendFile("image.png");</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.setStatusCode(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.setStatusCode(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Sets the response status code.</summary>
             <param name="statusCode">The status code (number)</param>
             <example><code lang="javascript">Response.setStatusCode(200);</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.setStatusDescription(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.setStatusDescription(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Sets the response status description.</summary>
             <param name="statusDescription">The status description (number)</param>
             <example><code lang="javascript">Response.setStatusDescription(200);</code></example>
         </member>
-        <member name="M:NetJS.Server.API.Response.setEncoding(NetJS.Core.Javascript.Constant,NetJS.Core.Javascript.Constant[],NetJS.Core.Javascript.Scope)">
+        <member name="M:NetJS.Server.API.Response.setEncoding(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Sets the response encoding.</summary>
             <param name="encoding">The web name (registered with IANA) of the encoding (string)</param>
             <example><code lang="javascript">Response.setEncoding("UTF-8");</code></example>

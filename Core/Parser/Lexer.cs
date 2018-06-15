@@ -227,6 +227,7 @@ namespace NetJS.Core {
                         continue;
                     }
                 }
+
                 if (InTemplate) {
                     HandleTemplate(c, action);
                     continue;
@@ -282,6 +283,8 @@ namespace NetJS.Core {
                 ClearBuffer(Token.Group.Operator, action);
             } else if (InNumber) {
                 ClearBuffer(Token.Group.Number, action);
+            } else if (InComment) {
+                ClearBuffer(Token.Group.Comment, action);
             } else if (InString) {
                 throw new SyntaxError("Unterminated string literal");
             } else {

@@ -57,6 +57,7 @@
     <Compile Include="Environment\GlobalEnvironmentRecord.cs" />
     <Compile Include="Environment\ObjectEnvironmentRecord.cs" />
     <Compile Include="Agent\ScriptRecord.cs" />
+    <Compile Include="Parser\DeclarationFinder.cs" />
     <Compile Include="Parser\Optimizer.cs" />
     <Compile Include="Statements\EmptyStatement.cs" />
     <Compile Include="Statements\FunctionDeclaration.cs" />

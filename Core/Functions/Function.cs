@@ -161,22 +161,13 @@ namespace NetJS.Core {
                 envRec.InitializeBinding(parameterNames[i], i < arguments.Length ? arguments[i] : Static.Undefined);
             }
 
-            Walker.Walk(ECMAScriptCode, node => {
-                if (node is FunctionLiteral || node is ClassLiteral) return null;
-
-                if (node is VariableDeclaration d && d.Scope != DeclarationScope.Block) {
-                    foreach (var dn in d.GetBoundNames()) {
-                        if (d.IsConstant) {
-                            envRec.CreateImmutableBinding(dn, true);
-                        } else {
-                            envRec.CreateMutableBinding(dn, false);
-                        }
-
-                        envRec.InitializeBinding(dn, Static.Undefined);
-                    }
+            DeclarationFinder.FindVarDeclarations(ECMAScriptCode, (dn, isConstant) => {
+                if (isConstant) {
+                    envRec.CreateImmutableBinding(dn, true);
+                } else {
+                    envRec.CreateMutableBinding(dn, false);
                 }
-
-                return node;
+                envRec.InitializeBinding(dn, Static.Undefined);
             });
 
             return Static.NormalCompletion;

@@ -73,7 +73,7 @@ namespace NetJS.Server.API {
         public static Constant getPath(Constant _this, Constant[] arguments, Agent agent) {
             var context = Tool.GetContext(agent, "Request.getPath");
             var path = Tool.GetPath(context.Request);
-            return Core.Tool.ToArray(path);
+            return Core.Tool.ToArray(path, agent);
         }
 
         /// <summary>Gets a parameter from the query part of the url</summary>
@@ -209,7 +209,7 @@ namespace NetJS.Server.API {
 
             using (MemoryStream ms = new MemoryStream()) {
                 file.InputStream.CopyTo(ms);
-                result.Set("content", new Core.Uint8Array(new Core.ArrayBuffer(ms.ToArray())));
+                result.Set("content", new Core.Uint8Array(new Core.ArrayBuffer(ms.ToArray()), agent));
             }
 
             return result;

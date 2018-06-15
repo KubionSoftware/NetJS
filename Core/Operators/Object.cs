@@ -13,7 +13,10 @@ namespace NetJS.Core {
 
             if (c is Reference reference) {
                 if (reference.IsUnresolvableReference()) {
-                    Assert.IsTrue(!reference.IsStrictReference(), $"Can't delete {c.ToDebugString()} because it is undefined");
+                    if (reference.IsStrictReference()) {
+                        throw new ReferenceError($"Can't delete {c.ToDebugString()} because it is undefined");
+                    }
+
                     return Boolean.True;
                 }
 

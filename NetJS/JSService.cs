@@ -12,14 +12,15 @@ namespace NetJS {
             try {
                 var agent = new NetJSAgent(application.Realm) {
                     Application = application,
-                    Session = session
+                    Session = session,
+                    IsSafe = true
                 };
 
                 var script = ScriptRecord.ParseScript(code, application.Realm, -1);
                 var result = script.Evaluate(agent);
 
-                if (result.Value is Core.String s) {
-                    return s.Value;
+                if (!(result.Value is Core.Undefined)) {
+                    return Core.Convert.ToString(result.Value, agent);
                 } else {
                     return agent.Running.Buffer.ToString();
                 }
@@ -35,7 +36,8 @@ namespace NetJS {
             try {
                 var agent = new NetJSAgent(application.Realm) {
                     Application = application,
-                    Session = session
+                    Session = session,
+                    IsSafe = true
                 };
 
                 if (arguments == null) {
@@ -51,8 +53,8 @@ namespace NetJS {
                     agent
                 );
 
-                if (result is Core.String s) {
-                    return s.Value;
+                if (!(result is Core.Undefined)) {
+                    return Core.Convert.ToString(result, agent);
                 } else {
                     return agent.Running.Buffer.ToString();
                 }

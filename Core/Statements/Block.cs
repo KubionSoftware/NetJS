@@ -6,10 +6,23 @@ using System.Threading.Tasks;
 
 namespace NetJS.Core {
     public class Block : Statement {
+
         public StatementList StatementList;
+
+        public List<VariableDeclaration> LexicalDeclarations = new List<VariableDeclaration>();
 
         public Block(StatementList statementList) {
             StatementList = statementList;
+
+            Walker.Walk(StatementList, node => {
+                if (node is FunctionLiteral || node is ClassLiteral || node is IterationStatement || node is For || node is ForInOf) return null;
+
+                if (node is VariableDeclaration d && d.Scope == DeclarationScope.Block) {
+                    LexicalDeclarations.Add(d);
+                }
+
+                return node;
+            });
         }
 
         public void BlockDeclarationInstantiation(LexicalEnvironment lex, Agent agent) {
@@ -19,21 +32,15 @@ namespace NetJS.Core {
 
             // TODO: function definitions
 
-            Walker.Walk(StatementList, node => {
-                if (node is FunctionLiteral || node is ClassLiteral || node is IterationStatement || node is For || node is ForInOf) return null;
-
-                if (node is VariableDeclaration d && d.Scope == DeclarationScope.Block) {
-                    foreach (var dn in d.GetBoundNames()) {
-                        if (d.IsConstant) {
-                            envRec.CreateImmutableBinding(dn, true);
-                        } else {
-                            envRec.CreateMutableBinding(dn, false);
-                        }
+            foreach (var d in LexicalDeclarations) {
+                foreach (var dn in d.GetBoundNames()) {
+                    if (d.IsConstant) {
+                        envRec.CreateImmutableBinding(dn, true);
+                    } else {
+                        envRec.CreateMutableBinding(dn, false);
                     }
                 }
-
-                return node;
-            });
+            }
         }
 
         public override Completion Evaluate(Agent agent) {

@@ -108,5 +108,15 @@ namespace NetJS.Core {
 
             return arguments[index];
         }
+
+        public static bool GetDate(Constant c, out DateTime date) {
+            if (c is Object obj && obj.Get(API.DateAPI.Primitive) is Foreign f && f.Value is DateTime d) {
+                date = d;
+                return true;
+            } else {
+                date = DateTime.Now;
+                return false;
+            }
+        }
     }
 }

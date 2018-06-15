@@ -40,6 +40,9 @@ namespace NetJS.Core {
             Constant v = Static.Undefined;
             CreatePerIterationEnvironment(perIterationBindings, agent);
 
+            bool isSafe = agent.IsSafe;
+            int i = 0;
+
             while (true) {
                 if(test != null) {
                     var testRef = test.Evaluate(agent);
@@ -48,7 +51,7 @@ namespace NetJS.Core {
                 }
 
                 var result = stmt.Evaluate(agent);
-                if (!LoopContinues(result, labelSet)) Completion.UpdateEmpty(result, v);
+                if (!LoopContinues(result, labelSet, ref i, isSafe)) Completion.UpdateEmpty(result, v);
                 if (result.Value != null) v = result.Value;
 
                 CreatePerIterationEnvironment(perIterationBindings, agent);

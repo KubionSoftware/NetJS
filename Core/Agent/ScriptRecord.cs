@@ -11,7 +11,7 @@ namespace NetJS.Core {
 
         public Realm Realm;
         public LexicalEnvironment Environment;
-        public Block ECMAScriptCode;
+        public Statement ECMAScriptCode;
         public int FileId;
 
         public void GlobalDeclarationInstantiation(LexicalEnvironment env) {
@@ -21,21 +21,13 @@ namespace NetJS.Core {
 
             // TODO: ECMAScript + functions
 
-            Walker.Walk(ECMAScriptCode, node => {
-                if (node is FunctionLiteral || node is ClassLiteral) return null;
-
-                if (node is VariableDeclaration d && d.Scope != DeclarationScope.Block) {
-                    foreach (var dn in d.GetBoundNames()) {
-                        if (d.IsConstant) {
-                            envRec.CreateImmutableBinding(dn, true);
-                        } else {
-                            envRec.CreateMutableBinding(dn, false);
-                        }
-                        envRec.InitializeBinding(dn, Static.Undefined);
-                    }
+            DeclarationFinder.FindVarDeclarations(ECMAScriptCode, (dn, isConstant) => {
+                if (isConstant) {
+                    envRec.CreateImmutableBinding(dn, true);
+                } else {
+                    envRec.CreateMutableBinding(dn, false);
                 }
-
-                return node;
+                envRec.InitializeBinding(dn, Static.Undefined);
             });
         }
 
@@ -89,6 +81,19 @@ namespace NetJS.Core {
             var tokens = new Lexer(sourceText, fileId).Lex();
             var parser = new Parser(fileId, tokens);
             var body = parser.Parse();
+
+            return new ScriptRecord() {
+                Realm = realm,
+                Environment = null,
+                ECMAScriptCode = body,
+                FileId = fileId
+            };
+        }
+
+        public static ScriptRecord ParseTemplate(string sourceText, Realm realm, int fileId) {
+            var tokens = new Lexer("`" + sourceText + "`", fileId).Lex();
+            var parser = new Parser(fileId, tokens);
+            var body = parser.ParseFile();
 
             return new ScriptRecord() {
                 Realm = realm,

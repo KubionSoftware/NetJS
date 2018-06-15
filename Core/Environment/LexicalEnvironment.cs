@@ -8,8 +8,6 @@ namespace NetJS.Core {
 
     public class LexicalEnvironment {
 
-        private const int MAX_DEPTH = 100;
-
         public EnvironmentRecord Record;
 
         private LexicalEnvironment _outer;
@@ -20,12 +18,6 @@ namespace NetJS.Core {
 
             set {
                 _outer = value;
-
-                _depth = -1;
-                if (Depth > MAX_DEPTH) {
-                    // Stackoverflow
-                    throw new RangeError("Maximum call stack size exceeded");
-                }
             }
         }
 

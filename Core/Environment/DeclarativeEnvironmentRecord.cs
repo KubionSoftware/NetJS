@@ -34,26 +34,38 @@ namespace NetJS.Core {
 
         public override Completion CreateMutableBinding(Constant name, bool canBeDeleted) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-createmutablebinding-n-d
-            
-            Assert.IsTrue(!_map.ContainsKey(name), $"{name.ToDebugString()} is already defined");
+
+            if (_map.ContainsKey(name)) {
+                throw new InternalError($"{name.ToDebugString()} is already defined");
+            }
+
             _map.Add(name, new Binding(Static.Undefined, false, true, canBeDeleted, false));
             return Static.NormalCompletion;
         }
 
         public override Completion CreateImmutableBinding(Constant name, bool isStrict) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-createimmutablebinding-n-s
-            
-            Assert.IsTrue(!_map.ContainsKey(name), $"{name.ToDebugString()} is already defined");
+
+            if (_map.ContainsKey(name)) {
+                throw new InternalError($"{name.ToDebugString()} is already defined");
+            }
+
             _map.Add(name, new Binding(Static.Undefined, false, false, false, isStrict));
             return Static.NormalCompletion;
         }
 
         public override Completion InitializeBinding(Constant name, Constant value) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-initializebinding-n-v
+            
+            if (!_map.ContainsKey(name)) {
+                throw new InternalError($"{name.ToDebugString()} is not defined");
+            }
 
-            Assert.IsTrue(_map.ContainsKey(name), $"{name.ToDebugString()} is not defined");
             var binding = _map[name];
-            Assert.IsTrue(!binding.IsInitialized, $"{name.ToDebugString()} is already initialized");
+
+            if (binding.IsInitialized) {
+                throw new InternalError($"{name.ToDebugString()} is already initialized");
+            }
 
             binding.Value = value;
             binding.IsInitialized = true;
@@ -94,8 +106,11 @@ namespace NetJS.Core {
 
         public override Constant GetBindingValue(Constant name, bool isStrict) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-getbindingvalue-n-s
-            
-            Assert.IsTrue(_map.ContainsKey(name), $"{name.ToDebugString()} is not defined");
+
+            if (!_map.ContainsKey(name)) {
+                throw new InternalError($"{name.ToDebugString()} is not defined");
+            }
+
             var binding = _map[name];
 
             if (!binding.IsInitialized) {
@@ -107,8 +122,11 @@ namespace NetJS.Core {
 
         public override bool DeleteBinding(Constant name) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-deletebinding-n
-            
-            Assert.IsTrue(_map.ContainsKey(name), $"{name.ToDebugString()} is not defined");
+
+            if (!_map.ContainsKey(name)) {
+                throw new InternalError($"{name.ToDebugString()} is not defined");
+            }
+
             var binding = _map[name];
 
             if (!binding.CanBeDeleted) return false;

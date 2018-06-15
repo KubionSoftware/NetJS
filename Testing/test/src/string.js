@@ -47,4 +47,5 @@ var x = 3;
 assert(() => `x:${x}` == "x:3", "String template variable");
 assert(() => `${1 + 1}` == "2", "String template expression");
 assert(() => `${1 + 1} - ${1 + 2}` == "2 - 3", "String template multiple expressions");
-// nesting Tags
+
+// comment

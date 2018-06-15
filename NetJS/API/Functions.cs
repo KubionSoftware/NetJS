@@ -25,10 +25,10 @@ namespace NetJS.API {
 
             if (returnVar) {
                 return result is Undefined ? new String(buffer.ToString()) : result;
-            } else {
+            } else if (!(result is Undefined)) {
                 buffer.Append(Convert.ToString(result, agent));
-                return Static.Undefined;
             }
+            return Static.Undefined;
         }
         
         /// <summary>include  takes a file, runs the code in the file and writes the result to the output buffer.
@@ -115,10 +115,10 @@ namespace NetJS.API {
         public static Constant @unsafe(Constant _this, Constant[] arguments, Agent agent) {
             var function = Core.Tool.GetArgument<Core.Function>(arguments, 0, "unsafe");
 
-            var netJSAgent = agent as NetJSAgent;
-            netJSAgent.Unsafe = true;
+            var oldSafe = agent.IsSafe;
+            agent.IsSafe = false;
             function.Call(Static.Undefined, agent, new Constant[] { });
-            netJSAgent.Unsafe = false;
+            agent.IsSafe = oldSafe;
 
             return Static.Undefined;
         }

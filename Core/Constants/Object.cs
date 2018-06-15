@@ -134,7 +134,9 @@ namespace NetJS.Core {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ordinarygetownproperty
 
             Assert.IsPropertyKey(p);
-            if (!Properties.ContainsKey(p)) return null;
+
+            Property prop;
+            if (!Properties.TryGetValue(p, out prop)) return null;
             return Properties[p].Clone(); 
         }
 

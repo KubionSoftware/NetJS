@@ -10,7 +10,6 @@ namespace NetJS {
 
         public JSApplication Application;
         public JSSession Session;
-        public bool Unsafe;
 
         public NetJSAgent(Realm realm) : base(realm) { }
     }
