@@ -9,6 +9,8 @@ namespace NetJS.Core {
 
         // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-agents
 
+        private const int MaxDepth = 100;
+
         public Stack<Context> Stack;
         public Context Running;
 
@@ -34,6 +36,12 @@ namespace NetJS.Core {
 
         public void Push(Context context) {
             Stack.Push(context);
+
+            if (Stack.Count > MaxDepth) {
+                // Stackoverflow
+                throw new RangeError("Maximum call stack size exceeded");
+            }
+
             Running = context;
         }
 
