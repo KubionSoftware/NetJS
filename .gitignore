@@ -4,3 +4,4 @@ bin/
 !release/bin
 obj/
 .idea/
+Testing/test/log.txt
