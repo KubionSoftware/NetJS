@@ -135,7 +135,7 @@ namespace NetJS.Core {
             return new Location(-1, -1);
         }
 
-        public static string Message(Javascript.Node node, string message) {
+        public static string Message(Node node, string message) {
             // can be slow because it only happens on an error, which should be almost never :)
             var location = GetNodeLocation(node.Id);
             var file = GetFileName(location.FileId);
@@ -220,10 +220,10 @@ namespace NetJS.Core {
             stack.Set("count", frames.Count);
             json.Set("stack", stack);
 
-            json.Set("scopes", scopes.Select(scope => {
+            json.Set("scopes", scopes.Select(lex => {
                 var scopeJson = new Json();
-                scopeJson.Set("name", scope.Name);
-                scopeJson.Set("variables", scope.Variables);
+                scopeJson.Set("name", lex.Name);
+                scopeJson.Set("variables", lex.Variables);
                 return scopeJson;
             }));
 

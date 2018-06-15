@@ -1,69 +1,64 @@
-﻿using System;
+﻿using NetJS.Core;
+using System;
 using System.Collections.Generic;
 
 namespace NetJS.Core {
     public class Tool {
 
-        public static string ToString(Javascript.Constant constant, Javascript.Scope scope) {
-            if(constant == null || constant.IsUndefined()) {
-                return "";
-            }
-
-            try {
-                var node = new Javascript.Call() {
-                    Left = new Javascript.Access(true) {
-                        Left = constant,
-                        Right = new Javascript.Variable("toString")
-                    },
-                    Right = new Javascript.ArgumentList()
-                };
-
-                var result = node.Execute(scope);
-
-                if (result is Javascript.String s) {
-                    return s.Value;
-                }
-            } catch {
-                return constant.ToString();
-            }
-
-            return "";
-        }
-
-        public static Javascript.Array ToArray(IList<string> list, Javascript.Scope scope) {
-            var array = new Javascript.Array();
-            foreach(var s in list) {
-                array.List.Add(new Javascript.String(s));
-            }
+        public static Array ToArray(IEnumerable<string> strings, Agent agent) {
+            var array = new Array(0, agent);
+            foreach (var s in strings) array.Add(new String(s));
             return array;
         }
 
-        public static Javascript.Object Construct(string name, Javascript.Scope scope) {
-            return new Javascript.Object(Prototype(name, scope));
+        public static Object Construct(string name, Agent agent, Expression[] arguments = null) {
+            var objRef = new New() {
+                NewExpression = new Identifier(name),
+                Arguments = arguments != null ? new ArgumentList(arguments) : new ArgumentList()
+            }.Evaluate(agent);
+            var objVal = References.GetValue(objRef, agent);
+            return (Object)objVal;
         }
 
-        public static Javascript.Object Prototype(string name, Javascript.Scope scope) {
-            Javascript.Object obj = null;
+        public static Object Prototype(string name, Agent agent) {
+            Object obj = null;
             try {
-                obj = scope.Engine.GetPrototype(name);
+                obj = agent.Running.Realm.GetPrototype(name);
             } catch {
-                if(scope.GetVariable(name) is Javascript.Object ob) {
+                if(References.GetValue(new Identifier(name).Evaluate(agent), agent) is Object ob) {
                     obj = ob;
                 } else {
-                    throw new Javascript.InternalError($"Could not get prototype of '{name}'");
+                    throw new InternalError($"Could not get prototype of '{name}'");
                 }
             }
             
-            var prototype = obj.Get("prototype");
-            if (prototype is Javascript.Object o) {
+            var prototype = obj.Get(new String("prototype"));
+            if (prototype is Object o) {
                 return o;
             }
 
-            throw new Javascript.InternalError($"Could not get prototype of '{name}'");
+            throw new InternalError($"Could not get prototype of '{name}'");
         }
 
-        public static bool IsType(Javascript.Object obj, Javascript.Object prototype) {
-            return obj.__proto__ == prototype.Get<Javascript.Object>("prototype");
+        public static bool IsType(Constant o, Constant c) {
+            if (o is Object oo) {
+                if (c is Object co) {
+                    var p = co.Get(new String("prototype"));
+                    if (p is Object po) {
+                        while (true) {
+                            oo = oo.GetPrototypeOf();
+                            if (oo == null) return false;
+                            if (Compare.SameValue(po, oo)) return true;
+                        }
+                    } else {
+                        throw new TypeError("Prototype is not an object");
+                    }
+                } else {
+                    throw new TypeError("Right-hand side of instanceof operator must be an object");
+                }
+            } else {
+                return false;
+            }
         }
 
         public static string NormalizePath(string path) {
@@ -87,22 +82,22 @@ namespace NetJS.Core {
             return insidePath;
         }
 
-        public static T GetArgument<T>(Javascript.Constant[] arguments, int index, string context, bool required = true) where T : Javascript.Constant {
+        public static T GetArgument<T>(Constant[] arguments, int index, string context, bool required = true) where T: Constant {
             if (index >= arguments.Length) {
                 if (required) {
-                    throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+                    throw new InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
                 } else {
-                    return null;
+                    return default(T);
                 }
             }
 
             var argument = arguments[index];
-            if (!(argument is T)) throw new Javascript.InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+            if (!(argument is T)) throw new InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
 
             return (T)argument;
         }
 
-        public static Javascript.Constant GetArgument(Javascript.Constant[] arguments, int index, string context, bool required = true) {
+        public static Constant GetArgument(Constant[] arguments, int index, string context, bool required = true) {
             if (index >= arguments.Length) {
                 if (required) {
                     throw new Exception($"{context}: Expected argument at index {index}");

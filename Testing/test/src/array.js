@@ -49,31 +49,31 @@ assert(() => fruit.length == 5, "Array.slice not modified");
 assert(() => sub.length == 2, "Array.slice length");
 assert(() => sub[0] == "banana", "Array.slice item");
 
-var numbers = [1, 2, 3];
+numbers = [1, 2, 3];
 
 var squareRoots = numbers.map(n => n * n);
 assert(() => squareRoots.length == 3, "Array.map length");
 assert(() => squareRoots[1] == 4, "Array.map item");
 
-var total = numbers.reduce((acc, val) => acc + val, 0);
+total = numbers.reduce((acc, val) => acc + val, 0);
 assert(() => total == 6, "Array.reduce");
 
-var numbers = [1, 2, 3, 4, 5, 6];
+numbers = [1, 2, 3, 4, 5, 6];
 var evens = numbers.filter(n => n % 2 == 0);
 assert(() => evens.length == 3, "Array.filter length");
 assert(() => evens[1] == 4, "Array.filter item");
 
-var numbers = [5, 3, 8, 4, 2];
+numbers = [5, 3, 8, 4, 2];
 numbers.sort((a, b) => a - b);
 assert(() => numbers.length == 5, "Array.sort length");
 assert(() => numbers[0] == 2, "Array.sort first item");
 assert(() => numbers[4] == 8, "Array.sort last item");
 
-var numbers = [3, 2, 5];
+numbers = [3, 2, 5];
 var s = numbers.join(",");
 assert(() => s == "3,2,5", "Array.join");
 
-var numbers = [3, 5, 2];
+numbers = [3, 5, 2];
 assert(() => numbers.some(n => n > 5) == false, "Array.some false");
 assert(() => numbers.some(n => n > 4) == true, "Array.some true");
 
@@ -89,5 +89,5 @@ assert(() => numbers.includes(6) == false, "Array.includes false");
 numbers.reverse();
 assert(() => numbers[0] == 2 && numbers[1] == 5 && numbers[2] == 3, "Array.reverse odd length");
 
-var numbers = [2, 3, 4, 5].reverse();
+numbers = [2, 3, 4, 5].reverse();
 assert(() => numbers[0] == 5 && numbers[1] == 4 && numbers[2] == 3 && numbers[3] == 2, "Array.reverse even length");

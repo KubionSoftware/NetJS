@@ -1,16 +1,16 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 
 namespace NetJS.Core.API {
-    class Boolean {
+    class BooleanAPI {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
-            var thisObject = (Javascript.Object)_this;
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            var thisObject = (Object)_this;
 
             return Static.Undefined;
         }
 
-        public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
-            return new Javascript.String(((Javascript.Boolean)_this).Value ? "true" : "false");
+        public static Constant toString(Constant _this, Constant[] arguments, Agent agent) {
+            return new String(((Boolean)_this).Value ? "true" : "false");
         }
     }
 }

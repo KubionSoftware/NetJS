@@ -1,37 +1,38 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
+using System.Linq;
 
 namespace NetJS.Core.API {
-    class Object {
+    class ObjectAPI {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
-            var thisObject = (Javascript.Object)_this;
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            var thisObject = (Object)_this;
 
             return Static.Undefined;
         }
 
         [StaticFunction]
-        public static Constant keys(Constant _this, Constant[] arguments, Scope scope) {
-            var o = Tool.GetArgument<Javascript.Object>(arguments, 0, "Object.keys");
-            return Tool.ToArray(o.GetKeys(), scope);
+        public static Constant keys(Constant _this, Constant[] arguments, Agent agent) {
+            var o = Tool.GetArgument<Object>(arguments, 0, "Object.keys");
+            return Tool.ToArray(o.OwnPropertyKeys().Select(key => key.ToString()), agent);
         }
 
         [StaticFunction]
-        public static Constant values(Constant _this, Constant[] arguments, Scope scope) {
-            var o = Tool.GetArgument<Javascript.Object>(arguments, 0, "Object.values");
-            var keys = o.GetKeys();
-            var array = new Javascript.Array();
+        public static Constant values(Constant _this, Constant[] arguments, Agent agent) {
+            var o = Tool.GetArgument<Object>(arguments, 0, "Object.values");
+            var keys = o.OwnPropertyKeys();
+            var array = new Array(0, agent);
             foreach(var key in keys) {
-                array.List.Add(o.Get(key));
+                array.Add(o.Get(key));
             }
             return array;
         }
 
-        public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant toString(Constant _this, Constant[] arguments, Agent agent) {
             // Because this is actually useful
-            return JSON.stringify(null, new Constant[] { _this }, scope);
+            return JSONAPI.stringify(null, new Constant[] { _this }, agent);
 
             // According to javascript specification
-            // return new Javascript.String("[object Object]");
+            // return new String("[object Object]");
         }
     }
 }

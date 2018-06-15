@@ -1,55 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using NetJS.Core.Javascript;
+using NetJS.Core;
 using System.Diagnostics;
 using NetJS;
 
 namespace Testing {
     
-    
-    class TestFunctions{
-        public static Constant assert(Constant _this, Constant[] arguments, Scope scope){
+    class TestFunctions {
+        public static Constant assert(Constant _this, Constant[] arguments, Agent agent) {
             Constant value = Static.Undefined;
             string message = "Could not read message";
 
             try {
-                var function =
-                    NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.InternalFunction>(arguments, 0, "assert");
-                message = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.String>(arguments, 1, "assert").Value;
+                var function = NetJS.Core.Tool.GetArgument<NetJS.Core.InternalFunction>(arguments, 0, "assert");
+                message = NetJS.Core.Tool.GetArgument<NetJS.Core.String>(arguments, 1, "assert").Value;
 
-                value = function.Call(new ArgumentList(), null, scope);
-            }
-            catch (Exception e) {
+                value = function.Call(Static.Undefined, agent, new Constant[] { });
+            } catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Error.WriteLine(e);
             }
 
-            if (value is NetJS.Core.Javascript.Boolean b && b.Value) {
+            if (value is NetJS.Core.Boolean b && b.Value) {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Test successful - " + message);
-                Program.NumSuccess++;
+//                Program.NumSuccess++;
             }
             else {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine("Test failed - " + message);
-                Program.NumFailed++;
+//                Program.NumFailed++;
             }
 
-            return NetJS.Core.Javascript.Static.Undefined;
+            return NetJS.Core.Static.Undefined;
         }
 
-        public static Constant time(Constant _this, Constant[] arguments, Scope scope){
+        public static Constant time(Constant _this, Constant[] arguments, Agent agent) {
             string message = "Could not read message";
 
             try {
-                var function =
-                    NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.InternalFunction>(arguments, 0, "assert");
-                message = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.String>(arguments, 1, "assert").Value;
+                var function = NetJS.Core.Tool.GetArgument<NetJS.Core.InternalFunction>(arguments, 0, "assert");
+                message = NetJS.Core.Tool.GetArgument<NetJS.Core.String>(arguments, 1, "assert").Value;
 
                 var watch = new Stopwatch();
                 watch.Start();
-                function.Call(new ArgumentList(), null, scope);
+                function.Call(Static.Undefined, agent, new Constant[] { });
                 watch.Stop();
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"{message} took {watch.ElapsedMilliseconds}ms");
@@ -59,7 +55,7 @@ namespace Testing {
                 Console.Error.WriteLine(e);
             }
 
-            return NetJS.Core.Javascript.Static.Undefined;
+            return NetJS.Core.Static.Undefined;
         }
     }
 
@@ -70,7 +66,6 @@ namespace Testing {
         private static int _testCount = 0;
         private static int _benchmarkRounds = 1;
         private static List<double> _benchmarkResults = new List<double>();
-
 
         static void Main(string[] args){
             try {

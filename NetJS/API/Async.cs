@@ -1,4 +1,4 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +9,17 @@ using System.Threading.Tasks;
 namespace NetJS.API {
     class Async {
 
-        private static Task[] CreateTasks(Constant[] arguments, Scope scope, string name) {
+        private static Task[] CreateTasks(Constant[] arguments, Agent agent, string name) {
             var tasks = new Task[arguments.Length];
 
             for (var i = 0; i < arguments.Length; i++) {
-                var function = Core.Tool.GetArgument<Core.Javascript.Function>(arguments, i, name);
+                var function = Core.Tool.GetArgument<Core.Function>(arguments, i, name);
                 var task = new Task(() => {
-                    function.Call(new ArgumentList(), Static.Undefined, scope);
+                    try {
+                        function.Call(Static.Undefined, agent, new Constant[] { });
+                    } catch (Exception e) {
+                        Core.Log.Write(e.ToString());
+                    }
                 });
                 task.Start();
                 tasks[i] = task;
@@ -33,8 +37,8 @@ namespace NetJS.API {
         ///     () => SQL.execute("query2"),
         ///     () => IO.writeText("big file")
         /// );</code></example>
-        public static Constant waitAll(Constant _this, Constant[] arguments, Scope scope) {
-            Task.WaitAll(CreateTasks(arguments, scope, "Async.waitAll"));
+        public static Constant waitAll(Constant _this, Constant[] arguments, Agent agent) {
+            Task.WaitAll(CreateTasks(arguments, agent, "Async.waitAll"));
             return Static.Undefined;
         }
 
@@ -47,8 +51,8 @@ namespace NetJS.API {
         ///     () => task2(),
         ///     () => task3()
         /// );</code></example>
-        public static Constant waitAny(Constant _this, Constant[] arguments, Scope scope) {
-            Task.WaitAny(CreateTasks(arguments, scope, "Async.waitAny"));
+        public static Constant waitAny(Constant _this, Constant[] arguments, Agent agent) {
+            Task.WaitAny(CreateTasks(arguments, agent, "Async.waitAny"));
             return Static.Undefined;
         }
 
@@ -61,16 +65,16 @@ namespace NetJS.API {
         ///     () => SQL.execute("query2"),
         ///     () => IO.writeText("big file")
         /// );</code></example>
-        public static Constant run(Constant _this, Constant[] arguments, Scope scope) {
-            CreateTasks(arguments, scope, "Async.run");
+        public static Constant run(Constant _this, Constant[] arguments, Agent agent) {
+            CreateTasks(arguments, agent, "Async.run");
             return Static.Undefined;
         }
 
         /// <summary>Sleeps for a given number of milliseconds.</summary>
         /// <param name="time">Milliseconds to sleep (number)</param>
         /// <example><code lang="javascript">Async.sleep(1000);</code></example>
-        public static Constant sleep(Constant _this, Constant[] arguments, Scope scope) {
-            var time = Core.Tool.GetArgument<Core.Javascript.Number>(arguments, 0, "Async.sleep");
+        public static Constant sleep(Constant _this, Constant[] arguments, Agent agent) {
+            var time = Core.Tool.GetArgument<Core.Number>(arguments, 0, "Async.sleep");
             Thread.Sleep((int)time.Value);
             return Static.Undefined;
         }

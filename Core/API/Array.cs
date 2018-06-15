@@ -1,178 +1,182 @@
 ﻿using System;
 using System.Collections.Generic;
-using NetJS.Core.Javascript;
+using NetJS.Core;
 using System.Text;
 
 namespace NetJS.Core.API {
-    class Array {
+    class ArrayAPI {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
-            var length = arguments.Length == 1 ? Tool.GetArgument<Javascript.Number>(arguments, 0, "Array constructor") : new Javascript.Number(0);
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            var length = arguments.Length == 1 ? (int)Tool.GetArgument<Number>(arguments, 0, "Array constructor").Value : 0;
+            return new Array(length, agent);
+        }
 
-            return new Javascript.Array((int)length.Value);
+        public static Array GetArray(Constant _this) {
+            return (Array)_this;
         }
 
         [StaticFunction]
-        public static Constant isArray(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant isArray(Constant _this, Constant[] arguments, Agent agent) {
             var o = Tool.GetArgument(arguments, 0, "Array.isArray");
-            return new Javascript.Boolean(o is Javascript.Array);
+            return Boolean.Create(o is Array);
         }
 
-        public static Constant forEach(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant forEach(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
             if (arguments.Length != 1) {
-                throw new Javascript.TypeError("Array.forEach takes one argument");
+                throw new TypeError("Array.forEach takes one argument");
             }
 
-            var callback = (Javascript.Function)arguments[0];
+            var callback = (Function)arguments[0];
 
             for (int i = 0; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     array.List[i],
-                    new Javascript.Number(i),
+                    new Number(i),
                     array
-                );
-                callback.Call(callbackArguments, Static.Undefined, scope);
+                };
+                callback.Call(Static.Undefined, agent, callbackArguments);
             }
 
             return Static.Undefined;
         }
 
-        public static Constant push(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant push(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
-            array.List.AddRange(arguments);
+            array.AddRange(arguments);
+            array.Set("length", new Number(array.List.Count));
 
             return Static.Undefined;
         }
 
-        public static Constant pop(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant pop(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
             
             if (array.List.Count == 0) return Static.Undefined;
 
             var element = array.List[array.List.Count - 1];
-            array.List.RemoveAt(array.List.Count - 1);
+            array.RemoveAt(array.List.Count - 1);
 
             return element;
         }
 
-        public static Constant shift(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant shift(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
             if (array.List.Count == 0) return Static.Undefined;
 
             var element = array.List[0];
-            array.List.RemoveAt(0);
+            array.RemoveAt(0);
 
             return element;
         }
 
-        public static Constant unshift(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant unshift(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
-            array.List.InsertRange(0, arguments);
+            array.InsertRange(0, arguments);
 
             return Static.Undefined;
         }
 
-        public static Constant indexOf(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant indexOf(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
-            var start = arguments.Length > 1 ? (int)((Javascript.Number)arguments[1]).Value : 0;
+            var start = arguments.Length > 1 ? (int)((Number)arguments[1]).Value : 0;
             
             for(var i = start; i < array.List.Count; i++) {
                 var element = array.List[i];
-                var equals = (Javascript.Boolean)(element.Equals(arguments[0], scope));
-                if (equals.Value) {
-                    return new Javascript.Number(i);
+                var equals = Compare.StrictEqualityComparison(element, arguments[0]);
+                if (equals) {
+                    return new Number(i);
                 }
             }
 
-            return new Javascript.Number(-1);
+            return new Number(-1);
         }
 
-        public static Constant splice(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant splice(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
             
-            var start = arguments.Length > 0 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Array.splice").Value : 0;
-            var count = (int)(arguments.Length > 1 ? ((Javascript.Number)arguments[1]).Value : array.List.Count - start);
+            var start = arguments.Length > 0 ? (int)Tool.GetArgument<Number>(arguments, 0, "Array.splice").Value : 0;
+            var count = (int)(arguments.Length > 1 ? ((Number)arguments[1]).Value : array.List.Count - start);
 
             // Remove items
-            var result = new Javascript.Array();
-            result.List.AddRange(array.List.GetRange(start, count));
-            array.List.RemoveRange(start, count);
+            var result = new Array(0, agent);
+            result.AddRange(array.GetRange(start, count));
+            array.RemoveRange(start, count);
 
             // Add items
             var addCount = arguments.Length <= 2 ? 0 : arguments.Length - 2;
             for (var i = 0; i < addCount; i++) {
-                array.List.Insert(start + i, arguments[i + 2]);
+                array.Insert(start + i, arguments[i + 2]);
             }
-            
+
             return result;
         }
 
-        public static Constant slice(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant slice(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
             
-            var begin = (int)(arguments.Length > 0 ? ((Javascript.Number)arguments[0]).Value : 0);
-            var end = (int)(arguments.Length > 1 ? ((Javascript.Number)arguments[1]).Value : array.List.Count);
+            var begin = (int)(arguments.Length > 0 ? ((Number)arguments[0]).Value : 0);
+            var end = (int)(arguments.Length > 1 ? ((Number)arguments[1]).Value : array.List.Count);
 
-            var result = new Javascript.Array();
+            var result = new Array(0, agent);
             for (int i = begin; i < end; i++) {
-                result.List.Add(array.List[i]);
+                result.Add(array.List[i]);
             }
             
             return result;
         }
 
-        public static Constant map(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant map(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
             if (arguments.Length != 1) {
-                throw new Javascript.TypeError("Array.map takes one argument");
+                throw new TypeError("Array.map takes one argument");
             }
 
-            var callback = (Javascript.Function)arguments[0];
+            var callback = (Function)arguments[0];
 
-            var result = new Javascript.Array();
+            var result = new Array(0, agent);
             for (int i = 0; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     array.List[i],
-                    new Javascript.Number(i),
+                    new Number(i),
                     array
-                );
-                var value = callback.Call(callbackArguments, Static.Undefined, scope);
-                result.List.Add(value);
+                };
+                var value = callback.Call(Static.Undefined, agent, callbackArguments);
+                result.Add(value);
             }
 
             return result;
         }
 
-        public static Constant filter(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant filter(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
             if (arguments.Length == 0 || arguments.Length > 2) {
-                throw new Javascript.TypeError("Array.filter takes one or two argument");
+                throw new TypeError("Array.filter takes one or two argument");
             }
 
-            var callback = (Javascript.Function)arguments[0];
+            var callback = (Function)arguments[0];
 
-            var result = new Javascript.Array();
+            var result = new Array(0, agent);
             for (int i = 0; i < array.List.Count; i++) {
                 var element = array.List[i];
 
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     element,
-                    new Javascript.Number(i),
+                    new Number(i),
                     array
-                );
+                };
 
-                var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], scope);
-                if (value is Javascript.Boolean) {
-                    if (((Javascript.Boolean)value).Value) {
-                        result.List.Add(element);
+                var value = callback.Call(arguments.Length == 1 ? Static.Undefined : arguments[1], agent, callbackArguments);
+                if (value is Boolean) {
+                    if (((Boolean)value).Value) {
+                        result.Add(element);
                     }
                 }
             }
@@ -180,57 +184,57 @@ namespace NetJS.Core.API {
             return result;
         }
 
-        public static Constant reduce(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant reduce(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
             if (arguments.Length < 1) {
-                throw new Javascript.TypeError("Array.reduce takes at least one argument");
+                throw new TypeError("Array.reduce takes at least one argument");
             }
 
-            var callback = (Javascript.Function)arguments[0];
+            var callback = (Function)arguments[0];
 
             Constant accumulator;
             if(arguments.Length > 1) {
                 accumulator = arguments[1];
             } else {
-                if (array.List.Count == 0) throw new Javascript.TypeError("Array.reduce: No initial value is supplied and array is empty");
+                if (array.List.Count == 0) throw new TypeError("Array.reduce: No initial value is supplied and array is empty");
                 accumulator = array.List[0];
             }
             
             for (int i = arguments.Length > 1 ? 0 : 1; i < array.List.Count; i++) {
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     accumulator,
                     array.List[i],
-                    new Javascript.Number(i),
+                    new Number(i),
                     array
-                );
-                accumulator = callback.Call(callbackArguments, Static.Undefined, scope);
+                };
+                accumulator = callback.Call(Static.Undefined, agent, callbackArguments);
             }
 
             return accumulator;
         }
 
-        private static Constant checkAll(Constant _this, Constant[] arguments, Scope scope, string name, Func<bool, Constant, int, Constant> resultFunc, Constant final) {
-            var array = (Javascript.Array)_this;
+        private static Constant checkAll(Constant _this, Constant[] arguments, Agent agent, string name, Func<bool, Constant, int, Constant> resultFunc, Constant final) {
+            var array = GetArray(_this);
 
             if (arguments.Length == 0 || arguments.Length > 2) {
-                throw new Javascript.TypeError(name + " takes one or two argument");
+                throw new TypeError(name + " takes one or two argument");
             }
 
-            var callback = (Javascript.Function)arguments[0];
+            var callback = (Function)arguments[0];
 
             for (int i = 0; i < array.List.Count; i++) {
                 var element = array.List[i];
 
-                var callbackArguments = new ArgumentList(
+                var callbackArguments = new Constant[] {
                     element,
-                    new Javascript.Number(i),
+                    new Number(i),
                     array
-                );
+                };
 
-                var value = callback.Call(callbackArguments, arguments.Length == 1 ? Static.Undefined : arguments[1], scope);
-                if (value is Javascript.Boolean) {
-                    var boolValue = ((Javascript.Boolean)value).Value;
+                var value = callback.Call(arguments.Length == 1 ? Static.Undefined : arguments[1], agent, callbackArguments);
+                if (value is Boolean) {
+                    var boolValue = ((Boolean)value).Value;
                     var result = resultFunc(boolValue, element, i);
                     if (result != null) return result;
                 }
@@ -239,81 +243,78 @@ namespace NetJS.Core.API {
             return final;
         }
 
-        public static Constant some(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant some(Constant _this, Constant[] arguments, Agent agent) {
             return checkAll(
                 _this, 
                 arguments, 
-                scope,
+                agent,
                 "Array.some",
-                (value, element, index) => value ? new Javascript.Boolean(true) : null, 
-                new Javascript.Boolean(false)
+                (value, element, index) => value ? Boolean.True : null, 
+                Boolean.False
             );
         }
 
-        public static Constant every(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant every(Constant _this, Constant[] arguments, Agent agent) {
             return checkAll(
                 _this, 
                 arguments, 
-                scope,
+                agent,
                 "Array.every",
-                (value, element, index) => !value ? new Javascript.Boolean(false) : null,
-                new Javascript.Boolean(true)
+                (value, element, index) => !value ? Boolean.False : null,
+                Boolean.True
             );
         }
 
-        public static Constant find(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant find(Constant _this, Constant[] arguments, Agent agent) {
             return checkAll(
                 _this,
                 arguments,
-                scope,
+                agent,
                 "Array.find",
                 (value, element, index) => value ? element : null,
-                Javascript.Static.Undefined
+                Static.Undefined
             );
         }
 
-        public static Constant findIndex(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant findIndex(Constant _this, Constant[] arguments, Agent agent) {
             return checkAll(
                 _this,
                 arguments,
-                scope,
+                agent,
                 "Array.findIndex",
-                (value, element, index) => value ? new Javascript.Number(index) : null,
-                Javascript.Static.Undefined
+                (value, element, index) => value ? new Number(index) : null,
+                Static.Undefined
             );
         }
 
-        public static Constant includes(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant includes(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
             if (arguments.Length == 0 || arguments.Length > 2) {
-                throw new Javascript.TypeError("Array.includes takes one or two argument");
+                throw new TypeError("Array.includes takes one or two argument");
             }
 
             var reference = arguments[0];
-            var startIndex = (int)(arguments.Length > 1 ? Tool.GetArgument<Javascript.Number>(arguments, 1, "Array.includes").Value : 0);
+            var startIndex = (int)(arguments.Length > 1 ? Tool.GetArgument<Number>(arguments, 1, "Array.includes").Value : 0);
 
             for (int i = startIndex; i < array.List.Count; i++) {
-                var value = array.List[i].Equals(reference, scope);
-                if (value is Javascript.Boolean) {
-                    var boolValue = ((Javascript.Boolean)value).Value;
-                    if (boolValue) {
-                        return new Javascript.Boolean(true);
-                    }
+                var equals = Compare.AbstractEqualityComparison(array.List[i], reference, agent);
+                if (equals) {
+                    return Boolean.True;
                 }
             }
 
-            return new Javascript.Boolean(false);
+            return Boolean.False;
         }
 
-        public static Constant sort(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant sort(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
             if (arguments.Length != 1) {
-                throw new Javascript.TypeError("Array.sort takes one argument");
+                throw new TypeError("Array.sort takes one argument");
             }
 
-            var callback = (Javascript.Function)arguments[0];
+            var callback = (Function)arguments[0];
 
             var n = array.List.Count;
             while (true) {
@@ -323,12 +324,12 @@ namespace NetJS.Core.API {
                     var aElement = array.List[i - 1];
                     var bElement = array.List[i];
 
-                    var callbackArguments = new ArgumentList(aElement, bElement);
-                    var value = (Javascript.Number)callback.Call(callbackArguments, Static.Undefined, scope);
+                    var callbackArguments = new Constant[] { aElement, bElement };
+                    var value = (Number)callback.Call(Static.Undefined, agent, callbackArguments);
 
                     if(value.Value > 0) {
-                        array.List[i - 1] = bElement;
-                        array.List[i] = aElement;
+                        array.Set(i - 1, bElement);
+                        array.Set(i, aElement);
                         swapped = true;
                     }
                 }
@@ -341,10 +342,10 @@ namespace NetJS.Core.API {
             return array;
         }
 
-        public static Constant join(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant join(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
-            var seperator = arguments.Length > 0 ? ((Javascript.String)arguments[0]).Value : ",";
+            var seperator = arguments.Length > 0 ? ((String)arguments[0]).Value : ",";
 
             var result = new StringBuilder();
             for (int i = 0; i < array.List.Count; i++) {
@@ -352,26 +353,40 @@ namespace NetJS.Core.API {
                     result.Append(seperator);
                 }
 
-                result.Append(Tool.ToString(array.List[i], scope));
+                result.Append(Convert.ToString(array.List[i], agent));
             }
 
-            return new Javascript.String(result.ToString());
+            return new String(result.ToString());
         }
 
-        public static Constant reverse(Constant _this, Constant[] arguments, Scope scope) {
-            var array = (Javascript.Array)_this;
+        public static Constant reverse(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
 
-            array.List.Reverse();
+            array.Reverse();
 
             return array;
         }
 
-        public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
+        public static Constant fill(Constant _this, Constant[] arguments, Agent agent) {
+            var array = GetArray(_this);
+
+            var value = Tool.GetArgument(arguments, 0, "Array.fill");
+            var start = Tool.GetArgument<Number>(arguments, 1, "Array.fill", false) ?? new Number(0);
+            var end = Tool.GetArgument<Number>(arguments, 2, "Array.fill", false) ?? new Number(array.List.Count);
+
+            for(var i = (int)start.Value; i < (int)end.Value; i++) {
+                array.Set(i, value);
+            }
+
+            return array;
+        }
+
+        public static Constant toString(Constant _this, Constant[] arguments, Agent agent) {
             // Because this is actually useful
-            return JSON.stringify(Static.Undefined, new Constant[] { _this }, scope);
+            return JSONAPI.stringify(Static.Undefined, new Constant[] { _this }, agent);
 
             // According to javascript specification
-            // return join(_this, arguments, scope);
+            // return join(_this, arguments, agent);
         }
     }
 }

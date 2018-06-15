@@ -1,4 +1,4 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,20 +8,20 @@ using System.Threading.Tasks;
 namespace NetJS.Console.API {
     class Console {
 
-        public static Constant write(Constant _this, Constant[] arguments, Scope scope) {
-            var text = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.String>(arguments, 0, "Console.write");
-            System.Console.Write(text);
+        public static Constant write(Constant _this, Constant[] arguments, Agent agent) {
+            var value = Tool.GetArgument(arguments, 0, "Console.write");
+            System.Console.Write(Core.Convert.ToString(value, agent));
             return Static.Undefined;
         }
 
-        public static Constant writeLine(Constant _this, Constant[] arguments, Scope scope) {
-            var text = NetJS.Core.Tool.GetArgument<NetJS.Core.Javascript.String>(arguments, 0, "Console.writeLine");
-            System.Console.WriteLine(text);
+        public static Constant writeLine(Constant _this, Constant[] arguments, Agent agent) {
+            var value = Tool.GetArgument(arguments, 0, "Console.writeLine");
+            System.Console.WriteLine(Core.Convert.ToString(value, agent));
             return Static.Undefined;
         }
 
-        public static Constant readLine(Constant _this, Constant[] arguments, Scope scope) {
-            return new NetJS.Core.Javascript.String(System.Console.ReadLine());
+        public static Constant readLine(Constant _this, Constant[] arguments, Agent agent) {
+            return new NetJS.Core.String(System.Console.ReadLine());
         }
     }
 }

@@ -11,7 +11,9 @@ assert(() => out("text") == undefined, "out");
 assert(() => outLine("text") == undefined, "outLine");
 
 // import
-assert(() => import("text.txt") == undefined, "import");
+var x = 3;
+var importResult = import("import.txt");
+assert(() => importResult == "3", "import");
 
 // redirect
 

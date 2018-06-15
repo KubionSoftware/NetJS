@@ -1,10 +1,10 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 
 namespace NetJS.Core.API {
-    class Function {
+    class FunctionAPI {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
-            var thisObject = (Javascript.Object)_this;
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            var thisObject = (Object)_this;
 
             return Static.Undefined;
         }

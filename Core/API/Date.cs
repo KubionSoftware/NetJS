@@ -1,153 +1,176 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Globalization;
 
 namespace NetJS.Core.API {
-    class Date {
+    class DateAPI {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
+        private const string Primitive = "[[PrimitiveValue]]";
+
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            DateTime date;
+
             if(arguments.Length == 1) {
-                if(arguments[0] is Javascript.String) {
-                    var dateString = Tool.GetArgument<Javascript.String>(arguments, 0, "Date constructor").Value;
-                    return new Javascript.Date(DateTime.Parse(dateString));
-                }else if(arguments[0] is Javascript.Number) {
-                    var milliseconds = Tool.GetArgument<Javascript.Number>(arguments, 0, "Date constructor").Value;
-                    return new Javascript.Date(Convert.UnixMillisecondsToDateTime(milliseconds));
+                if(arguments[0] is String) {
+                    var dateString = Tool.GetArgument<String>(arguments, 0, "Date constructor").Value;
+                    date = DateTime.Parse(dateString);
+                }else if(arguments[0] is Number) {
+                    var milliseconds = Tool.GetArgument<Number>(arguments, 0, "Date constructor").Value;
+                    date = Convert.UnixMillisecondsToDateTime(milliseconds);
+                } else {
+                    date = DateTime.Now;
                 }
             }else if(arguments.Length >= 2) {
-                var year = (int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date constructor").Value;
-                var month = (int)Tool.GetArgument<Javascript.Number>(arguments, 1, "Date constructor").Value;
-                var day = arguments.Length > 2 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 2, "Date constructor").Value : 0;
-                var hours = arguments.Length > 3 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 3, "Date constructor").Value : 0;
-                var minutes = arguments.Length > 4 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 4, "Date constructor").Value : 0;
-                var seconds = arguments.Length > 5 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 5, "Date constructor").Value : 0;
-                var milliseconds = arguments.Length > 6 ? (int)Tool.GetArgument<Javascript.Number>(arguments, 6, "Date constructor").Value : 0;
+                var year = (int)Tool.GetArgument<Number>(arguments, 0, "Date constructor").Value;
+                var month = (int)Tool.GetArgument<Number>(arguments, 1, "Date constructor").Value;
+                var day = arguments.Length > 2 ? (int)Tool.GetArgument<Number>(arguments, 2, "Date constructor").Value : 0;
+                var hours = arguments.Length > 3 ? (int)Tool.GetArgument<Number>(arguments, 3, "Date constructor").Value : 0;
+                var minutes = arguments.Length > 4 ? (int)Tool.GetArgument<Number>(arguments, 4, "Date constructor").Value : 0;
+                var seconds = arguments.Length > 5 ? (int)Tool.GetArgument<Number>(arguments, 5, "Date constructor").Value : 0;
+                var milliseconds = arguments.Length > 6 ? (int)Tool.GetArgument<Number>(arguments, 6, "Date constructor").Value : 0;
 
-                var date = new DateTime(year, month + 1, day, hours, minutes, seconds, milliseconds);
-                return new Javascript.Date(date);
+                date = new DateTime(year, month + 1, day, hours, minutes, seconds, milliseconds);
+            } else {
+                date = DateTime.Now;
             }
 
-            var now = DateTime.Now;
-            return new Javascript.Date(now);
+            (_this as Object).Set(Primitive, new Foreign(date));
+            return _this;
         }
 
-        public static Constant toString(Constant _this, Constant[] arguments, Scope scope) {
-            return new Javascript.String(toDateString(_this, arguments, scope).ToString() + " " + toTimeString(_this, arguments, scope).ToString());
+        private static DateTime GetDate(Constant _this) {
+            return (DateTime)((_this as Object).Get(Primitive) as Foreign).Value;
         }
 
-        public static Constant toISOString(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.String(date.Value.ToUniversalTime().ToString("o"));
+        private static void SetDate(Constant _this, DateTime date) {
+            ((_this as Object).Get(Primitive) as Foreign).Value = date;
         }
 
-        public static Constant toDateString(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.String(date.Value.ToString("ddd MMM dd yyyy"));
+        public static Constant toString(Constant _this, Constant[] arguments, Agent agent) {
+            return new String(toDateString(_this, arguments, agent).ToString() + " " + toTimeString(_this, arguments, agent).ToString());
         }
 
-        public static Constant toTimeString(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
+        public static Constant toISOString(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new String(date.ToUniversalTime().ToString("o"));
+        }
+
+        public static Constant toDateString(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new String(date.ToString("ddd MMM dd yyyy"));
+        }
+
+        public static Constant toTimeString(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
             var timeZoneName = TimeZoneInfo.Local.StandardName;
-            var timeZoneTime = date.Value.ToString("zzz").Replace(":", "");
-            return new Javascript.String(date.Value.ToString("HH:mm:ss") + " GMT" + timeZoneTime + " (" + timeZoneName + ")");
+            var timeZoneTime = date.ToString("zzz").Replace(":", "");
+            return new String(date.ToString("HH:mm:ss") + " GMT" + timeZoneTime + " (" + timeZoneName + ")");
         }
 
-        public static Constant toUTCString(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.String(date.Value.ToString("ddd MMM dd yyyy HH:mm:ss") + " GMT");
+        public static Constant toUTCString(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new String(date.ToString("ddd MMM dd yyyy HH:mm:ss") + " GMT");
         }
 
-        public static Constant getFullYear(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.Number(date.Value.Year);
+        public static Constant getFullYear(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number(date.Year);
         }
 
-        public static Constant getMonth(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.Number(date.Value.Month - 1);
+        public static Constant getMonth(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number(date.Month - 1);
         }
 
-        public static Constant getDate(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this; ;
-            return new Javascript.Number(date.Value.Day);
+        public static Constant getDate(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number(date.Day);
         }
 
-        public static Constant getDay(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.Number((int)date.Value.DayOfWeek);
+        public static Constant getDay(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number((int)date.DayOfWeek);
         }
 
-        public static Constant getHours(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.Number(date.Value.Hour);
+        public static Constant getHours(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number(date.Hour);
         }
 
-        public static Constant getMinutes(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.Number(date.Value.Minute);
+        public static Constant getMinutes(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number(date.Minute);
         }
 
-        public static Constant getSeconds(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.Number(date.Value.Second);
+        public static Constant getSeconds(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number(date.Second);
         }
 
-        public static Constant getMilliseconds(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.Number(date.Value.Millisecond);
+        public static Constant getMilliseconds(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number(date.Millisecond);
         }
 
-        public static Constant getTime(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            return new Javascript.Number(Convert.DateTimeToUnixMilliseconds(date.Value));
+        public static Constant getTime(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            return new Number(Convert.DateTimeToUnixMilliseconds(date));
         }
 
-        public static Constant setFullYear(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            date.Value = date.Value.AddYears((int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date.setFullYear").Value - date.Value.Year);
-            return getTime(_this, new Constant[] { }, scope);
+        public static Constant setFullYear(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            var year = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setFullYear").Value;
+            SetDate(_this, date.AddYears(year - date.Year));
+            return getTime(_this, new Constant[] { }, agent);
         }
 
-        public static Constant setMonth(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            date.Value = date.Value.AddMonths(((int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date.setMonth").Value + 1) - date.Value.Month);
-            return getTime(_this, new Constant[] { }, scope);
+        public static Constant setMonth(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            var month = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setMonth").Value + 1;
+            SetDate(_this, date.AddMonths(month - date.Month));
+            return getTime(_this, new Constant[] { }, agent);
         }
 
-        public static Constant setDate(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this; ;
-            date.Value = date.Value.AddDays((int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date.setDate").Value - date.Value.Day);
-            return getTime(_this, new Constant[] { }, scope);
+        public static Constant setDate(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            var d = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setDate").Value;
+            SetDate(_this, date.AddDays(d - date.Day));
+            return getTime(_this, new Constant[] { }, agent);
         }
 
-        public static Constant setHours(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            date.Value = date.Value.AddHours((int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date.setHours").Value - date.Value.Hour);
-            return getTime(_this, new Constant[] { }, scope);
+        public static Constant setHours(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            var hour = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setHours").Value;
+            SetDate(_this, date.AddHours(hour - date.Hour));
+            return getTime(_this, new Constant[] { }, agent);
         }
 
-        public static Constant setMinutes(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            date.Value = date.Value.AddMinutes((int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date.setMinutes").Value - date.Value.Minute);
-            return getTime(_this, new Constant[] { }, scope);
+        public static Constant setMinutes(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            var minute = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setMinutes").Value;
+            SetDate(_this, date.AddMinutes(minute - date.Minute));
+            return getTime(_this, new Constant[] { }, agent);
         }
 
-        public static Constant setSeconds(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            date.Value = date.Value.AddSeconds((int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date.setSeconds").Value - date.Value.Second);
-            return getTime(_this, new Constant[] { }, scope);
+        public static Constant setSeconds(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            var second = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setSeconds").Value;
+            SetDate(_this, date.AddSeconds(second - date.Second));
+            return getTime(_this, new Constant[] { }, agent);
         }
 
-        public static Constant setMilliseconds(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            date.Value = date.Value.AddMilliseconds((int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date.setMilliseconds").Value - date.Value.Millisecond);
-            return getTime(_this, new Constant[] { }, scope);
+        public static Constant setMilliseconds(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            var ms = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setMilliseconds").Value;
+            SetDate(_this, date.AddMilliseconds(ms - date.Millisecond));
+            return getTime(_this, new Constant[] { }, agent);
         }
 
-        public static Constant setTime(Constant _this, Constant[] arguments, Scope scope) {
-            var date = (Javascript.Date)_this;
-            date.Value = Convert.UnixMillisecondsToDateTime((int)Tool.GetArgument<Javascript.Number>(arguments, 0, "Date.setTime").Value);
-            return getTime(_this, new Constant[] { }, scope);
+        public static Constant setTime(Constant _this, Constant[] arguments, Agent agent) {
+            var date = GetDate(_this);
+            var time = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setTime").Value;
+            SetDate(_this, Convert.UnixMillisecondsToDateTime(time));
+            return getTime(_this, new Constant[] { }, agent);
         }
     }
 }

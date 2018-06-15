@@ -19,8 +19,8 @@ namespace NetJS.Server {
         public JSApplication CreateApplication() {
             var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory);
 
-            application.Engine.RegisterClass(typeof(API.Request));
-            application.Engine.RegisterClass(typeof(API.Response));
+            application.Realm.RegisterClass(typeof(API.Request));
+            application.Realm.RegisterClass(typeof(API.Response));
 
             var session = new JSSession();
             _service.RunTemplate(application.Settings.Startup, "", ref application, ref session);

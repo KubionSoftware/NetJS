@@ -1,30 +1,33 @@
 // async waitAll
-var a = 0;
-var b = 0;
+var a = false;
+var b = false;
 
-function test(variable) {
-    variable = parseInt(new Date().getSeconds().toString()); 
-    Async.sleep(500);
-    return [variable];
-}
 assert(() => Async.waitAll(
-    () => a =test(a),
-    () => b =parseInt(new Date().getSeconds().toString())
+    () => a = true,
+    () => b = true
 ) == undefined, "Async.waitAll");
-assert(() => a[0] - b < 5, "Async.waitAll result");
+assert(() => a == true && b == true, "Async.waitAll result");
 
 // waitAny
 a = false;
 b = false;
 
 assert(() => Async.waitAny(
-    () => a=test(a),
-    () => b=test(b)
+    () => {
+		Async.sleep(100);
+		a = true;
+	},
+    () => b = true
 ) == undefined, "Async.waitAny");
-assert(() => (a[0] != false) || (b[0] != false), "Async.waitAny result");
+assert(() => a == false && b == true, "Async.waitAny result");
 
 // run
+a = false;
+b = false;
+
 assert(() => Async.run(
-	() => a = 0,
-	() => b = 0
+	() => a = true,
+	() => b = true
 ) == undefined, "Async.run");
+Async.sleep(10);
+assert(() => a == true && b == true, "Async.run result");

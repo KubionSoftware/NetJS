@@ -1,4 +1,4 @@
-﻿using NetJS.Core.Javascript;
+﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Core.API {
-    class Uint8Array {
+    class Uint8ArrayAPI {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Scope scope) {
-            var length = Tool.GetArgument<Javascript.Number>(arguments, 0, "Uint8Array constructor");
+        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
+            var length = Tool.GetArgument<Number>(arguments, 0, "Uint8Array constructor");
 
-            return new Javascript.Uint8Array((int)length.Value);
+            return new Uint8Array((int)length.Value, agent);
         }
     }
 }
