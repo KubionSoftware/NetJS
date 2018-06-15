@@ -27,7 +27,7 @@ namespace Testing{
             var allFiles = System.IO.Directory.GetFiles(path);
             foreach (var file in allFiles) {
 #if DEBUG
-                Console.WriteLine("found test: " + file);
+               // Console.WriteLine("found test: " + file);
                 #endif
                 _files.Add(file);
                 myRoot._files.Add(file);
@@ -161,7 +161,7 @@ namespace Testing{
             };
 
             var readText = File.ReadAllText(_path);
-            
+            _code = readText;
             foreach (var word in excludeWords) {
                 if (readText.Contains(word)) {
                     Implemented.Add(word);
@@ -250,18 +250,19 @@ namespace Testing{
                     var preTestPath = Path.GetFullPath("../../test/src/262/harness/" + preTest.Replace(",", ""))
                         .Replace('\\', '/');
 #if DEBUG
-                     Console.WriteLine("preTest: " + preTestPath);
+                     // Console.WriteLine("preTest: " + preTestPath);
                     #endif
                     preTestOutput += service.RunTemplate(preTestPath, "{}", ref application, ref session);
                 }
             }
 #if DEBUG
-             Console.WriteLine("executing: " + _path);
+             // Console.WriteLine("executing: " + _path);
             #endif
             
             var templateWatch = new Stopwatch();
             templateWatch.Start();
-            var testOutput = service.RunTemplate(_path, "{}", ref application, ref session);
+//            var testOutput = service.RunTemplate(_path, "{}", ref application, ref session);
+            var testOutput = service.RunCode(_code, ref application, ref session);
             templateWatch.Stop();
 
             watch.Stop();
