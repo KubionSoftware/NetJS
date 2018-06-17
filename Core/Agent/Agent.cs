@@ -20,6 +20,8 @@ namespace NetJS.Core {
 
         public Agent(Realm realm) {
             var context = new Context(realm, new StringBuilder());
+            context.Lex = realm.GlobalEnv;
+            context.Var = realm.GlobalEnv;
 
             Stack = new Stack<Context>();
             Stack.Push(context);

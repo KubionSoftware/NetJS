@@ -8,12 +8,16 @@ using System.Web;
 namespace NetJS.Server {
     public class JSServer {
 
-        private NetJS.JSService _service;
+        private JSService _service;
+        private JSApplication _application;
+
+        public JSApplication Application { get { return _application; } }
 
         public JSServer() : this(new JSService()) { }
 
         public JSServer(JSService service) {
             _service = service;
+            _application = CreateApplication();
         }
 
         public JSApplication CreateApplication() {
@@ -21,11 +25,21 @@ namespace NetJS.Server {
 
             application.Realm.RegisterClass(typeof(API.Request), "Request");
             application.Realm.RegisterClass(typeof(API.Response), "Response");
+            application.Realm.RegisterClass(typeof(API.WebSocket), "WebSocket");
 
             var session = new JSSession();
             _service.RunTemplate(application.Settings.Startup, "", ref application, ref session);
 
             return application;
+        }
+
+        public JSSession GetSession(HttpContext context) {
+            NetJS.JSSession session = null;
+
+            if (context.Session != null) session = (NetJS.JSSession)context.Session["JSSession"];
+            if (session == null) session = new NetJS.JSSession();
+
+            return session;
         }
 
         public void ProcessRequest(HttpContext context, NetJS.JSApplication application, NetJS.JSSession session) {
@@ -38,14 +52,8 @@ namespace NetJS.Server {
         }
 
         public void ProcessRequest(HttpContext context) {
-            NetJS.JSApplication application = null;
-            NetJS.JSSession session = null;
-
-            if (context.Application != null) application = (NetJS.JSApplication)context.Application["JSApplication"];
-            if (application == null) application = CreateApplication();
-
-            if (context.Session != null) session = (NetJS.JSSession)context.Session["JSSession"];
-            if (session == null) session = new NetJS.JSSession();
+            var application = _application;
+            var session = GetSession(context);
 
             ProcessRequest(context, application, session);
 
@@ -54,10 +62,7 @@ namespace NetJS.Server {
         }
 
         public void Handle(HttpContext context) {
-            JSApplication application = null;
-            if (context.Application != null) application = (JSApplication)context.Application["JSApplication"];
-            if (application == null) application = CreateApplication();
-
+            var application = _application;
             var mainTemplate = application.Settings.Root + application.Settings.TemplateFolder + application.Settings.Entry;
 
             if (mainTemplate.EndsWith(".js")) {

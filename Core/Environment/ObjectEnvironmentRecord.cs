@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -98,9 +99,9 @@ namespace NetJS.Core {
             return Static.Undefined;
         }
 
-        public override Dictionary<Constant, Binding> GetMap() {
-            var map = new Dictionary<Constant, Binding>();
-            foreach (var prop in BindingObject.OwnPropertyKeys()) map.Add(prop, new Binding(BindingObject.Get(prop), true, true, true, false));
+        public override ConcurrentDictionary<Constant, Binding> GetMap() {
+            var map = new ConcurrentDictionary<Constant, Binding>();
+            foreach (var prop in BindingObject.OwnPropertyKeys()) map.TryAdd(prop, new Binding(BindingObject.Get(prop), true, true, true, false));
             return map;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,6 @@ namespace NetJS.Core {
 
         public abstract Constant WithBaseObject();
 
-        public abstract Dictionary<Constant, Binding> GetMap();
+        public abstract ConcurrentDictionary<Constant, Binding> GetMap();
     }
 }

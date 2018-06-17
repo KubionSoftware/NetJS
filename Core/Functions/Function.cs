@@ -161,6 +161,11 @@ namespace NetJS.Core {
                 envRec.InitializeBinding(parameterNames[i], i < arguments.Length ? arguments[i] : Static.Undefined);
             }
 
+            var argumentsArray = new Array(arguments.Length, agent);
+            argumentsArray.AddRange(arguments);
+            envRec.CreateImmutableBinding(new String("arguments"), true);
+            envRec.InitializeBinding(new String("arguments"), argumentsArray);
+
             DeclarationFinder.FindVarDeclarations(ECMAScriptCode, (dn, isConstant) => {
                 if (isConstant) {
                     envRec.CreateImmutableBinding(dn, true);

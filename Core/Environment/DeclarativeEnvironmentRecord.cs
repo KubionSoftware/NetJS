@@ -1,5 +1,6 @@
 ﻿using NetJS.Core;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,7 @@ namespace NetJS.Core {
 
     public class DeclarativeEnvironmentRecord : EnvironmentRecord {
 
-        private Dictionary<Constant, Binding> _map = new Dictionary<Constant, Binding>();
+        private ConcurrentDictionary<Constant, Binding> _map = new ConcurrentDictionary<Constant, Binding>();
 
         public override bool HasBinding(Constant name) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-hasbinding-n
@@ -39,7 +40,7 @@ namespace NetJS.Core {
                 throw new InternalError($"{name.ToDebugString()} is already defined");
             }
 
-            _map.Add(name, new Binding(Static.Undefined, false, true, canBeDeleted, false));
+            _map.TryAdd(name, new Binding(Static.Undefined, false, true, canBeDeleted, false));
             return Static.NormalCompletion;
         }
 
@@ -50,7 +51,7 @@ namespace NetJS.Core {
                 throw new InternalError($"{name.ToDebugString()} is already defined");
             }
 
-            _map.Add(name, new Binding(Static.Undefined, false, false, false, isStrict));
+            _map.TryAdd(name, new Binding(Static.Undefined, false, false, false, isStrict));
             return Static.NormalCompletion;
         }
 
@@ -131,7 +132,7 @@ namespace NetJS.Core {
 
             if (!binding.CanBeDeleted) return false;
 
-            _map.Remove(name);
+            _map.TryRemove(name, out Binding removed);
             return true;
         }
 
@@ -154,7 +155,7 @@ namespace NetJS.Core {
             return Static.Undefined;
         }
 
-        public override Dictionary<Constant, Binding> GetMap() {
+        public override ConcurrentDictionary<Constant, Binding> GetMap() {
             return _map;
         }
 

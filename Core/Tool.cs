@@ -5,6 +5,14 @@ using System.Collections.Generic;
 namespace NetJS.Core {
     public class Tool {
 
+        public static string GetResultString(Constant result, Agent agent) {
+            if (!(result is Core.Undefined)) {
+                return Core.Convert.ToString(result, agent);
+            } else {
+                return agent.Running.Buffer.ToString();
+            }
+        }
+
         public static Array ToArray(IEnumerable<string> strings, Agent agent) {
             var array = new Array(0, agent);
             foreach (var s in strings) array.Add(new String(s));
@@ -85,14 +93,14 @@ namespace NetJS.Core {
         public static T GetArgument<T>(Constant[] arguments, int index, string context, bool required = true) where T: Constant {
             if (index >= arguments.Length) {
                 if (required) {
-                    throw new InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+                    throw new TypeError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
                 } else {
                     return default(T);
                 }
             }
 
             var argument = arguments[index];
-            if (!(argument is T)) throw new InternalError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
+            if (!(argument is T)) throw new TypeError($"{context}: Expected argument with type '{typeof(T)}' at index {index}");
 
             return (T)argument;
         }
@@ -100,7 +108,7 @@ namespace NetJS.Core {
         public static Constant GetArgument(Constant[] arguments, int index, string context, bool required = true) {
             if (index >= arguments.Length) {
                 if (required) {
-                    throw new Exception($"{context}: Expected argument at index {index}");
+                    throw new TypeError($"{context}: Expected argument at index {index}");
                 } else {
                     return null;
                 }

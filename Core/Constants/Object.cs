@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,15 @@ namespace NetJS.Core {
                 if (d.Writable.HasValue) Writable = d.Writable;
             }
         }
+
+        public override Object ToObject(Agent agent) {
+            var obj = Tool.Construct("Object", agent);
+            obj.Set("value", Value);
+            obj.Set("writable", Boolean.Create(IsWritable));
+            obj.Set("enumerable", Boolean.Create(IsEnumerable));
+            obj.Set("configurable", Boolean.Create(IsConfigurable));
+            return obj;
+        }
     }
 
     public class AccessorProperty : Property {
@@ -56,6 +66,15 @@ namespace NetJS.Core {
                 if (a.Set != null) Set = a.Set;
             }
         }
+
+        public override Object ToObject(Agent agent) {
+            var obj = Tool.Construct("Object", agent);
+            obj.Set("get", Get);
+            obj.Set("set", Set);
+            obj.Set("enumerable", Boolean.Create(IsEnumerable));
+            obj.Set("configurable", Boolean.Create(IsConfigurable));
+            return obj;
+        }
     }
 
     public abstract class Property {
@@ -67,10 +86,43 @@ namespace NetJS.Core {
 
         public abstract Property Clone();
         public abstract void SetAttributes(Property prop);
+        public abstract Object ToObject(Agent agent);
+
+        public static Property FromObject(Object obj) {
+            Property prop;
+
+            // TODO: handle non-existing properties better
+
+            if (obj.HasOwnProperty("value")) {
+                var dataProp = new DataProperty() {
+                    Value = obj.Get("value")
+                };
+
+                if (obj.HasOwnProperty("writable")) {
+                    dataProp.Writable = (obj.Get("writable") as Boolean).Value;
+                }
+                prop = dataProp;
+            } else {
+                prop = new AccessorProperty() {
+                    Get = obj.Get("get") as Function,
+                    Set = obj.Get("set") as Function
+                };
+            }
+
+            if (obj.HasOwnProperty("enumerable")) {
+                prop.Enumerable = (obj.Get("enumerable") as Boolean).Value;
+            }
+
+            if (obj.HasOwnProperty("configurable")) {
+                prop.Configurable = (obj.Get("configurable") as Boolean).Value;
+            }
+
+            return prop;
+        }
     }
 
     public class Object : Constant {
-        private Dictionary<Constant, Property> Properties = new Dictionary<Constant, Property>();
+        private ConcurrentDictionary<Constant, Property> Properties = new ConcurrentDictionary<Constant, Property>();
 
         // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ordinary-object-internal-methods-and-internal-slots
 
@@ -147,6 +199,10 @@ namespace NetJS.Core {
 
             var desc = GetOwnProperty(p);
             return desc != null;
+        }
+
+        public bool HasOwnProperty(string p) {
+            return HasOwnProperty(new String(p));
         }
 
         public bool ValidateAndApplyPropertyDescriptor(Constant p, bool extensible, Property desc, Property current) {
@@ -323,7 +379,7 @@ namespace NetJS.Core {
             var desc = GetOwnProperty(p);
             if (desc == null) return true;
             if (desc.IsConfigurable) {
-                Properties.Remove(p);
+                Properties.TryRemove(p, out Property removed);
                 return true;
             }
 

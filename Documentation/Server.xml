@@ -159,5 +159,33 @@
             <param name="encoding">The web name (registered with IANA) of the encoding (string)</param>
             <example><code lang="javascript">Response.setEncoding("UTF-8");</code></example>
         </member>
+        <member name="M:NetJS.Server.API.WebSocket.on(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+            <summary>Creates an event listener</summary>
+            <param name="event">The name of the event (connection|message|close|error)</param>
+            <param name="func">The function to call</param>
+            <returns>undefined</returns>
+            <example><code lang="javascript">WebSocket.on("connection", function(id){
+                Log.write(id);
+            });</code></example>
+        </member>
+        <member name="M:NetJS.Server.API.WebSocket.send(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+            <summary>Send a message to a websocket</summary>
+            <param name="id">The id of the socket (string)</param>
+            <param name="message">The message (string)</param>
+            <returns>undefined</returns>
+            <example><code lang="javascript">WebSocket.send(id, "{}");</code></example>
+        </member>
+        <member name="M:NetJS.Server.API.WebSocket.close(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+            <summary>Closes a websocket connection</summary>
+            <param name="id">The id of the socket (string)</param>
+            <returns>undefined</returns>
+            <example><code lang="javascript">WebSocket.close(id);</code></example>
+        </member>
+        <member name="M:NetJS.Server.API.WebSocket.isOpen(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+            <summary>Checks if there is an open connection to a websocket</summary>
+            <param name="id">The id of the socket (string)</param>
+            <returns>If there is an open connection (boolean)</returns>
+            <example><code lang="javascript">var open = WebSocket.isOpen(id);</code></example>
+        </member>
     </members>
 </doc>

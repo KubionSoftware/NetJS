@@ -8,22 +8,33 @@ using NetJS.Core.API;
 namespace NetJS { 
     public class JSService {
 
-        public string RunCode(string code, ref JSApplication application, ref JSSession session) {
+        public string RunCode(string code, JSApplication application, JSSession session, bool global = true, bool newContext = true) {
             try {
-                var agent = new NetJSAgent(application.Realm) {
-                    Application = application,
-                    Session = session,
+                var agent = new NetJSAgent(application.Realm, application, session) {
                     IsSafe = true
                 };
 
                 var script = ScriptRecord.ParseScript(code, application.Realm, -1);
-                var result = script.Evaluate(agent);
+                var result = script.Evaluate(agent, global, newContext);
 
-                if (!(result.Value is Core.Undefined)) {
-                    return Core.Convert.ToString(result.Value, agent);
-                } else {
-                    return agent.Running.Buffer.ToString();
-                }
+                return Core.Tool.GetResultString(result.Value, agent);
+            } catch (Error e) {
+                return e.ToString();
+            } catch (Exception e) {
+                return "System error - " + e.ToString();
+            }
+        }
+
+        public string RunScript(string template, JSApplication application, JSSession session, bool global = true, bool newContext = true) {
+            try {
+                var agent = new NetJSAgent(application.Realm, application, session) {
+                    IsSafe = true
+                };
+
+                var script = application.Cache.GetScript(template, application);
+                var result = script.Evaluate(agent, global, newContext);
+
+                return Core.Tool.GetResultString(result.Value, agent);
             } catch (Error e) {
                 return e.ToString();
             } catch (Exception e) {
@@ -34,9 +45,7 @@ namespace NetJS {
         // Every template is executed via this function
         public string RunTemplate(string template, Core.Object arguments, ref JSApplication application, ref JSSession session, ref XHTMLMerge.SVCache svCache) {
             try {
-                var agent = new NetJSAgent(application.Realm) {
-                    Application = application,
-                    Session = session,
+                var agent = new NetJSAgent(application.Realm, application, session) {
                     IsSafe = true
                 };
 
@@ -53,11 +62,7 @@ namespace NetJS {
                     agent
                 );
 
-                if (!(result is Core.Undefined)) {
-                    return Core.Convert.ToString(result, agent);
-                } else {
-                    return agent.Running.Buffer.ToString();
-                }
+                return Core.Tool.GetResultString(result, agent);
             } catch (Error e) {
                 return e.ToString();
             } catch (Exception e) {
@@ -115,7 +120,7 @@ namespace NetJS {
 
             return RunTemplate(template, arguments, ref application, ref session);
         }
-
+        
         public string RunTemplate(string template, Core.Object arguments, ref JSApplication application, ref JSSession session) {
             if (application == null) {
                 application = new JSApplication();
