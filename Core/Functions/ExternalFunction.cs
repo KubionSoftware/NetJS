@@ -29,6 +29,8 @@ namespace NetJS.Core {
             var callerContext = agent.Running;
             var calleeContext = PrepareForOrdinaryCall(null, agent);
 
+            if (arguments == null) arguments = new Constant[] { };
+
             OrdinaryCallBindThis(calleeContext, thisValue, agent);
             var result = Function(thisValue, arguments, agent);
 
