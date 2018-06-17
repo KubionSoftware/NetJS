@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using NetJS;
 using YamlDotNet.RepresentationModel;
 
-namespace Testing{
+namespace NetJS.Testing{
     public class Directory{
         private List<Directory> _directories;
         private readonly int _level;
@@ -252,7 +252,7 @@ namespace Testing{
 #if DEBUG
                      // Console.WriteLine("preTest: " + preTestPath);
                     #endif
-                    preTestOutput += service.RunTemplate(preTestPath, "{}", ref application, ref session);
+                    preTestOutput += service.RunScript(preTestPath, application, session, true, false);
                 }
             }
 #if DEBUG
@@ -262,7 +262,7 @@ namespace Testing{
             var templateWatch = new Stopwatch();
             templateWatch.Start();
 //            var testOutput = service.RunTemplate(_path, "{}", ref application, ref session);
-            var testOutput = service.RunCode(_code, ref application, ref session);
+            var testOutput = service.RunCode(_code, application, session, false, true);
             templateWatch.Stop();
 
             watch.Stop();

@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using NetJS.Core;
 using System.Diagnostics;
 using NetJS;
+using System.Linq;
 
-namespace Testing {
+namespace NetJS.Testing {
     
     class TestFunctions {
         public static Constant assert(Constant _this, Constant[] arguments, Agent agent) {
@@ -85,6 +86,7 @@ namespace Testing {
                 recursiveFindWatch.Stop();
 
                 _allTests = root.Tests;
+
                 var executeWatch = new Stopwatch();
                 
 
@@ -121,8 +123,16 @@ namespace Testing {
 
                 Console.WriteLine("Elapsed Retrieval Time(mm:ss):" + recursiveFindWatch.Elapsed.ToString(@"mm\:ss"));
                 Console.WriteLine("Elapsed Formatting Time (mm:ss):" + watch.Elapsed.ToString(@"mm\:ss"));
-                System.IO.File.WriteAllText(@"../../test\test.csv",
-                    output);
+
+                while (true) {
+                    try {
+                        System.IO.File.WriteAllText(@"../../test\test.csv", output);
+                        break;
+                    } catch {
+                        Console.Error.WriteLine("Close csv file. Then press enter");
+                        Console.ReadLine();
+                    }
+                }
 
                 var totalExecutionTime = 0.0;
                 foreach (var result in _benchmarkResults) {
@@ -150,8 +160,8 @@ namespace Testing {
             var session = new JSSession();
             var application = new JSApplication("../../test/");
 
-            service.RunTemplate("262/harness/sta.js", "{}", ref application, ref session);
-            service.RunTemplate("262/harness/assert.js", "{}", ref application, ref session);
+            service.RunScript("262/harness/sta.js", application, session, true, false);
+            service.RunScript("262/harness/assert.js", application, session, true, false);
 
             while (true) {
                 Test myTest;
@@ -160,7 +170,7 @@ namespace Testing {
                     if (_testCount < _allTests.Count) {
                         myTest = _allTests[_testCount];
                         _testCount++;
-                        if(_testCount % 3000 == 0) {
+                        if(_testCount % 1000 == 0) {
                             Console.WriteLine("We are at number: " + _testCount);
                         }
                     }
