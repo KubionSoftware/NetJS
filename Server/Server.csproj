@@ -76,8 +76,11 @@
   <ItemGroup>
     <Compile Include="API\Request.cs" />
     <Compile Include="API\Response.cs" />
+    <Compile Include="API\WebSocket.cs" />
+    <Compile Include="DebugSocketHandler.cs" />
     <Compile Include="JSServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SocketHandler.cs" />
     <Compile Include="Tool.cs" />
     <Compile Include="WebHandler.cs" />
   </ItemGroup>

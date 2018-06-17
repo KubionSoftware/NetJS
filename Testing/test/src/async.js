@@ -14,7 +14,7 @@ b = false;
 
 assert(() => Async.waitAny(
     () => {
-		Async.sleep(100);
+		Async.sleep(1000);
 		a = true;
 	},
     () => b = true
@@ -29,5 +29,5 @@ assert(() => Async.run(
 	() => a = true,
 	() => b = true
 ) == undefined, "Async.run");
-Async.sleep(10);
+Async.sleep(100);
 assert(() => a == true && b == true, "Async.run result");

@@ -11,6 +11,9 @@ namespace NetJS {
         public JSApplication Application;
         public JSSession Session;
 
-        public NetJSAgent(Realm realm) : base(realm) { }
+        public NetJSAgent(Realm realm, JSApplication application, JSSession session) : base(realm) {
+            Application = application;
+            Session = session;
+        }
     }
 }

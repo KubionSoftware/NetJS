@@ -21,10 +21,10 @@ namespace NetJS.API {
             // Execute template
             var buffer = returnVar ? new StringBuilder() : agent.Running.Buffer;
             Object parameters = arguments.Length > 1 ? (Object)arguments[1] : null;
-            var result = script.Evaluate(agent, true, buffer, parameters).Value;
+            var result = script.Evaluate(agent, false, true, buffer, parameters).Value;
 
             if (returnVar) {
-                return result is Undefined ? new String(buffer.ToString()) : result;
+                return result == null || result is Undefined ? new String(buffer.ToString()) : result;
             } else if (!(result is Undefined)) {
                 buffer.Append(Convert.ToString(result, agent));
             }
@@ -87,12 +87,14 @@ namespace NetJS.API {
             var application = (agent as NetJSAgent).Application;
             var node = application.Cache.GetScript(name.Value, application);
 
+            var buffer = new StringBuilder();
+
             // Pop created function environment so import runs in callee environment
             var oldEnv = agent.Pop();
-            var result = node.Evaluate(agent, false).Value;
+            var result = node.Evaluate(agent, false, false, buffer).Value;
             agent.Push(oldEnv);
 
-            return result;
+            return result == null || result is Undefined ? new String(buffer.ToString()) : result;
         }
         
         /// <summary>redirect takes an url and redirects a HttpResponse to the given url.</summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -70,7 +71,7 @@ namespace NetJS.Core {
     }
 
     public class Object : Constant {
-        private Dictionary<Constant, Property> Properties = new Dictionary<Constant, Property>();
+        private ConcurrentDictionary<Constant, Property> Properties = new ConcurrentDictionary<Constant, Property>();
 
         // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ordinary-object-internal-methods-and-internal-slots
 
@@ -323,7 +324,7 @@ namespace NetJS.Core {
             var desc = GetOwnProperty(p);
             if (desc == null) return true;
             if (desc.IsConfigurable) {
-                Properties.Remove(p);
+                Properties.TryRemove(p, out Property removed);
                 return true;
             }
 

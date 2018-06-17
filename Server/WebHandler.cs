@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.SessionState;
 using System.Web.WebSockets;
 using NetJS.Core;
+using System.Net.WebSockets;
 
 namespace NetJS.Server {
     internal class WebHandler : IHttpHandler, IRequiresSessionState {
@@ -27,39 +28,31 @@ namespace NetJS.Server {
                 context.AcceptWebSocketRequest(WebSocketRequestHandler);
                 return;
             }
-            
+
+            var segments = context.Request.Url.Segments;
+            var lastSegment = segments.Length == 0 ? "" : segments[segments.Length - 1];
+            if (lastSegment.ToLower() == "restart") {
+                _server = new JSServer();
+            }
+
             _server.Handle(context);
         }
 
         public async Task WebSocketRequestHandler(AspNetWebSocketContext context) {
             var socket = context.WebSocket;
 
-#if debug_enabled
-            Debug.AddSocket(socket);
-#endif
+            var segments = context.RequestUri.Segments;
+            var lastSegment = segments.Length == 0 ? "" : segments[segments.Length - 1];
 
-            const int maxMessageSize = 1024;
+            SocketHandler handler;
 
-            if (socket.State == System.Net.WebSockets.WebSocketState.Open) {
-                var receiveBuffer = new ArraySegment<Byte>(new Byte[maxMessageSize]);
-                var cancellationToken = new CancellationToken();
-
-                while (true) {
-                    var content = await socket.ReceiveAsync(receiveBuffer, cancellationToken);
-                    if (content.MessageType == System.Net.WebSockets.WebSocketMessageType.Close) {
-#if debug_enabled
-                        Debug.RemoveSocket(socket);
-#endif
-                        break;
-                    } else {
-                        var text = Encoding.UTF8.GetString(receiveBuffer.Array, 0, content.Count);
-
-#if debug_enabled
-                        Debug.HandleMessage(text);
-#endif
-                    }
-                }
+            if (lastSegment.ToLower() == "debug") {
+                handler = new DebugSocketHandler();
+            } else {
+                handler = new API.WebSocket(_server);
             }
+
+            await handler.Handle(context);
         }
     }
 }

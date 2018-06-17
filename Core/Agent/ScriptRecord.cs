@@ -31,7 +31,7 @@ namespace NetJS.Core {
             });
         }
 
-        public Completion Evaluate(Agent agent, bool newContext = true, StringBuilder buffer = null, Object arguments = null) {
+        public Completion Evaluate(Agent agent, bool global = true, bool newContext = true, StringBuilder buffer = null, Object arguments = null) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-runtime-semantics-scriptevaluation
             
             Context scriptCtx;
@@ -46,7 +46,7 @@ namespace NetJS.Core {
 
                 // Deviating from ECMAScript because every file has its own lexical environment
                 var globalEnv = Realm.GlobalEnv;
-                scriptEnv = LexicalEnvironment.NewDeclarativeEnvironment(globalEnv);
+                scriptEnv = global ? globalEnv : LexicalEnvironment.NewDeclarativeEnvironment(globalEnv);
                 scriptCtx.Var = scriptEnv;
                 scriptCtx.Lex = scriptEnv;
 

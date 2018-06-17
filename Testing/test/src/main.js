@@ -22,7 +22,7 @@ load("log");
 load("classlessfunctions");
 load("async");
 load("sql");
-load("unsafe");
+//load("unsafe");
 
 time(() => unsafe(function(){
 	var ret = [], tmp, num = 500, i = 1024;

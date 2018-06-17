@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -190,10 +191,10 @@ namespace NetJS.Core {
             return Static.NormalCompletion;
         }
 
-        public override Dictionary<Constant, Binding> GetMap() {
-            var map = new Dictionary<Constant, Binding>();
-            foreach (var pair in ObjectRecord.GetMap()) map.Add(pair.Key, pair.Value);
-            foreach (var pair in DeclarativeRecord.GetMap()) map.Add(pair.Key, pair.Value);
+        public override ConcurrentDictionary<Constant, Binding> GetMap() {
+            var map = new ConcurrentDictionary<Constant, Binding>();
+            foreach (var pair in ObjectRecord.GetMap()) map.TryAdd(pair.Key, pair.Value);
+            foreach (var pair in DeclarativeRecord.GetMap()) map.TryAdd(pair.Key, pair.Value);
             return map;
         }
 
