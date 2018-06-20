@@ -16,7 +16,8 @@ namespace NetJS.API {
                 var function = Core.Tool.GetArgument<Core.Function>(arguments, i, name);
                 var task = new Task(() => {
                     try {
-                        function.Call(Static.Undefined, agent, new Constant[] { });
+                        var asyncAgent = new Agent(agent.Running.Realm);
+                        function.Call(Static.Undefined, asyncAgent, new Constant[] { });
                     } catch (Exception e) {
                         Core.Log.Write(e.ToString());
                     }

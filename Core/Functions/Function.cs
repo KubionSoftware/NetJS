@@ -157,22 +157,22 @@ namespace NetJS.Core {
             // TODO: a lot
 
             for(var i = 0; i < parameterNames.Length; i++) {
-                envRec.CreateMutableBinding(parameterNames[i], false);
-                envRec.InitializeBinding(parameterNames[i], i < arguments.Length ? arguments[i] : Static.Undefined);
+                envRec.CreateMutableBinding(parameterNames[i], false, agent);
+                envRec.InitializeBinding(parameterNames[i], i < arguments.Length ? arguments[i] : Static.Undefined, agent);
             }
 
             var argumentsArray = new Array(arguments.Length, agent);
             argumentsArray.AddRange(arguments);
-            envRec.CreateImmutableBinding(new String("arguments"), true);
-            envRec.InitializeBinding(new String("arguments"), argumentsArray);
+            envRec.CreateImmutableBinding(new String("arguments"), true, agent);
+            envRec.InitializeBinding(new String("arguments"), argumentsArray, agent);
 
             DeclarationFinder.FindVarDeclarations(ECMAScriptCode, (dn, isConstant) => {
                 if (isConstant) {
-                    envRec.CreateImmutableBinding(dn, true);
+                    envRec.CreateImmutableBinding(dn, true, agent);
                 } else {
-                    envRec.CreateMutableBinding(dn, false);
+                    envRec.CreateMutableBinding(dn, false, agent);
                 }
-                envRec.InitializeBinding(dn, Static.Undefined);
+                envRec.InitializeBinding(dn, Static.Undefined, agent);
             });
 
             return Static.NormalCompletion;

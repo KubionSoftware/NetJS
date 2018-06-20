@@ -38,6 +38,14 @@ namespace NetJS.Core {
             };
         }
 
+        public List<Context> GetState() {
+            return Stack.Select(c => c.Clone()).ToList();
+        }
+
+        public void SetState(List<Context> state) {
+            Stack = new Stack<Context>(state);
+        }
+
         public void Push(Context context) {
             Stack.Push(context);
 
@@ -70,9 +78,9 @@ namespace NetJS.Core {
             return frames;
         }
 
-        public List<Debug.Scope> GetScopes() {
+        public List<Debug.Scope> GetScopes(Agent agent) {
             var scopes = new List<Debug.Scope>();
-            scopes.Add(Running.Lex.GetScope(1));
+            scopes.Add(Running.Lex.GetScope(1, agent));
 
             var lex = Running.Lex;
             var index = 1;
@@ -80,7 +88,7 @@ namespace NetJS.Core {
                 lex = lex.Outer;
                 index++;
 
-                scopes.Add(lex.GetScope(index));
+                scopes.Add(lex.GetScope(index, agent));
             }
 
             return scopes;

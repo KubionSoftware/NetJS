@@ -58,7 +58,7 @@ namespace NetJS.Core {
                 // TODO: anonymous function name
 
                 if (Scope == DeclarationScope.Block) {
-                    References.InitializeReferencedBinding(lhs, value);
+                    References.InitializeReferencedBinding(lhs, value, agent);
                 } else {
                     References.PutValue(lhs, value, agent);
                 }

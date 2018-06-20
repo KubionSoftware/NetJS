@@ -40,7 +40,7 @@ namespace NetJS.Core {
                 }
             }
             
-            var prototype = obj.Get(new String("prototype"));
+            var prototype = obj.Get(new String("prototype"), agent);
             if (prototype is Object o) {
                 return o;
             }
@@ -48,10 +48,10 @@ namespace NetJS.Core {
             throw new InternalError($"Could not get prototype of '{name}'");
         }
 
-        public static bool IsType(Constant o, Constant c) {
+        public static bool IsType(Constant o, Constant c, Agent agent) {
             if (o is Object oo) {
                 if (c is Object co) {
-                    var p = co.Get(new String("prototype"));
+                    var p = co.Get(new String("prototype"), agent);
                     if (p is Object po) {
                         while (true) {
                             oo = oo.GetPrototypeOf();
@@ -117,8 +117,8 @@ namespace NetJS.Core {
             return arguments[index];
         }
 
-        public static bool GetDate(Constant c, out DateTime date) {
-            if (c is Object obj && obj.Get(API.DateAPI.Primitive) is Foreign f && f.Value is DateTime d) {
+        public static bool GetDate(Constant c, out DateTime date, Agent agent) {
+            if (c is Object obj && obj.Get(API.DateAPI.Primitive, agent) is Foreign f && f.Value is DateTime d) {
                 date = d;
                 return true;
             } else {

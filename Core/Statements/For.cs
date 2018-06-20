@@ -25,9 +25,9 @@ namespace NetJS.Core {
                 var thisIterationEnvRec = thisIterationEnv.Record;
 
                 foreach (var bn in perIterationBindings) {
-                    thisIterationEnvRec.CreateMutableBinding(bn, false);
-                    var lastValue = lastIterationEnvRec.GetBindingValue(bn, true);
-                    thisIterationEnvRec.InitializeBinding(bn, lastValue);
+                    thisIterationEnvRec.CreateMutableBinding(bn, false, agent);
+                    var lastValue = lastIterationEnvRec.GetBindingValue(bn, true, agent);
+                    thisIterationEnvRec.InitializeBinding(bn, lastValue, agent);
                 }
 
                 agent.Running.Lex = thisIterationEnv;
@@ -84,9 +84,9 @@ namespace NetJS.Core {
                     
                     foreach (var dn in boundNames) {
                         if (isConst) {
-                            loopEnvRec.CreateImmutableBinding(dn, true);
+                            loopEnvRec.CreateImmutableBinding(dn, true, agent);
                         } else {
-                            loopEnvRec.CreateMutableBinding(dn, false);
+                            loopEnvRec.CreateMutableBinding(dn, false, agent);
                         }
                     }
 

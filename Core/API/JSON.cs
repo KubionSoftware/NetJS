@@ -26,7 +26,7 @@ namespace NetJS.Core.API {
 
             var beautify = arguments.Length > 1 ? Tool.GetArgument<Boolean>(arguments, 1, "JSON.stringify").Value : false;
 
-            var json = Convert.ValueToJson(arguments[0]);
+            var json = Convert.ValueToJson(arguments[0], agent);
             return new String(JsonParser.ValueToString(json, beautify));
         }
     }

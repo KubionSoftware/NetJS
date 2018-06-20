@@ -46,7 +46,7 @@ namespace NetJS.API {
             var data = ((Core.Object)arguments[1]);
 
             foreach(var key in data.OwnPropertyKeys()) {
-                var value = data.Get(key);
+                var value = data.Get(key, agent);
                 string stringValue = null;
 
                 if (value is Number n) {

@@ -38,12 +38,12 @@ namespace NetJS.Core.API {
             return _this;
         }
 
-        private static DateTime GetDate(Constant _this) {
-            return (DateTime)((_this as Object).Get(Primitive) as Foreign).Value;
+        private static DateTime GetDate(Constant _this, Agent agent) {
+            return (DateTime)((_this as Object).Get(Primitive, agent) as Foreign).Value;
         }
 
-        private static void SetDate(Constant _this, DateTime date) {
-            ((_this as Object).Get(Primitive) as Foreign).Value = date;
+        private static void SetDate(Constant _this, DateTime date, Agent agent) {
+            ((_this as Object).Get(Primitive, agent) as Foreign).Value = date;
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Agent agent) {
@@ -51,125 +51,125 @@ namespace NetJS.Core.API {
         }
 
         public static Constant toISOString(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new String(date.ToUniversalTime().ToString("o"));
         }
 
         public static Constant toDateString(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new String(date.ToString("ddd MMM dd yyyy"));
         }
 
         public static Constant toTimeString(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var timeZoneName = TimeZoneInfo.Local.StandardName;
             var timeZoneTime = date.ToString("zzz").Replace(":", "");
             return new String(date.ToString("HH:mm:ss") + " GMT" + timeZoneTime + " (" + timeZoneName + ")");
         }
 
         public static Constant toUTCString(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new String(date.ToString("ddd MMM dd yyyy HH:mm:ss") + " GMT");
         }
 
         public static Constant getFullYear(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number(date.Year);
         }
 
         public static Constant getMonth(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number(date.Month - 1);
         }
 
         public static Constant getDate(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number(date.Day);
         }
 
         public static Constant getDay(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number((int)date.DayOfWeek);
         }
 
         public static Constant getHours(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number(date.Hour);
         }
 
         public static Constant getMinutes(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number(date.Minute);
         }
 
         public static Constant getSeconds(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number(date.Second);
         }
 
         public static Constant getMilliseconds(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number(date.Millisecond);
         }
 
         public static Constant getTime(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             return new Number(Convert.DateTimeToUnixMilliseconds(date));
         }
 
         public static Constant setFullYear(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var year = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setFullYear").Value;
-            SetDate(_this, date.AddYears(year - date.Year));
+            SetDate(_this, date.AddYears(year - date.Year), agent);
             return getTime(_this, new Constant[] { }, agent);
         }
 
         public static Constant setMonth(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var month = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setMonth").Value + 1;
-            SetDate(_this, date.AddMonths(month - date.Month));
+            SetDate(_this, date.AddMonths(month - date.Month), agent);
             return getTime(_this, new Constant[] { }, agent);
         }
 
         public static Constant setDate(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var d = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setDate").Value;
-            SetDate(_this, date.AddDays(d - date.Day));
+            SetDate(_this, date.AddDays(d - date.Day), agent);
             return getTime(_this, new Constant[] { }, agent);
         }
 
         public static Constant setHours(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var hour = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setHours").Value;
-            SetDate(_this, date.AddHours(hour - date.Hour));
+            SetDate(_this, date.AddHours(hour - date.Hour), agent);
             return getTime(_this, new Constant[] { }, agent);
         }
 
         public static Constant setMinutes(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var minute = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setMinutes").Value;
-            SetDate(_this, date.AddMinutes(minute - date.Minute));
+            SetDate(_this, date.AddMinutes(minute - date.Minute), agent);
             return getTime(_this, new Constant[] { }, agent);
         }
 
         public static Constant setSeconds(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var second = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setSeconds").Value;
-            SetDate(_this, date.AddSeconds(second - date.Second));
+            SetDate(_this, date.AddSeconds(second - date.Second), agent);
             return getTime(_this, new Constant[] { }, agent);
         }
 
         public static Constant setMilliseconds(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var ms = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setMilliseconds").Value;
-            SetDate(_this, date.AddMilliseconds(ms - date.Millisecond));
+            SetDate(_this, date.AddMilliseconds(ms - date.Millisecond), agent);
             return getTime(_this, new Constant[] { }, agent);
         }
 
         public static Constant setTime(Constant _this, Constant[] arguments, Agent agent) {
-            var date = GetDate(_this);
+            var date = GetDate(_this, agent);
             var time = (int)Tool.GetArgument<Number>(arguments, 0, "Date.setTime").Value;
-            SetDate(_this, Convert.UnixMillisecondsToDateTime(time));
+            SetDate(_this, Convert.UnixMillisecondsToDateTime(time), agent);
             return getTime(_this, new Constant[] { }, agent);
         }
     }

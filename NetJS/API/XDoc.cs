@@ -58,7 +58,7 @@ namespace NetJS.API {
             if (arguments.Length > 1) {
                 var param = (Core.Object)arguments[1];
                 foreach (var key in param.OwnPropertyKeys()) {
-                    parameters.Add(key.ToString(), Convert.ToString(param.Get(key), agent));
+                    parameters.Add(key.ToString(), Convert.ToString(param.Get(key, agent), agent));
                 }
             }
 

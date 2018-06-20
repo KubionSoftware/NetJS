@@ -20,19 +20,19 @@ namespace NetJS.Core {
 #if debug_enabled
                 if (Debug.BreakpointNodes.Contains(statement.Id)) {
                     Debug.SteppingLevel = depth;
-                    Debug.Break(Debug.StopOnBreakpoint, agent.GetStackTrace(Debug.GetNodeLocation(statement.Id)), agent.GetScopes());
+                    Debug.Break(Debug.StopOnBreakpoint, agent.GetStackTrace(Debug.GetNodeLocation(statement.Id)), agent.GetScopes(agent));
                 } else if (Debug.SteppingInto && depth > Debug.SteppingLevel) {
                     Debug.SteppingLevel++;
                     Debug.SteppingInto = false;
-                    Debug.Break(Debug.StopOnBreakpoint, agent.GetStackTrace(Debug.GetNodeLocation(statement.Id)), agent.GetScopes());
+                    Debug.Break(Debug.StopOnBreakpoint, agent.GetStackTrace(Debug.GetNodeLocation(statement.Id)), agent.GetScopes(agent));
                 } else if (Debug.SteppingOut && depth < Debug.SteppingLevel) {
                     Debug.SteppingLevel--;
                     Debug.SteppingOut = false;
-                    Debug.Break(Debug.StopOnBreakpoint, agent.GetStackTrace(Debug.GetNodeLocation(statement.Id)), agent.GetScopes());
+                    Debug.Break(Debug.StopOnBreakpoint, agent.GetStackTrace(Debug.GetNodeLocation(statement.Id)), agent.GetScopes(agent));
                 } else if (Debug.SteppingOver && depth <= Debug.SteppingLevel) {
                     Debug.SteppingLevel = depth;
                     Debug.SteppingOver = false;
-                    Debug.Break(Debug.StopOnBreakpoint, agent.GetStackTrace(Debug.GetNodeLocation(statement.Id)), agent.GetScopes());
+                    Debug.Break(Debug.StopOnBreakpoint, agent.GetStackTrace(Debug.GetNodeLocation(statement.Id)), agent.GetScopes(agent));
                 }
 #endif
 
@@ -44,7 +44,7 @@ namespace NetJS.Core {
 #if debug_enabled
                     Debug.SteppingLevel = depth;
                     var location = Debug.GetNodeLocation(statement.Id);
-                    Debug.Break(Debug.StopOnException, agent.GetStackTrace(location), agent.GetScopes());
+                    Debug.Break(Debug.StopOnException, agent.GetStackTrace(location), agent.GetScopes(agent));
 
                     e.AddStackTrace(location);
 #endif

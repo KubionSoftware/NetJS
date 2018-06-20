@@ -18,7 +18,7 @@ namespace NetJS.Core {
         }
 
         public override Constant Instantiate(Agent agent) {
-            return References.GetIdentifierReference(agent.Running.Lex, Name, false);
+            return References.GetIdentifierReference(agent.Running.Lex, Name, false, agent);
         }
 
         public override string ToDebugString() {

@@ -24,6 +24,16 @@ namespace NetJS.Core {
             Realm = realm;
             Buffer = buffer;
         }
+
+        public Context Clone() {
+            return new Context(Realm, Buffer) {
+                Lex = Lex,
+                Var = Var,
+                Function = Function,
+                ScriptOrModule = ScriptOrModule,
+                IsStrict = IsStrict
+            };
+        }
         
         public Debug.Frame GetFrame(int index, Debug.Location location) {
             return new Debug.Frame() {
