@@ -26,15 +26,15 @@ namespace NetJS.Server.API {
             var cookie = new HttpCookie(key, value);
 
             if (options != null) {
-                if(Core.Tool.GetDate(options.Get("expires"), out DateTime date)) {
+                if(Core.Tool.GetDate(options.Get("expires", agent), out DateTime date, agent)) {
                     cookie.Expires = date;
                 }
 
-                if (options.Get("path") is Core.String path) {
+                if (options.Get("path", agent) is Core.String path) {
                     cookie.Path = path.Value;
                 }
 
-                if (options.Get("httpOnly") is Core.Boolean httpOnly) {
+                if (options.Get("httpOnly", agent) is Core.Boolean httpOnly) {
                     cookie.HttpOnly = httpOnly.Value;
                 }
             }

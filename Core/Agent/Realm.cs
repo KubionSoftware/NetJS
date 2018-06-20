@@ -83,7 +83,7 @@ namespace NetJS.Core {
 
             RegisterFunctions(typeof(API.FunctionsAPI));
 
-            //RegisterForeignNamespace("System");
+            RegisterForeignNamespace("System");
 
             GlobalObject = Tool.Construct("Object", _agent);
         }
@@ -97,6 +97,7 @@ namespace NetJS.Core {
         }
 
         private Dictionary<System.Type, Object> _foreigns = new Dictionary<System.Type, Object>();
+        private Dictionary<string, Object> _namespaces = new Dictionary<string, Object>();
 
         private Object CreateForeignObject(object foreign) {
             var obj = Tool.Construct("Object", _agent);
@@ -105,7 +106,7 @@ namespace NetJS.Core {
             return obj;
         }
 
-        private void RegisterForeignNamespace(string ns) {
+        public void RegisterForeignNamespace(string ns) {
             var types = AppDomain.CurrentDomain.GetAssemblies()
                        .SelectMany(t => t.GetTypes()).Where(t => t.Namespace == ns);
             foreach (var type in types) {
@@ -113,10 +114,38 @@ namespace NetJS.Core {
             }
         }
 
-        private void RegisterForeignType(System.Type type) {
+        public Object GetNamespace(System.Type type) {
+            var ns = type.Namespace;
+            var parts = ns.Split('.');
+
+            if (parts.Length == 0) throw new InternalError("No namespace for type " + type.ToString());
+
+            Object b;
+            if (_namespaces.ContainsKey(parts[0])) {
+                b = _namespaces[parts[0]];
+            } else {
+                b = Tool.Construct("Object", _agent);
+                _namespaces[parts[0]] = b;
+                DeclareVariable(parts[0], b);
+            }
+
+            for (var i = 1; i < parts.Length; i++) {
+                if (b.HasProperty(new String(parts[i]))) {
+                    b = b.Get(parts[i], _agent) as Object;
+                } else {
+                    var obj = Tool.Construct("Object", _agent); ;
+                    b.Set(parts[i], obj);
+                    b = obj;
+                }
+            }
+
+            return b;
+        }
+
+        public void RegisterForeignType(System.Type type) {
             var prototype = Tool.Construct("Object", _agent);
             
-            var constructor = new ExternalFunction(type.Name, (_this, arguments, agent) => {
+            var constructor = new ExternalFunction(type.FullName, (_this, arguments, agent) => {
                 var args = ToForeignTypes(arguments);
                 var con = type.GetConstructor(args.Select(a => a.GetType()).ToArray());
                 if (con == null) throw new TypeError("There is no foreign constructor for the given arguments");
@@ -127,16 +156,22 @@ namespace NetJS.Core {
 
             foreach (var method in type.GetMethods()) {
                 if (method.IsStatic) {
-                    constructor.Set(method.Name, new ExternalFunction(type.Name + "." + method.Name, (_this, arguments, agent) => {
+                    constructor.Set(method.Name, new ExternalFunction(type.FullName + "." + method.Name, (_this, arguments, agent) => {
                         var args = ToForeignTypes(arguments);
-                        var m = type.GetMethod(method.Name, BindingFlags.Static, null, args.Select(a => a.GetType()).ToArray(), null);
+                        var m = type.GetMethod(method.Name, BindingFlags.Static | BindingFlags.Public, null, args.Select(a => a.GetType()).ToArray(), null);
+                        if (m == null) {
+                            throw new InternalError($"Can't find method with name {method.Name} for type {type.FullName}");
+                        }
                         return FromForeignType(m.Invoke(null, args));
                     }, _agent));
                 } else {
-                    prototype.Set(method.Name, new ExternalFunction(type.Name + "." + method.Name, (_this, arguments, agent) => {
+                    prototype.Set(method.Name, new ExternalFunction(type.FullName + "." + method.Name, (_this, arguments, agent) => {
                         var foreign = ((_this as Object).Get("[[Foreign]]", agent) as Foreign).Value;
                         var args = ToForeignTypes(arguments);
                         var m = type.GetMethod(method.Name, args.Select(a => a.GetType()).ToArray());
+                        if (m == null) {
+                            throw new InternalError($"Can't find method with name {method.Name} for type {type.FullName}");
+                        }
                         return FromForeignType(m.Invoke(foreign, args));
                     }, _agent));
                 }
@@ -146,7 +181,7 @@ namespace NetJS.Core {
                 var method = property.GetMethod;
                 if (method.IsStatic) {
                     constructor.DefineOwnProperty(new String(property.Name), new AccessorProperty() {
-                        Get = new ExternalFunction(type.Name + "." + property.Name, (_this, arguments, agent) => {
+                        Get = new ExternalFunction(type.FullName + "." + property.Name, (_this, arguments, agent) => {
                             var args = ToForeignTypes(arguments);
                             return FromForeignType(property.GetGetMethod(false).Invoke(null, args));
                         }, _agent),
@@ -155,7 +190,7 @@ namespace NetJS.Core {
                     });
                 } else {
                     prototype.DefineOwnProperty(new String(property.Name), new AccessorProperty() {
-                        Get = new ExternalFunction(type.Name + "." + property.Name, (_this, arguments, agent) => {
+                        Get = new ExternalFunction(type.FullName + "." + property.Name, (_this, arguments, agent) => {
                             var foreign = ((_this as Object).Get("[[Foreign]]", agent) as Foreign).Value;
                             var args = ToForeignTypes(arguments);
                             return FromForeignType(property.GetGetMethod(false).Invoke(foreign, args));
@@ -166,7 +201,8 @@ namespace NetJS.Core {
                 }
             }
 
-            DeclareVariable(type.Name, constructor);
+            var ns = GetNamespace(type);
+            ns.Set(type.Name, constructor);
 
             _foreigns[type] = prototype;
         }
@@ -179,6 +215,8 @@ namespace NetJS.Core {
 
         private object ToForeignType(Constant v) {
             switch (v) {
+                case Undefined u: return null;
+                case Null nu: return null;
                 case Number n: {
                     if(n.Value % 1 == 0) {
                         return (int)n.Value;
@@ -195,6 +233,7 @@ namespace NetJS.Core {
 
         private Constant FromForeignType(object v) {
             switch (v) {
+                case null: return Static.Undefined;
                 case byte bt: return new Number(bt);
                 case short sh: return new Number(sh);
                 case int i: return new Number(i);

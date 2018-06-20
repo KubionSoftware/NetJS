@@ -31,10 +31,8 @@ namespace NetJS.Console {
             try {
                 var result = service.RunTemplate(application.Settings.Entry, data, ref application, ref session);
                 System.Console.WriteLine(result);
-                System.Console.Read();
             } catch (Exception e) {
                 System.Console.WriteLine(e);
-                System.Console.Read();
             }
         }
     }
