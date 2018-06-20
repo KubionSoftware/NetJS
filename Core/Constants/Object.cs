@@ -287,7 +287,7 @@ namespace NetJS.Core {
             return false;
         }
 
-        public virtual Constant Get(Constant p, Agent agent, Constant receiver = null) {
+        public virtual Constant Get(Constant p, Agent agent, Constant receiver = null, int depth = 0) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ordinaryget
 
             Assert.IsPropertyKey(p);
@@ -298,7 +298,10 @@ namespace NetJS.Core {
             if (desc == null) {
                 var parent = GetPrototypeOf();
                 if (parent == null) return Static.Undefined;
-                return parent.Get(p, agent, receiver);
+                if (depth > 20) {
+                    throw new Error("Object prototype loop");
+                }
+                return parent.Get(p, agent, receiver, depth + 1);
             }
 
             if (desc is DataProperty dp) return dp.Value;
@@ -313,7 +316,7 @@ namespace NetJS.Core {
             return Get(new String(p), agent);
         }
 
-        public virtual bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null) {
+        public virtual bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null, int depth = 0) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-set-o-p-v-throw
 
             Assert.IsPropertyKey(p);
@@ -324,7 +327,10 @@ namespace NetJS.Core {
             if (ownDesc == null) {
                 var parent = GetPrototypeOf();
                 if (parent != null) {
-                    return parent.Set(p, v, agent, receiver);
+                    if (depth > 20) {
+                        throw new Error("Object prototype loop");
+                    }
+                    return parent.Set(p, v, agent, receiver, depth + 1);
                 } else {
                     ownDesc = new DataProperty() {
                         Value = null,

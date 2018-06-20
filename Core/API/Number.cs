@@ -15,7 +15,7 @@ namespace NetJS.Core.API {
             return _this;
         }
 
-        public static Number GetNumber(Constant _this, Agent agent) {
+        private static Number GetNumber(Constant _this, Agent agent) {
             if (_this is Number s) return s;
             return (_this as Object).Get(Primitive, agent) as Number;
         }

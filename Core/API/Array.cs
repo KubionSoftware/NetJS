@@ -11,7 +11,7 @@ namespace NetJS.Core.API {
             return new Array(length, agent);
         }
 
-        public static Array GetArray(Constant _this) {
+        private static Array GetArray(Constant _this) {
             return (Array)_this;
         }
 

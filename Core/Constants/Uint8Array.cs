@@ -32,7 +32,7 @@ namespace NetJS.Core {
             }
         }
 
-        public override Constant Get(Constant p, Agent agent = null, Constant receiver = null) {
+        public override Constant Get(Constant p, Agent agent = null, Constant receiver = null, int depth = 0) {
             Assert.IsPropertyKey(p);
 
             var keyString = p.ToString();
@@ -42,10 +42,10 @@ namespace NetJS.Core {
                 return Get(index);
             }
 
-            return base.Get(p, agent, receiver);
+            return base.Get(p, agent, receiver, depth);
         }
 
-        public override bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null) {
+        public override bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null, int depth = 0) {
             Assert.IsPropertyKey(p);
 
             var keyString = p.ToString();
@@ -58,7 +58,7 @@ namespace NetJS.Core {
                 }
             }
 
-            return base.Set(p, v, agent, receiver);
+            return base.Set(p, v, agent, receiver, depth);
         }
 
         public override string ToString() {

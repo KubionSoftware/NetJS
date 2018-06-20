@@ -36,7 +36,9 @@ namespace NetJS.Core {
             return obj;
         }
 
-        public static object ValueToJson(Constant value, Agent agent) {
+        public static object ValueToJson(Constant value, Agent agent, List<Object> objects = null) {
+            if (objects == null) objects = new List<Object>();
+
             if (value is String s) {
                 return s.Value;
             } else if (value is Number n) {
@@ -44,24 +46,30 @@ namespace NetJS.Core {
             } else if (value is Boolean b) {
                 return b.Value;
             } else if (value is Function) {
-                return "f () {}";
+                return "f (){}";
             } else if (value is Array array) {
+                if (objects.Contains(array)) throw new TypeError("Converting circular structure to JSON");
+                objects.Add(array);
+
                 var list = new List<object>();
                 for (var i = 0; i < array.List.Count; i++) {
-                    list.Add(ValueToJson(array.List[i], agent));
+                    list.Add(ValueToJson(array.List[i], agent, objects));
                 }
                 return list;
             } else if (value is Object obj) {
-                return ObjectToJson(obj, agent);
+                if (objects.Contains(obj)) throw new TypeError("Converting circular structure to JSON");
+                objects.Add(obj);
+
+                return ObjectToJson(obj, agent, objects);
             }
 
             return null;
         }
 
-        public static Dictionary<string, object> ObjectToJson(Object obj, Agent agent) {
+        private static Dictionary<string, object> ObjectToJson(Object obj, Agent agent, List<Object> objects) {
             var json = new Dictionary<string, object>();
             foreach (var key in obj.OwnPropertyKeys()) {
-                json[key.ToString()] = ValueToJson(obj.Get(key, agent), agent);
+                json[key.ToString()] = ValueToJson(obj.Get(key, agent), agent, objects);
             }
             return json;
         }

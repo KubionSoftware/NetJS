@@ -26,9 +26,6 @@ namespace NetJS.Testing{
             var myRoot = root ?? this;
             var allFiles = System.IO.Directory.GetFiles(path);
             foreach (var file in allFiles) {
-#if DEBUG
-               // Console.WriteLine("found test: " + file);
-                #endif
                 _files.Add(file);
                 myRoot._files.Add(file);
                 var test = new Test(file);
@@ -247,7 +244,7 @@ namespace NetJS.Testing{
             if (_include != null) {
                 foreach (var preTest in _include) {
                     if (!preTest.Contains(".js")) continue;
-                    var preTestPath = Path.GetFullPath("../../test/src/262/harness/" + preTest.Replace(",", ""))
+                    var preTestPath = Path.GetFullPath(Program.Test262Root + "/../harness/" + preTest.Replace(",", ""))
                         .Replace('\\', '/');
 #if DEBUG
                      // Console.WriteLine("preTest: " + preTestPath);
@@ -255,9 +252,8 @@ namespace NetJS.Testing{
                     preTestOutput += service.RunScript(preTestPath, application, session, true, false);
                 }
             }
-#if DEBUG
-             // Console.WriteLine("executing: " + _path);
-            #endif
+
+            //Console.WriteLine("executing: " + _path);
             
             var templateWatch = new Stopwatch();
             templateWatch.Start();
@@ -307,7 +303,7 @@ namespace NetJS.Testing{
         public string GetCsv(int level){
             var answer = "";
             if (!UseNonStrict) return answer;
-            var fullpath = Path.GetFullPath("../../test/src/262/test");
+            var fullpath = Program.Test262Root;
             var splitpath = fullpath.Length + 1;
             var dirPathSplitted = fullpath.Split('\\');
             level = level + dirPathSplitted.Length;

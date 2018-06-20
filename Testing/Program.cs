@@ -68,6 +68,8 @@ namespace NetJS.Testing {
         private static int _benchmarkRounds = 1;
         private static List<double> _benchmarkResults = new List<double>();
 
+        public static string Test262Root = System.IO.Path.GetFullPath("../../test262/test");
+
         static void Main(string[] args){
             try {
                 NumFailed = 0;
@@ -77,10 +79,7 @@ namespace NetJS.Testing {
                 recursiveFindWatch.Start();
 
                 var root = new Directory("test", 1);
-                root = root.Walkthrough(System.IO.Path.GetFullPath("../../test/src/262/test" +
-//                                                                   "/language" +
-//                                                                       "/white-space" +
-                                                                   ""), null);
+                root = root.Walkthrough(Test262Root, null);
                 Console.WriteLine("Got all files!");
 
                 recursiveFindWatch.Stop();
@@ -96,7 +95,7 @@ namespace NetJS.Testing {
                     executeWatch.Restart();
 
                     var taskList = new List<Task>();
-                    for (var i = 0; i < Environment.ProcessorCount; i++) {
+                    for (var i = 0; i < 1 && i < Environment.ProcessorCount; i++) {
                         taskList.Add(Task.Factory.StartNew(ExecuteWorker));
                     }
 
@@ -126,7 +125,7 @@ namespace NetJS.Testing {
 
                 while (true) {
                     try {
-                        System.IO.File.WriteAllText(@"../../test\test.csv", output);
+                        System.IO.File.WriteAllText(@"test.csv", output);
                         break;
                     } catch {
                         Console.Error.WriteLine("Close csv file. Then press enter");
@@ -146,8 +145,7 @@ namespace NetJS.Testing {
                 Console.ForegroundColor = ConsoleColor.Red;
 
                 Console.WriteLine("Error in NetJS: ");
-                System.IO.File.WriteAllText(@"../../test\error.txt",
-                    e.Message);
+                System.IO.File.WriteAllText(@"error.txt", e.Message);
                 Console.WriteLine(e);
             }
 
@@ -158,10 +156,10 @@ namespace NetJS.Testing {
         private static void ExecuteWorker(){
             var service = new JSService();
             var session = new JSSession();
-            var application = new JSApplication("../../test/");
+            var application = new JSApplication(Test262Root);
 
-            service.RunScript("262/harness/sta.js", application, session, true, false);
-            service.RunScript("262/harness/assert.js", application, session, true, false);
+            service.RunScript(Test262Root + "/../harness/sta.js", application, session, true, false);
+            service.RunScript(Test262Root + "/../harness/assert.js", application, session, true, false);
 
             while (true) {
                 Test myTest;

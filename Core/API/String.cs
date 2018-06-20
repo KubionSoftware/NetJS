@@ -16,7 +16,7 @@ namespace NetJS.Core.API {
             return _this;
         }
 
-        public static String GetString(Constant _this, Agent agent) {
+        private static String GetString(Constant _this, Agent agent) {
             if (_this is String s) return s;
             return (_this as Object).Get(Primitive, agent) as String;
         }

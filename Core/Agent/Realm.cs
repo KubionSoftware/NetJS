@@ -83,7 +83,7 @@ namespace NetJS.Core {
 
             RegisterFunctions(typeof(API.FunctionsAPI));
 
-            RegisterForeignNamespace("System");
+            //RegisterForeignNamespace("System");
 
             GlobalObject = Tool.Construct("Object", _agent);
         }
@@ -232,9 +232,17 @@ namespace NetJS.Core {
             var obj = Tool.Construct("Object", _agent);
 
             foreach (var method in methods) {
-                try {
-                    obj.Set(new String(method.Name.Replace("@", "")), GetFunction(name, method));
-                } catch { }
+                var parameters = method.GetParameters();
+                if (
+                    parameters.Length == 3 && 
+                    parameters[0].GetType() == typeof(Constant) && 
+                    parameters[1].GetType() == typeof(Constant[]) && 
+                    parameters[2].GetType() == typeof(Agent)
+                ) {
+                    try {
+                        obj.Set(new String(method.Name.Replace("@", "")), GetFunction(name, method));
+                    } catch { }
+                }
             }
 
             DeclareVariable(name, obj);
