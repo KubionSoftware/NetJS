@@ -12,28 +12,22 @@ namespace NetJS.Testing{
     public class Directory{
         private List<Directory> _directories;
         private readonly int _level;
-
-        private List<string> _files;
         public List<Test> Tests = new List<Test>();
 
         public Directory(string s, int level){
             this._level = level;
             _directories = new List<Directory>();
-            _files = new List<string>();
         }
 
         public Directory Walkthrough(string path, Directory root){
             var myRoot = root ?? this;
             var allFiles = System.IO.Directory.GetFiles(path);
             foreach (var file in allFiles) {
-                _files.Add(file);
-                myRoot._files.Add(file);
                 var test = new Test(file);
                 myRoot.Tests.Add(test);
             }
 
             if (allFiles.Length > 0) {
-                myRoot._files.Add(null);
                 myRoot.Tests.Add(null);
             }
 
@@ -83,11 +77,18 @@ namespace NetJS.Testing{
 
             foreach (var test in Tests) {
                 if (test != null) {
-//                    test.Execute(application, service, session);
                     answer.Add(test.GetCsv(level));
                     if (test.Implemented.Count < 1) {
                         if (test.UseNonStrict) {
                             if (test.NonStrictResult) {
+                                countSuccesful++;
+                            }
+                            else {
+                                countFailed++;
+                            }
+                        }
+                        if (test.UseStrict) {
+                            if (test.StrictResult) {
                                 countSuccesful++;
                             }
                             else {
@@ -99,7 +100,7 @@ namespace NetJS.Testing{
                         countUndefined++;
                     }
 
-                    countTotal++;
+                    countTotal += test.TotalTests;
                 }
                 else {
                     answer.Add("");
@@ -126,12 +127,11 @@ namespace NetJS.Testing{
         private readonly string _path;
         private string[] _splittedPath;
         private string _name;
-        private bool _useStrict;
+        public bool UseStrict;
         public bool UseNonStrict;
         private List<string> _include;
-        public string StrictOutput;
+        private string _strictOutput = "";
         private string _nonStrictOutput = "";
-        private string _information;
         private YamlNode _es5Id;
         private YamlNode _description;
         private YamlNode _negative;
@@ -140,9 +140,12 @@ namespace NetJS.Testing{
         private List<string> _flags;
         public List<string> Implemented = new List<string>();
         private string _nonStrictTime;
-        public bool NonStrictResult;
+        private string _strictTime;
+        public bool NonStrictResult = false;
+        public bool StrictResult = false;
         private bool _useAsync = false;
         private string _code;
+        public int TotalTests = 1;
 
         public Test(string filePath){
             _path = filePath.Replace('\\', '/');
@@ -210,7 +213,7 @@ namespace NetJS.Testing{
                 foreach (var flag in _flags) {
                     switch (flag) {
                         case "[ onlyStrict ]":
-                            _useStrict = true;
+                            UseStrict = true;
                             Implemented.Add("onlyStrict");
                             break;
                         case "[ noStrict ]":
@@ -229,9 +232,11 @@ namespace NetJS.Testing{
                     }
                 }
             }
-            else {
+            else
+            {
+                TotalTests = 2;
                 UseNonStrict = true;
-                _useStrict = true;
+                UseStrict = true;
             }
         }
 
@@ -246,37 +251,66 @@ namespace NetJS.Testing{
                     if (!preTest.Contains(".js")) continue;
                     var preTestPath = Path.GetFullPath(Program.Test262Root + "/../harness/" + preTest.Replace(",", ""))
                         .Replace('\\', '/');
-#if DEBUG
-                     // Console.WriteLine("preTest: " + preTestPath);
-                    #endif
                     preTestOutput += service.RunScript(preTestPath, application, session, true, false);
                 }
             }
+            
+            var strictTestOutput = "";
+            var strictWatch = new Stopwatch();
+            if (UseStrict)
+            {
+                
+                strictWatch.Start();
+                strictTestOutput = service.RunCode("\"use strict\"\n" + _code, application, session, false, true);
+                strictWatch.Stop();
+                
+            }
 
-            //Console.WriteLine("executing: " + _path);
             
             var templateWatch = new Stopwatch();
             templateWatch.Start();
-//            var testOutput = service.RunTemplate(_path, "{}", ref application, ref session);
             var testOutput = service.RunCode(_code, application, session, false, true);
             templateWatch.Stop();
 
             watch.Stop();
 
             if (_negative != null && _negativeType != null && _negativeType.ToString().Length > 0) {
+                var splitStrictOutput = testOutput.Split(' ');
                 var splitOutput = testOutput.Split(' ');
                 var comparewith = "";
                 if (splitOutput.Length > 1) {
                     comparewith = splitOutput[0] + splitOutput[1][0].ToString().ToUpper() +
                                   splitOutput[1].Substring(1);
                 }
+                
+                var compareStrictWith = "";
+                if (splitStrictOutput.Length > 1)
+                {
+                    compareStrictWith = splitStrictOutput[0] + splitStrictOutput[1][0].ToString().ToUpper() +
+                                        splitStrictOutput[1].Substring(1);
+                }
 
                 if (comparewith.Contains(_negativeType.ToString())) {
                     NonStrictResult = true;
                 }
+
+                if (compareStrictWith.Contains(_negativeType.ToString()))
+                {
+                    StrictResult = true;
+                }
             }
-            else if (testOutput.Length < 1) {
-                NonStrictResult = true;
+
+            else
+            {
+                if (testOutput.Length < 1)
+                {
+                    NonStrictResult = true;
+                }
+
+                if (strictTestOutput.Length < 1)
+                {
+                    StrictResult = true;
+                }
             }
 
             if (_useAsync && templateWatch.ElapsedMilliseconds > 75) {
@@ -287,16 +321,26 @@ namespace NetJS.Testing{
 
             if (preTestOutput.Length > 0) {
                 _nonStrictOutput += "preTest: " + preTestOutput + " | ";
+                _strictOutput += "preTest: " + strictTestOutput + " | ";
             }
+            
 
             _nonStrictOutput += testOutput;
-            var stringTime = Math.Round(watch.Elapsed.TotalMilliseconds, 2).ToString().Split('.');
+            var stringTime = Math.Round(templateWatch.Elapsed.TotalMilliseconds, 2).ToString().Split('.');
+            var strictStringTime = Math.Round(strictWatch.Elapsed.TotalMilliseconds, 2).ToString().Split('.');
             var timeDecimal = "00";
             if (stringTime.Length == 2) {
                 timeDecimal = (int.Parse(stringTime[1]) * 6 / 10).ToString();
             }
 
+            var timeStrictDecimal = "00";
+            if (strictStringTime.Length == 2)
+            {
+                timeStrictDecimal = (int.Parse(strictStringTime[1]) * 6 / 10).ToString();
+            }
+
             _nonStrictTime = stringTime[0] + "." + timeDecimal;
+            _strictTime = strictStringTime[0] + "." + timeStrictDecimal;
         }
 
 
@@ -307,30 +351,54 @@ namespace NetJS.Testing{
             var splitpath = fullpath.Length + 1;
             var dirPathSplitted = fullpath.Split('\\');
             level = level + dirPathSplitted.Length;
+            var infoString = "";
 
             var dirPath = string.Join(",", _splittedPath, 0, _splittedPath.Length - 1);
-            answer += dirPath.Substring(splitpath);
+            infoString += dirPath.Substring(splitpath);
 
             if (level > _splittedPath.Length - 1) {
-                answer += new string(',', (level - _splittedPath.Length) + 1);
+                infoString += new string(',', (level - _splittedPath.Length) + 1);
             }
             else {
-                answer += ",";
+                infoString += ",";
             }
 
 
-            answer += _name;
-            if (Implemented.Count < 1) {
-                var preOutput = "";
-                if (_negative != null && _negativeType != null) {
-                    preOutput = "[negative:" + _negativeType + "] ";
+            infoString += _name;
+            if (Implemented.Count < 1)
+            {
+                var rgx4 = new Regex(@"([\r\n])+");
+                if (UseNonStrict)
+                {
+                    var preOutput = "";
+                    if (_negative != null && _negativeType != null)
+                    {
+                        preOutput = "[negative:" + _negativeType + "] ";
+                    }
+
+                    answer += infoString + "," + NonStrictResult + "," + _nonStrictTime + "," + "\"" +
+                              rgx4.Replace(preOutput.Replace('"', '\'') + _nonStrictOutput.Replace('"', '\''), " ") +
+                              "\"," +
+                              _path.Replace('/', '\\');
+                    if (UseStrict)
+                    {
+                        answer += "\n";
+                    }
                 }
 
-                var rgx4 = new Regex(@"([\r\n])+");
+                if (UseStrict)
+                {
+                    var preOutput = "";
+                    if (_negative != null && _negativeType != null)
+                    {
+                        preOutput = "[negative:" + _negativeType + "] ";
+                        
+                    }
 
-                answer += "," + NonStrictResult + "," + _nonStrictTime + "," + "\"" +
-                          rgx4.Replace(preOutput.Replace('"', '\'') + _nonStrictOutput.Replace('"', '\''), " ") + "\"," +
-                          _path.Replace('/', '\\');
+                    answer += infoString + " (strict modus)," + StrictResult + "," + _strictTime + ",\"" +
+                              rgx4.Replace(preOutput.Replace('"', '\'') + _strictOutput.Replace('"', '\''), " ") + "\"," + _path.Replace('/', '\\');
+                }
+                
             }
             else {
                 answer += "," + "undefined" + ",," +
