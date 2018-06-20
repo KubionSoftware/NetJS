@@ -25,12 +25,12 @@ namespace NetJS.Core {
                         b = Convert.ToObject(b, agent);
                     }
 
-                    return ((Object)b).Get(r.GetReferencedName());
+                    return ((Object)b).Get(r.GetReferencedName(), agent);
                 } else if (b is ExoticConstant e) {
                     return e.GetProperty(r.GetReferencedName(), agent);
                 } else {
                     var record = (EnvironmentRecord)b;
-                    return record.GetBindingValue(r.GetReferencedName(), r.IsStrictReference());
+                    return record.GetBindingValue(r.GetReferencedName(), r.IsStrictReference(), agent);
                 }
             } else {
                 return v;
@@ -65,7 +65,7 @@ namespace NetJS.Core {
                     return Static.NormalCompletion;
                 } else {
                     var record = (EnvironmentRecord)b;
-                    return record.SetMutableBinding(r.GetReferencedName(), w, r.IsStrictReference());
+                    return record.SetMutableBinding(r.GetReferencedName(), w, r.IsStrictReference(), agent);
                 }
             } else {
                 throw new ReferenceError($"Can't assign value to {v.ToDebugString()}");
@@ -94,7 +94,7 @@ namespace NetJS.Core {
             return argument;
         }
 
-        public static Reference GetIdentifierReference(LexicalEnvironment lex, Constant name, bool isStrict) {
+        public static Reference GetIdentifierReference(LexicalEnvironment lex, Constant name, bool isStrict, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-getidentifierreference
 
             if (lex == null) {
@@ -102,13 +102,13 @@ namespace NetJS.Core {
             }
 
             var envRec = lex.Record;
-            var exists = envRec.HasBinding(name);
+            var exists = envRec.HasBinding(name, agent);
 
             if (exists) {
                 return new Reference(envRec, name, isStrict);
             } else {
                 var outer = lex.Outer;
-                return GetIdentifierReference(outer, name, isStrict);
+                return GetIdentifierReference(outer, name, isStrict, agent);
             }
         }
 
@@ -117,15 +117,15 @@ namespace NetJS.Core {
 
             if (lex == null) lex = agent.Running.Lex;
 
-            return GetIdentifierReference(lex, name, agent.Running.IsStrict);
+            return GetIdentifierReference(lex, name, agent.Running.IsStrict, agent);
         }
 
-        public static void InitializeReferencedBinding(Reference v, Constant w) {
+        public static void InitializeReferencedBinding(Reference v, Constant w, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-initializereferencedbinding
 
             var b = v.GetBase();
             if (b is EnvironmentRecord e) {
-                e.InitializeBinding(v.GetReferencedName(), w);
+                e.InitializeBinding(v.GetReferencedName(), w, agent);
             } else {
                 throw new Error("Base of reference is not an environment record");
             }
@@ -136,7 +136,7 @@ namespace NetJS.Core {
 
             if (lex != null) {
                 var env = lex.Record;
-                env.InitializeBinding(name, value);
+                env.InitializeBinding(name, value, agent);
                 return Static.NormalCompletion;
             } else {
                 var lhs = ResolveBinding(name, null, agent);

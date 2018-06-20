@@ -14,7 +14,7 @@ namespace NetJS.Core {
         public Statement ECMAScriptCode;
         public int FileId;
 
-        public void GlobalDeclarationInstantiation(LexicalEnvironment env) {
+        public void GlobalDeclarationInstantiation(LexicalEnvironment env, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-globaldeclarationinstantiation
 
             var envRec = env.Record;
@@ -23,11 +23,11 @@ namespace NetJS.Core {
 
             DeclarationFinder.FindVarDeclarations(ECMAScriptCode, (dn, isConstant) => {
                 if (isConstant) {
-                    envRec.CreateImmutableBinding(dn, true);
+                    envRec.CreateImmutableBinding(dn, true, agent);
                 } else {
-                    envRec.CreateMutableBinding(dn, false);
+                    envRec.CreateMutableBinding(dn, false, agent);
                 }
-                envRec.InitializeBinding(dn, Static.Undefined);
+                envRec.InitializeBinding(dn, Static.Undefined, agent);
             });
         }
 
@@ -57,12 +57,12 @@ namespace NetJS.Core {
                 scriptEnv = scriptCtx.Lex;
             }
 
-            GlobalDeclarationInstantiation(scriptEnv);
+            GlobalDeclarationInstantiation(scriptEnv, agent);
 
             if (arguments != null) {
                 foreach (var key in arguments.OwnPropertyKeys()) {
-                    scriptEnv.Record.CreateMutableBinding(key, true);
-                    scriptEnv.Record.InitializeBinding(key, arguments.Get(key));
+                    scriptEnv.Record.CreateMutableBinding(key, true, agent);
+                    scriptEnv.Record.InitializeBinding(key, arguments.Get(key, agent), agent);
                 }
             }
 

@@ -24,7 +24,7 @@ namespace NetJS.Core.API {
             var keys = o.OwnPropertyKeys();
             var array = new Array(0, agent);
             foreach(var key in keys) {
-                array.Add(o.Get(key));
+                array.Add(o.Get(key, agent));
             }
             return array;
         }
@@ -99,8 +99,8 @@ namespace NetJS.Core.API {
             foreach (var key in props.OwnPropertyKeys()) {
                 var propDesc = props.GetOwnProperty(key);
                 if (propDesc != null && propDesc.IsEnumerable) {
-                    var descObj = props.Get(key) as Object;
-                    var desc = Property.FromObject(descObj);
+                    var descObj = props.Get(key, agent) as Object;
+                    var desc = Property.FromObject(descObj, agent);
                     descriptors.Add(new Tuple<Constant, Property>(key, desc));
                 }
             }

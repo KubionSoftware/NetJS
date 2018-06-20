@@ -87,34 +87,34 @@ namespace NetJS.Core {
         public abstract Property Clone();
         public abstract void SetAttributes(Property prop);
         public abstract Object ToObject(Agent agent);
-
-        public static Property FromObject(Object obj) {
+        
+        public static Property FromObject(Object obj, Agent agent) {
             Property prop;
 
             // TODO: handle non-existing properties better
 
             if (obj.HasOwnProperty("value")) {
                 var dataProp = new DataProperty() {
-                    Value = obj.Get("value")
+                    Value = obj.Get("value", agent)
                 };
 
                 if (obj.HasOwnProperty("writable")) {
-                    dataProp.Writable = (obj.Get("writable") as Boolean).Value;
+                    dataProp.Writable = (obj.Get("writable", agent) as Boolean).Value;
                 }
                 prop = dataProp;
             } else {
                 prop = new AccessorProperty() {
-                    Get = obj.Get("get") as Function,
-                    Set = obj.Get("set") as Function
+                    Get = obj.Get("get", agent) as Function,
+                    Set = obj.Get("set", agent) as Function
                 };
             }
 
             if (obj.HasOwnProperty("enumerable")) {
-                prop.Enumerable = (obj.Get("enumerable") as Boolean).Value;
+                prop.Enumerable = (obj.Get("enumerable", agent) as Boolean).Value;
             }
 
             if (obj.HasOwnProperty("configurable")) {
-                prop.Configurable = (obj.Get("configurable") as Boolean).Value;
+                prop.Configurable = (obj.Get("configurable", agent) as Boolean).Value;
             }
 
             return prop;
@@ -122,12 +122,18 @@ namespace NetJS.Core {
     }
 
     public class Object : Constant {
-        private ConcurrentDictionary<Constant, Property> Properties = new ConcurrentDictionary<Constant, Property>();
+        private ConcurrentDictionary<Constant, Property> _properties = new ConcurrentDictionary<Constant, Property>();
+        private List<Constant> _keys = new List<Constant>();
 
         // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ordinary-object-internal-methods-and-internal-slots
 
         public Object Prototype;
         public bool Extensible;
+
+        private void AddProperty(Constant key, Property prop) {
+            _properties[key] = prop;
+            _keys.Add(key);
+        }
 
         public Object (Object proto) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-objectcreate
@@ -188,8 +194,8 @@ namespace NetJS.Core {
             Assert.IsPropertyKey(p);
 
             Property prop;
-            if (!Properties.TryGetValue(p, out prop)) return null;
-            return Properties[p].Clone(); 
+            if (!_properties.TryGetValue(p, out prop)) return null;
+            return _properties[p].Clone(); 
         }
 
         public bool HasOwnProperty(Constant p) {
@@ -213,7 +219,7 @@ namespace NetJS.Core {
             if(current == null) {
                 if (!extensible) return false;
 
-                Properties[p] = desc;
+                AddProperty(p, desc);
                 return true;
             }
 
@@ -228,19 +234,19 @@ namespace NetJS.Core {
             if ((current is DataProperty) != (desc is DataProperty)){
                 if (!current.IsConfigurable) return false;
                 if (current is DataProperty) {
-                    Properties[p] = new AccessorProperty() {
+                    AddProperty(p, new AccessorProperty() {
                         Get = null,
                         Set = null,
                         Configurable = current.Configurable,
                         Enumerable = current.Enumerable
-                    };
+                    });
                 } else {
-                    Properties[p] = new DataProperty() {
+                    AddProperty(p, new DataProperty() {
                         Value = Static.Undefined,
                         Writable = false,
                         Configurable = current.Configurable,
                         Enumerable = current.Enumerable
-                    };
+                    });
                 }
             } else if (current is DataProperty cd && desc is DataProperty dd) {
                 if (!cd.IsConfigurable && !cd.IsWritable) {
@@ -256,7 +262,7 @@ namespace NetJS.Core {
                 }
             }
 
-            Properties[p].SetAttributes(desc);
+            _properties[p].SetAttributes(desc);
 
             return true;
         }
@@ -281,7 +287,7 @@ namespace NetJS.Core {
             return false;
         }
 
-        public virtual Constant Get(Constant p, Agent agent = null, Constant receiver = null) {
+        public virtual Constant Get(Constant p, Agent agent, Constant receiver = null) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ordinaryget
 
             Assert.IsPropertyKey(p);
@@ -303,8 +309,8 @@ namespace NetJS.Core {
             return getter.Call(receiver, agent);
         }
 
-        public Constant Get(string p) {
-            return Get(new String(p));
+        public Constant Get(string p, Agent agent) {
+            return Get(new String(p), agent);
         }
 
         public virtual bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null) {
@@ -379,7 +385,8 @@ namespace NetJS.Core {
             var desc = GetOwnProperty(p);
             if (desc == null) return true;
             if (desc.IsConfigurable) {
-                Properties.TryRemove(p, out Property removed);
+                _properties.TryRemove(p, out Property removed);
+                _keys.Remove(p);
                 return true;
             }
 
@@ -389,14 +396,7 @@ namespace NetJS.Core {
         public List<Constant> OwnPropertyKeys() {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ordinaryownpropertykeys
 
-            var keys = new List<Constant>();
-
-            // TODO: correct order
-            foreach (var p in Properties.Keys) {
-                keys.Add(p);
-            }
-
-            return keys;
+            return _keys;
         }
 
         public static Object CreateFromConstructor(Function constructor, string intrinsicDefaultProto) {
@@ -409,7 +409,7 @@ namespace NetJS.Core {
         public static Object GetPrototypeFromConstructor(Function constructor, string intrinsicDefaultProto) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-getprototypefromconstructor
 
-            var proto = constructor.Get(new String("prototype"));
+            var proto = constructor.Get(new String("prototype"), null);
             if (!(proto is Object)) {
                 var realm = constructor.Realm;
                 proto = realm.GetPrototype(intrinsicDefaultProto);

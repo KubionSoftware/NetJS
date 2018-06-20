@@ -36,7 +36,7 @@ namespace NetJS.Core {
             return obj;
         }
 
-        public static object ValueToJson(Constant value) {
+        public static object ValueToJson(Constant value, Agent agent) {
             if (value is String s) {
                 return s.Value;
             } else if (value is Number n) {
@@ -48,20 +48,20 @@ namespace NetJS.Core {
             } else if (value is Array array) {
                 var list = new List<object>();
                 for (var i = 0; i < array.List.Count; i++) {
-                    list.Add(ValueToJson(array.List[i]));
+                    list.Add(ValueToJson(array.List[i], agent));
                 }
                 return list;
             } else if (value is Object obj) {
-                return ObjectToJson(obj);
+                return ObjectToJson(obj, agent);
             }
 
             return null;
         }
 
-        public static Dictionary<string, object> ObjectToJson(Object obj) {
+        public static Dictionary<string, object> ObjectToJson(Object obj, Agent agent) {
             var json = new Dictionary<string, object>();
             foreach (var key in obj.OwnPropertyKeys()) {
-                json[key.ToString()] = ValueToJson(obj.Get(key));
+                json[key.ToString()] = ValueToJson(obj.Get(key, agent), agent);
             }
             return json;
         }
@@ -94,7 +94,7 @@ namespace NetJS.Core {
                 case Symbol sy:
                     break;
                 case Object o:
-                    var method = o.Get(new String("toString"));
+                    var method = o.Get(new String("toString"), agent);
                     if (method is Function f) {
                         var result = f.Call(o, agent);
 
@@ -112,13 +112,13 @@ namespace NetJS.Core {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-toprimitive
 
             if (value is Object o) {
-                var valueOf = o.Get(new String("valueOf"));
+                var valueOf = o.Get(new String("valueOf"), agent);
                 if (valueOf is Function vf) {
                     var result = vf.Call(o, agent);
                     if (!(result is Object)) return result;
                 }
 
-                var toString = o.Get(new String("toString"));
+                var toString = o.Get(new String("toString"), agent);
                 if (toString is Function sf) {
                     var result = sf.Call(o, agent);
                     if (!(result is Object)) return result;

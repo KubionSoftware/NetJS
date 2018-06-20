@@ -28,12 +28,12 @@ namespace NetJS.Core {
 
         private ConcurrentDictionary<Constant, Binding> _map = new ConcurrentDictionary<Constant, Binding>();
 
-        public override bool HasBinding(Constant name) {
+        public override bool HasBinding(Constant name, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-hasbinding-n
             return _map.ContainsKey(name);
         }
 
-        public override Completion CreateMutableBinding(Constant name, bool canBeDeleted) {
+        public override Completion CreateMutableBinding(Constant name, bool canBeDeleted, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-createmutablebinding-n-d
 
             if (_map.ContainsKey(name)) {
@@ -44,7 +44,7 @@ namespace NetJS.Core {
             return Static.NormalCompletion;
         }
 
-        public override Completion CreateImmutableBinding(Constant name, bool isStrict) {
+        public override Completion CreateImmutableBinding(Constant name, bool isStrict, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-createimmutablebinding-n-s
 
             if (_map.ContainsKey(name)) {
@@ -55,7 +55,7 @@ namespace NetJS.Core {
             return Static.NormalCompletion;
         }
 
-        public override Completion InitializeBinding(Constant name, Constant value) {
+        public override Completion InitializeBinding(Constant name, Constant value, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-initializebinding-n-v
             
             if (!_map.ContainsKey(name)) {
@@ -74,7 +74,7 @@ namespace NetJS.Core {
             return Static.NormalCompletion;
         }
 
-        public override Completion SetMutableBinding(Constant name, Constant value, bool isStrict) {
+        public override Completion SetMutableBinding(Constant name, Constant value, bool isStrict, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-setmutablebinding-n-v-s
 
             Binding binding = null;
@@ -84,8 +84,8 @@ namespace NetJS.Core {
                     throw new ReferenceError($"Can't set {name} because it is not defined");
                 }
 
-                CreateMutableBinding(name, true);
-                InitializeBinding(name, value);
+                CreateMutableBinding(name, true, agent);
+                InitializeBinding(name, value, agent);
                 return Static.NormalCompletion;
             }
 
@@ -105,7 +105,7 @@ namespace NetJS.Core {
             return Static.NormalCompletion;
         }
 
-        public override Constant GetBindingValue(Constant name, bool isStrict) {
+        public override Constant GetBindingValue(Constant name, bool isStrict, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-getbindingvalue-n-s
 
             if (!_map.ContainsKey(name)) {
@@ -121,7 +121,7 @@ namespace NetJS.Core {
             return binding.Value;
         }
 
-        public override bool DeleteBinding(Constant name) {
+        public override bool DeleteBinding(Constant name, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-declarative-environment-records-deletebinding-n
 
             if (!_map.ContainsKey(name)) {
@@ -155,7 +155,7 @@ namespace NetJS.Core {
             return Static.Undefined;
         }
 
-        public override ConcurrentDictionary<Constant, Binding> GetMap() {
+        public override ConcurrentDictionary<Constant, Binding> GetMap(Agent agent) {
             return _map;
         }
 

@@ -30,7 +30,7 @@ namespace NetJS.Core {
                     return Boolean.Create(deleteStatus);
                 } else {
                     var bindings = (EnvironmentRecord)reference.GetBase();
-                    return Boolean.Create(bindings.DeleteBinding(reference.GetReferencedName()));
+                    return Boolean.Create(bindings.DeleteBinding(reference.GetReferencedName(), agent));
                 }
             } else {
                 return Boolean.True;

@@ -15,13 +15,13 @@ namespace NetJS.Core.API {
             return _this;
         }
 
-        public static Number GetNumber(Constant _this) {
+        public static Number GetNumber(Constant _this, Agent agent) {
             if (_this is Number s) return s;
-            return (_this as Object).Get(Primitive) as Number;
+            return (_this as Object).Get(Primitive, agent) as Number;
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Agent agent) {
-            var num = GetNumber(_this);
+            var num = GetNumber(_this, agent);
             return new String(num.Value.ToString(CultureInfo.InvariantCulture));
         }
     }

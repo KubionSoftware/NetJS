@@ -95,7 +95,7 @@ namespace NetJS.Core {
         }
 
         public override bool Check(Constant constant, Agent agent) {
-            var value = agent.Running.Lex.Record.GetBindingValue(new String(_instance), false);
+            var value = agent.Running.Lex.Record.GetBindingValue(new String(_instance), false, agent);
 
             if(value is Interface i) {
                 if (constant is Object o) {

@@ -21,7 +21,7 @@ namespace NetJS.Core {
             var catchEnvRec = catchEnv.Record;
 
             // TODO: multiple variables
-            catchEnvRec.CreateMutableBinding(CatchVariable, false);
+            catchEnvRec.CreateMutableBinding(CatchVariable, false, agent);
 
             agent.Running.Lex = catchEnv;
             var status = References.InitializeBoundName(CatchVariable, thrownValue, catchEnv, agent);
@@ -41,6 +41,8 @@ namespace NetJS.Core {
 
             Completion c;
 
+            var oldState = agent.GetState();
+
             try {
                 var b = TryBody.Evaluate(agent);
                 if (b.Type == CompletionType.Throw) {
@@ -51,6 +53,8 @@ namespace NetJS.Core {
             } catch (Exception e) {
                 c = CatchClauseEvaluation(new String(e.ToString()), agent);
             }
+
+            agent.SetState(oldState);
 
             if (FinallyBody != null) {
                 var f = FinallyBody.Evaluate(agent);

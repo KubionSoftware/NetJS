@@ -21,12 +21,12 @@ namespace NetJS.Core.API {
             return Static.Undefined;
         }
 
-        private static RegexOptions GetOptions(Object _this) {
+        private static RegexOptions GetOptions(Object _this, Agent agent) {
             var options = new RegexOptions();
             options |= RegexOptions.ECMAScript;
 
-            if ((Convert.ToBoolean(_this.Get("ignoreCase")))) options |= RegexOptions.IgnoreCase;
-            if ((Convert.ToBoolean(_this.Get("multiline")))) options |= RegexOptions.Multiline;
+            if ((Convert.ToBoolean(_this.Get("ignoreCase", agent)))) options |= RegexOptions.IgnoreCase;
+            if ((Convert.ToBoolean(_this.Get("multiline", agent)))) options |= RegexOptions.Multiline;
 
             // TODO: only enable this for xdoc
             options |= RegexOptions.IgnoreCase;
@@ -37,13 +37,13 @@ namespace NetJS.Core.API {
         public static Constant match(Constant _this, Constant[] arguments, Agent agent) {
             var exp = (Object)_this;
             var str = ((String)arguments[0]).Value;
-            var source = ((String)exp.Get("source")).Value;
+            var source = ((String)exp.Get("source", agent)).Value;
 
-            var options = GetOptions(exp);
+            var options = GetOptions(exp, agent);
 
             var result = new List<string>();
 
-            if ((Convert.ToBoolean(exp.Get("global")))) {
+            if ((Convert.ToBoolean(exp.Get("global", agent)))) {
                 var matches = Regex.Matches(str, source, options);
 
                 if(matches.Count == 0) {
@@ -79,20 +79,20 @@ namespace NetJS.Core.API {
             var exp = (Object)_this;
             var str = (String)arguments[0];
             var replacement = (String)arguments[1];
-            var source = ((String)exp.Get("source")).Value;
+            var source = ((String)exp.Get("source", agent)).Value;
 
-            var options = GetOptions(exp);
+            var options = GetOptions(exp, agent);
 
             var regex = new Regex(source, options);
-            return new String(regex.Replace(str.Value, replacement.Value, (Convert.ToBoolean(exp.Get("global"))) ? -1 : 1));
+            return new String(regex.Replace(str.Value, replacement.Value, (Convert.ToBoolean(exp.Get("global", agent))) ? -1 : 1));
         }
 
         public static Constant search(Constant _this, Constant[] arguments, Agent agent) {
             var exp = (Object)_this;
             var str = (String)arguments[0];
-            var source = ((String)exp.Get("source")).Value;
+            var source = ((String)exp.Get("source", agent)).Value;
 
-            var options = GetOptions(exp);
+            var options = GetOptions(exp, agent);
 
             var match = Regex.Match(str.Value, source, options);
             if (match.Success) {
@@ -105,9 +105,9 @@ namespace NetJS.Core.API {
         public static Constant split(Constant _this, Constant[] arguments, Agent agent) {
             var exp = (Object)_this;
             var str = (String)arguments[0];
-            var source = ((String)exp.Get("source")).Value;
+            var source = ((String)exp.Get("source", agent)).Value;
 
-            var options = GetOptions(exp);
+            var options = GetOptions(exp, agent);
 
             var result = Regex.Split(str.Value, source, options);
             return Tool.ToArray(result, agent);

@@ -31,11 +31,11 @@ namespace NetJS.Core {
         public void DeclareVariable(string keyString, Constant value) {
             var key = new String(keyString);
 
-            if (!GlobalEnv.Record.HasBinding(key)) {
-                GlobalEnv.Record.CreateMutableBinding(key, true);
-                GlobalEnv.Record.InitializeBinding(key, value);
+            if (!GlobalEnv.Record.HasBinding(key, _agent)) {
+                GlobalEnv.Record.CreateMutableBinding(key, true, _agent);
+                GlobalEnv.Record.InitializeBinding(key, value, _agent);
             } else {
-                GlobalEnv.Record.SetMutableBinding(key, value, false);
+                GlobalEnv.Record.SetMutableBinding(key, value, false, _agent);
             }
         }
 
@@ -83,6 +83,8 @@ namespace NetJS.Core {
 
             RegisterFunctions(typeof(API.FunctionsAPI));
 
+            RegisterForeignNamespace("System");
+
             GlobalObject = Tool.Construct("Object", _agent);
         }
 
@@ -92,6 +94,122 @@ namespace NetJS.Core {
             foreach (System.Type type in dll.GetExportedTypes()) {
                 RegisterClass(type, type.Name);
             }
+        }
+
+        private Dictionary<System.Type, Object> _foreigns = new Dictionary<System.Type, Object>();
+
+        private Object CreateForeignObject(object foreign) {
+            var obj = Tool.Construct("Object", _agent);
+            obj.Prototype = _foreigns[foreign.GetType()];
+            obj.Set("[[Foreign]]", new Foreign(foreign));
+            return obj;
+        }
+
+        private void RegisterForeignNamespace(string ns) {
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+                       .SelectMany(t => t.GetTypes()).Where(t => t.Namespace == ns);
+            foreach (var type in types) {
+                RegisterForeignType(type);
+            }
+        }
+
+        private void RegisterForeignType(System.Type type) {
+            var prototype = Tool.Construct("Object", _agent);
+            
+            var constructor = new ExternalFunction(type.Name, (_this, arguments, agent) => {
+                var args = ToForeignTypes(arguments);
+                var con = type.GetConstructor(args.Select(a => a.GetType()).ToArray());
+                if (con == null) throw new TypeError("There is no foreign constructor for the given arguments");
+                return CreateForeignObject(con.Invoke(args));
+            }, _agent);
+            constructor.Set(new String("prototype"), prototype);
+            prototype.Set(new String("constructor"), constructor);
+
+            foreach (var method in type.GetMethods()) {
+                if (method.IsStatic) {
+                    constructor.Set(method.Name, new ExternalFunction(type.Name + "." + method.Name, (_this, arguments, agent) => {
+                        var args = ToForeignTypes(arguments);
+                        var m = type.GetMethod(method.Name, BindingFlags.Static, null, args.Select(a => a.GetType()).ToArray(), null);
+                        return FromForeignType(m.Invoke(null, args));
+                    }, _agent));
+                } else {
+                    prototype.Set(method.Name, new ExternalFunction(type.Name + "." + method.Name, (_this, arguments, agent) => {
+                        var foreign = ((_this as Object).Get("[[Foreign]]", agent) as Foreign).Value;
+                        var args = ToForeignTypes(arguments);
+                        var m = type.GetMethod(method.Name, args.Select(a => a.GetType()).ToArray());
+                        return FromForeignType(m.Invoke(foreign, args));
+                    }, _agent));
+                }
+            }
+
+            foreach (var property in type.GetProperties()) {
+                var method = property.GetMethod;
+                if (method.IsStatic) {
+                    constructor.DefineOwnProperty(new String(property.Name), new AccessorProperty() {
+                        Get = new ExternalFunction(type.Name + "." + property.Name, (_this, arguments, agent) => {
+                            var args = ToForeignTypes(arguments);
+                            return FromForeignType(property.GetGetMethod(false).Invoke(null, args));
+                        }, _agent),
+                        Configurable = true,
+                        Enumerable = true
+                    });
+                } else {
+                    prototype.DefineOwnProperty(new String(property.Name), new AccessorProperty() {
+                        Get = new ExternalFunction(type.Name + "." + property.Name, (_this, arguments, agent) => {
+                            var foreign = ((_this as Object).Get("[[Foreign]]", agent) as Foreign).Value;
+                            var args = ToForeignTypes(arguments);
+                            return FromForeignType(property.GetGetMethod(false).Invoke(foreign, args));
+                        }, _agent),
+                        Configurable = true,
+                        Enumerable = true
+                    });
+                }
+            }
+
+            DeclareVariable(type.Name, constructor);
+
+            _foreigns[type] = prototype;
+        }
+
+        private object[] ToForeignTypes(Constant[] arguments) {
+            var args = new object[arguments.Length];
+            for (var i = 0; i < arguments.Length; i++) args[i] = ToForeignType(arguments[i]);
+            return args;
+        }
+
+        private object ToForeignType(Constant v) {
+            switch (v) {
+                case Number n: {
+                    if(n.Value % 1 == 0) {
+                        return (int)n.Value;
+                    } else {
+                        return n.Value;
+                    }
+                }
+                case Boolean b: return b.Value;
+                case String s: return s.Value;
+            }
+
+            throw new TypeError($"Can't convert {v.ToDebugString()} to foreign type");
+        }
+
+        private Constant FromForeignType(object v) {
+            switch (v) {
+                case byte bt: return new Number(bt);
+                case short sh: return new Number(sh);
+                case int i: return new Number(i);
+                case long l: return new Number(l);
+                case float f: return new Number(f);
+                case double d: return new Number(d);
+                case bool b: return Boolean.Create(b);
+                case string s: return new String(s);
+            }
+
+            if (_foreigns.ContainsKey(v.GetType())) {
+                return CreateForeignObject(v);
+            }
+
+            throw new TypeError($"Can't convert {v.ToString()} to internal type");
         }
 
         private ExternalFunction GetFunction(string className, MethodInfo info, Object prototype = null) {

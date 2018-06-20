@@ -9,19 +9,19 @@ namespace NetJS.Core {
 
     public abstract class EnvironmentRecord : Constant {
 
-        public abstract bool HasBinding(Constant name);
+        public abstract bool HasBinding(Constant name, Agent agent);
 
-        public abstract Completion CreateMutableBinding(Constant name, bool canBeDeleted);
+        public abstract Completion CreateMutableBinding(Constant name, bool canBeDeleted, Agent agent);
 
-        public abstract Completion CreateImmutableBinding(Constant name, bool isStrict);
+        public abstract Completion CreateImmutableBinding(Constant name, bool isStrict, Agent agent);
 
-        public abstract Completion InitializeBinding(Constant name, Constant value);
+        public abstract Completion InitializeBinding(Constant name, Constant value, Agent agent);
 
-        public abstract Completion SetMutableBinding(Constant name, Constant value, bool isStrict);
+        public abstract Completion SetMutableBinding(Constant name, Constant value, bool isStrict, Agent agent);
 
-        public abstract Constant GetBindingValue(Constant name, bool isStrict);
+        public abstract Constant GetBindingValue(Constant name, bool isStrict, Agent agent);
 
-        public abstract bool DeleteBinding(Constant name);
+        public abstract bool DeleteBinding(Constant name, Agent agent);
 
         public abstract bool HasThisBinding();
 
@@ -31,6 +31,6 @@ namespace NetJS.Core {
 
         public abstract Constant WithBaseObject();
 
-        public abstract ConcurrentDictionary<Constant, Binding> GetMap();
+        public abstract ConcurrentDictionary<Constant, Binding> GetMap(Agent agent);
     }
 }

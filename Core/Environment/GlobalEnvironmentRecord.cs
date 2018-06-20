@@ -15,35 +15,35 @@ namespace NetJS.Core {
         public DeclarativeEnvironmentRecord DeclarativeRecord;
         public HashSet<Constant> VarNames;
 
-        public override Completion CreateImmutableBinding(Constant name, bool isStrict) {
+        public override Completion CreateImmutableBinding(Constant name, bool isStrict, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-global-environment-records-createimmutablebinding-n-s
 
-            if (DeclarativeRecord.HasBinding(name)) {
+            if (DeclarativeRecord.HasBinding(name, agent)) {
                 throw new TypeError($"There is already a binding for {name}");
             }
-            return DeclarativeRecord.CreateImmutableBinding(name, isStrict);
+            return DeclarativeRecord.CreateImmutableBinding(name, isStrict, agent);
         }
 
-        public override Completion CreateMutableBinding(Constant name, bool canBeDeleted) {
+        public override Completion CreateMutableBinding(Constant name, bool canBeDeleted, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-global-environment-records-createmutablebinding-n-d
 
-            if (DeclarativeRecord.HasBinding(name)) {
+            if (DeclarativeRecord.HasBinding(name, agent)) {
                 throw new TypeError($"There is already a binding for {name}");
             }
-            return DeclarativeRecord.CreateMutableBinding(name, canBeDeleted);
+            return DeclarativeRecord.CreateMutableBinding(name, canBeDeleted, agent);
         }
 
-        public override bool DeleteBinding(Constant name) {
+        public override bool DeleteBinding(Constant name, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-global-environment-records-deletebinding-n
 
-            if (DeclarativeRecord.HasBinding(name)) {
-                return DeclarativeRecord.DeleteBinding(name);
+            if (DeclarativeRecord.HasBinding(name, agent)) {
+                return DeclarativeRecord.DeleteBinding(name, agent);
             }
 
             var globalObject = ObjectRecord.BindingObject;
             var existingProp = globalObject.HasOwnProperty(name);
             if (existingProp) {
-                var status = ObjectRecord.DeleteBinding(name);
+                var status = ObjectRecord.DeleteBinding(name, agent);
                 if (status) {
                     VarNames.Remove(name);
                 }
@@ -53,21 +53,21 @@ namespace NetJS.Core {
             return true;
         }
 
-        public override Constant GetBindingValue(Constant name, bool isStrict) {
+        public override Constant GetBindingValue(Constant name, bool isStrict, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-global-environment-records-getbindingvalue-n-s
 
-            if (DeclarativeRecord.HasBinding(name)) {
-                return DeclarativeRecord.GetBindingValue(name, isStrict);
+            if (DeclarativeRecord.HasBinding(name, agent)) {
+                return DeclarativeRecord.GetBindingValue(name, isStrict, agent);
             }
 
-            return ObjectRecord.GetBindingValue(name, isStrict);
+            return ObjectRecord.GetBindingValue(name, isStrict, agent);
         }
 
-        public override bool HasBinding(Constant name) {
+        public override bool HasBinding(Constant name, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-global-environment-records-hasbinding-n
 
-            if (DeclarativeRecord.HasBinding(name)) return true;
-            return ObjectRecord.HasBinding(name);
+            if (DeclarativeRecord.HasBinding(name, agent)) return true;
+            return ObjectRecord.HasBinding(name, agent);
         }
 
         public override bool HasSuperBinding() {
@@ -78,24 +78,24 @@ namespace NetJS.Core {
             return true;
         }
 
-        public override Completion InitializeBinding(Constant name, Constant value) {
+        public override Completion InitializeBinding(Constant name, Constant value, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-global-environment-records-initializebinding-n-v
 
-            if (DeclarativeRecord.HasBinding(name)) {
-                return DeclarativeRecord.InitializeBinding(name, value);
+            if (DeclarativeRecord.HasBinding(name, agent)) {
+                return DeclarativeRecord.InitializeBinding(name, value, agent);
             }
 
-            return ObjectRecord.InitializeBinding(name, value);
+            return ObjectRecord.InitializeBinding(name, value, agent);
         }
 
-        public override Completion SetMutableBinding(Constant name, Constant value, bool isStrict) {
+        public override Completion SetMutableBinding(Constant name, Constant value, bool isStrict, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-global-environment-records-setmutablebinding-n-v-s
 
-            if (DeclarativeRecord.HasBinding(name)) {
-                return DeclarativeRecord.SetMutableBinding(name, value, isStrict);
+            if (DeclarativeRecord.HasBinding(name, agent)) {
+                return DeclarativeRecord.SetMutableBinding(name, value, isStrict, agent);
             }
 
-            return ObjectRecord.SetMutableBinding(name, value, isStrict);
+            return ObjectRecord.SetMutableBinding(name, value, isStrict, agent);
         }
 
         public override Constant WithBaseObject() {
@@ -114,10 +114,10 @@ namespace NetJS.Core {
             return VarNames.Contains(name);
         }
 
-        public bool HasLexicalDeclaration(Constant name) {
+        public bool HasLexicalDeclaration(Constant name, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-haslexicaldeclaration
 
-            return DeclarativeRecord.HasBinding(name);
+            return DeclarativeRecord.HasBinding(name, agent);
         }
 
         public bool HasResistrictedGlobalProperty(Constant name) {
@@ -147,7 +147,7 @@ namespace NetJS.Core {
             return false;
         }
 
-        public Completion CreateGlobalVarBinding(Constant name, bool canBeDeleted) {
+        public Completion CreateGlobalVarBinding(Constant name, bool canBeDeleted, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-createglobalvarbinding
 
             var globalObject = ObjectRecord.BindingObject;
@@ -155,8 +155,8 @@ namespace NetJS.Core {
             var extensible = globalObject.IsExtensible();
 
             if (!hasProperty && extensible) {
-                ObjectRecord.CreateMutableBinding(name, canBeDeleted);
-                ObjectRecord.InitializeBinding(name, Static.Undefined);
+                ObjectRecord.CreateMutableBinding(name, canBeDeleted, agent);
+                ObjectRecord.InitializeBinding(name, Static.Undefined, agent);
             }
 
             if (!VarNames.Contains(name)) VarNames.Add(name);
@@ -191,10 +191,10 @@ namespace NetJS.Core {
             return Static.NormalCompletion;
         }
 
-        public override ConcurrentDictionary<Constant, Binding> GetMap() {
+        public override ConcurrentDictionary<Constant, Binding> GetMap(Agent agent) {
             var map = new ConcurrentDictionary<Constant, Binding>();
-            foreach (var pair in ObjectRecord.GetMap()) map.TryAdd(pair.Key, pair.Value);
-            foreach (var pair in DeclarativeRecord.GetMap()) map.TryAdd(pair.Key, pair.Value);
+            foreach (var pair in ObjectRecord.GetMap(agent)) map.TryAdd(pair.Key, pair.Value);
+            foreach (var pair in DeclarativeRecord.GetMap(agent)) map.TryAdd(pair.Key, pair.Value);
             return map;
         }
 

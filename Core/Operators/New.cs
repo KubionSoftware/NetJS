@@ -21,7 +21,7 @@ namespace NetJS.Core {
             var argList = Arguments.Evaluate(agent);
 
             if (constructor is Function f) {
-                var thisValue = new Object((Object)f.Get(new String("prototype")));
+                var thisValue = new Object((Object)f.Get(new String("prototype"), agent));
                 var result = f.Call(thisValue, agent, argList);
                 if (result is Undefined) {
                     return thisValue;

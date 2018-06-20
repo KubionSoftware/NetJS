@@ -23,13 +23,13 @@ namespace NetJS.Core {
 
         private LexicalEnvironment() { }
 
-        public Debug.Scope GetScope(int index) {
+        public Debug.Scope GetScope(int index, Agent agent) {
             var localVariables = new Util.Json();
 
-            var map = Record.GetMap();
+            var map = Record.GetMap(null);
 
             foreach (var key in map.Keys) {
-                var value = Convert.ValueToJson(map[key].Value);
+                var value = Convert.ValueToJson(map[key].Value, agent);
                 localVariables.Value[key.ToString()] = value;
             }
 

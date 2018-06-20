@@ -46,7 +46,7 @@ namespace NetJS.Core {
             var lval = References.GetValue(lref, agent);
             var rval = References.GetValue(rref, agent);
 
-            return Boolean.Create(Tool.IsType(lval, rval));
+            return Boolean.Create(Tool.IsType(lval, rval, agent));
         }
 
         public override string ToDebugString() {

@@ -47,25 +47,25 @@ namespace NetJS.API {
 
             var settings = Core.Tool.GetArgument<Core.Object>(arguments, settingsIndex, "HTTP.execute", false);
             if(settings != null) {
-                if (settings.Get("cookies") is Core.Object cookies) {
+                if (settings.Get("cookies", agent) is Core.Object cookies) {
                     foreach (var key in cookies.OwnPropertyKeys()) {
-                        request.CookieContainer.Add(new Cookie(key.ToString(), Core.Convert.ToString(cookies.Get(key), agent)));
+                        request.CookieContainer.Add(new Cookie(key.ToString(), Core.Convert.ToString(cookies.Get(key, agent), agent)));
                     }
                 }
 
-                if (settings.Get("headers") is Core.Object headers) {
+                if (settings.Get("headers", agent) is Core.Object headers) {
                     foreach (var key in headers.OwnPropertyKeys()) {
-                        Util.HttpWebRequestExtensions.SetRawHeader(request, key.ToString(), Core.Convert.ToString(headers.Get(key), agent));
+                        Util.HttpWebRequestExtensions.SetRawHeader(request, key.ToString(), Core.Convert.ToString(headers.Get(key, agent), agent));
                     }
                 }
 
-                if (settings.Get("method") is Core.String method) {
+                if (settings.Get("method", agent) is Core.String method) {
                     request.Method = method.Value;
                 } else { 
                     request.Method = "GET";
                 }
 
-                if (settings.Get("content") is Core.String content) {
+                if (settings.Get("content", agent) is Core.String content) {
                     var writer = new StreamWriter(request.GetRequestStream(), Encoding.Default);
                     writer.Write(content);
                     writer.Close();

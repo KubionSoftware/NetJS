@@ -107,14 +107,14 @@ namespace NetJS.Core {
                         var loopRec = loopEnv.Record;
 
                         foreach (var dn in boundNames) {
-                            loopRec.CreateImmutableBinding(dn, true);
+                            loopRec.CreateImmutableBinding(dn, true, agent);
                         }
                     }
 
                     var lhsRef = References.ResolveBinding(Declaration.Declarations[0].Name, null, agent);
 
                     if (Declaration.Scope == DeclarationScope.Block) {
-                        References.InitializeReferencedBinding(lhsRef, nextValue);
+                        References.InitializeReferencedBinding(lhsRef, nextValue, agent);
                     } else {
                         References.PutValue(lhsRef, nextValue, agent);
                     }

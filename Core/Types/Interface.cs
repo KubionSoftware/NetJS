@@ -56,7 +56,7 @@ namespace NetJS.Core {
 
         public bool Check(Object o, Agent agent) {
             foreach (var member in _members) {
-                var value = o.Get(member.Name);
+                var value = o.Get(member.Name, agent);
                 if (value is Undefined && member.Optional) continue;
                 if (!member.Type.Check(value, agent)) return false;
             }

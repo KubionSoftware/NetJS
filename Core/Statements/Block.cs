@@ -35,9 +35,9 @@ namespace NetJS.Core {
             foreach (var d in LexicalDeclarations) {
                 foreach (var dn in d.GetBoundNames()) {
                     if (d.IsConstant) {
-                        envRec.CreateImmutableBinding(dn, true);
+                        envRec.CreateImmutableBinding(dn, true, agent);
                     } else {
-                        envRec.CreateMutableBinding(dn, false);
+                        envRec.CreateMutableBinding(dn, false, agent);
                     }
                 }
             }
