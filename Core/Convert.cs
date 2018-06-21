@@ -11,7 +11,7 @@ namespace NetJS.Core {
                 return JsonToObject(dict, agent);
             } else if (value is List<object> list) {
                 var array = new Array(0, agent);
-                array.AddRange(list.Select(item => JsonToValue(item, agent)));
+                array.AddRange(list.Select(item => JsonToValue(item, agent)), agent);
                 return array;
             } else if (value is string s) {
                 return new String(s);
@@ -31,7 +31,7 @@ namespace NetJS.Core {
         public static Constant JsonToObject(Dictionary<string, object> json, Agent agent) {
             var obj = new Object(Tool.Construct("Object", agent));
             foreach (var key in json.Keys) {
-                obj.Set(new String(key), JsonToValue(json[key], agent));
+                obj.Set(key, JsonToValue(json[key], agent), agent);
             }
             return obj;
         }

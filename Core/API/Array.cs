@@ -45,8 +45,8 @@ namespace NetJS.Core.API {
         public static Constant push(Constant _this, Constant[] arguments, Agent agent) {
             var array = GetArray(_this);
 
-            array.AddRange(arguments);
-            array.Set("length", new Number(array.List.Count));
+            array.AddRange(arguments, agent);
+            array.Set("length", new Number(array.List.Count), agent);
 
             return Static.Undefined;
         }
@@ -57,7 +57,7 @@ namespace NetJS.Core.API {
             if (array.List.Count == 0) return Static.Undefined;
 
             var element = array.List[array.List.Count - 1];
-            array.RemoveAt(array.List.Count - 1);
+            array.RemoveAt(array.List.Count - 1, agent);
 
             return element;
         }
@@ -68,7 +68,7 @@ namespace NetJS.Core.API {
             if (array.List.Count == 0) return Static.Undefined;
 
             var element = array.List[0];
-            array.RemoveAt(0);
+            array.RemoveAt(0, agent);
 
             return element;
         }
@@ -76,7 +76,7 @@ namespace NetJS.Core.API {
         public static Constant unshift(Constant _this, Constant[] arguments, Agent agent) {
             var array = GetArray(_this);
 
-            array.InsertRange(0, arguments);
+            array.InsertRange(0, arguments, agent);
 
             return Static.Undefined;
         }
@@ -105,13 +105,13 @@ namespace NetJS.Core.API {
 
             // Remove items
             var result = new Array(0, agent);
-            result.AddRange(array.GetRange(start, count));
-            array.RemoveRange(start, count);
+            result.AddRange(array.GetRange(start, count), agent);
+            array.RemoveRange(start, count, agent);
 
             // Add items
             var addCount = arguments.Length <= 2 ? 0 : arguments.Length - 2;
             for (var i = 0; i < addCount; i++) {
-                array.Insert(start + i, arguments[i + 2]);
+                array.Insert(start + i, arguments[i + 2], agent);
             }
 
             return result;
@@ -125,7 +125,7 @@ namespace NetJS.Core.API {
 
             var result = new Array(0, agent);
             for (int i = begin; i < end; i++) {
-                result.Add(array.List[i]);
+                result.Add(array.List[i], agent);
             }
             
             return result;
@@ -148,7 +148,7 @@ namespace NetJS.Core.API {
                     array
                 };
                 var value = callback.Call(Static.Undefined, agent, callbackArguments);
-                result.Add(value);
+                result.Add(value, agent);
             }
 
             return result;
@@ -176,7 +176,7 @@ namespace NetJS.Core.API {
                 var value = callback.Call(arguments.Length == 1 ? Static.Undefined : arguments[1], agent, callbackArguments);
                 if (value is Boolean) {
                     if (((Boolean)value).Value) {
-                        result.Add(element);
+                        result.Add(element, agent);
                     }
                 }
             }

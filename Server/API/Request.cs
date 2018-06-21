@@ -26,7 +26,7 @@ namespace NetJS.Server.API {
             var cookies = Core.Tool.Construct("Object", agent);
 
             foreach(HttpCookie cookie in HttpContext.Current.Request.Cookies) {
-                cookies.Set(cookie.Name, new Core.String(cookie.Value));
+                cookies.Set(cookie.Name, new Core.String(cookie.Value), agent);
             }
             
             return cookies;
@@ -52,7 +52,7 @@ namespace NetJS.Server.API {
 
             var context = Tool.GetContext(agent, "Request.getHeaders");
             foreach (var key in context.Request.Headers.AllKeys) {
-                headers.Set(key, new Core.String(context.Request.Headers[key]));
+                headers.Set(key, new Core.String(context.Request.Headers[key]), agent);
             }
 
             return headers;
@@ -96,7 +96,7 @@ namespace NetJS.Server.API {
 
             var context = Tool.GetContext(agent, "Request.getParameters");
             foreach (var key in context.Request.QueryString.AllKeys) {
-                parameters.Set(key, new Core.String(context.Request.QueryString[key]));
+                parameters.Set(key, new Core.String(context.Request.QueryString[key]), agent);
             }
 
             return parameters;
@@ -147,7 +147,7 @@ namespace NetJS.Server.API {
 
             var context = Tool.GetContext(agent, "Request.getForm");
             foreach (var key in context.Request.Form.AllKeys) {
-                form.Set(key, new Core.String(context.Request.Form[key]));
+                form.Set(key, new Core.String(context.Request.Form[key]), agent);
             }
 
             return form;
@@ -172,8 +172,8 @@ namespace NetJS.Server.API {
             var user = Core.Tool.Construct("Object", agent);
 
             var context = Tool.GetContext(agent, "Request.getUser");
-            user.Set("ip", new Core.String(context.Request.UserHostAddress));
-            user.Set("agent", new Core.String(context.Request.UserAgent));
+            user.Set("ip", new Core.String(context.Request.UserHostAddress), agent);
+            user.Set("agent", new Core.String(context.Request.UserAgent), agent);
 
             return user;
         }
@@ -203,13 +203,13 @@ namespace NetJS.Server.API {
             var result = Core.Tool.Construct("Object", agent);
 
             var file = context.Request.Files[(int)index.Value];
-            result.Set("name", new Core.String(file.FileName));
-            result.Set("contentType", new Core.String(file.ContentType));
-            result.Set("size", new Core.Number(file.ContentLength));
+            result.Set("name", new Core.String(file.FileName), agent);
+            result.Set("contentType", new Core.String(file.ContentType), agent);
+            result.Set("size", new Core.Number(file.ContentLength), agent);
 
             using (MemoryStream ms = new MemoryStream()) {
                 file.InputStream.CopyTo(ms);
-                result.Set("content", new Core.Uint8Array(new Core.ArrayBuffer(ms.ToArray()), agent));
+                result.Set("content", new Core.Uint8Array(new Core.ArrayBuffer(ms.ToArray()), agent), agent);
             }
 
             return result;

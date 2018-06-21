@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -26,6 +27,12 @@ namespace NetJS.Server {
             application.Realm.RegisterClass(typeof(API.Request), "Request");
             application.Realm.RegisterClass(typeof(API.Response), "Response");
             application.Realm.RegisterClass(typeof(API.WebSocket), "WebSocket");
+
+            var watch = new Stopwatch();
+            watch.Start();
+            application.Realm.RegisterForeignNamespace("System.Threading.Tasks");
+            var time = watch.ElapsedMilliseconds;
+            Core.Log.Write(time.ToString());
 
             var session = new JSSession();
             _service.RunTemplate(application.Settings.Startup, "", ref application, ref session);

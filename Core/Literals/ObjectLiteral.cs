@@ -18,7 +18,7 @@ namespace NetJS.Core {
             foreach (var key in Blueprints.Keys) {
                 var reference = Blueprints[key].Evaluate(agent);
                 var value = References.GetValue(reference, agent);
-                newObject.Set(new String(key), value);
+                newObject.Set(key, value, agent);
             }
 
             return newObject;

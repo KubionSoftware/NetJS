@@ -95,7 +95,7 @@ namespace NetJS.Testing {
                     executeWatch.Restart();
 
                     var taskList = new List<Task>();
-                    for (var i = 0; i < 1 && i < Environment.ProcessorCount; i++) {
+                    for (var i = 0; i < Environment.ProcessorCount; i++) {
                         taskList.Add(Task.Factory.StartNew(ExecuteWorker));
                     }
 

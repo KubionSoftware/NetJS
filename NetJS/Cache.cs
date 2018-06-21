@@ -20,16 +20,20 @@ namespace NetJS {
 
         private Dictionary<string, SourceFile> Files = new Dictionary<string, SourceFile>();
 
-        public string GetPath(string name, JSApplication application, bool inSource = true) {
+        public string GetPath(string name, JSApplication application, bool inSource) {
             var path = name;
             if (!System.IO.Path.IsPathRooted(path)) {
-                path = application.Settings.Root + (inSource ? application.Settings.TemplateFolder : "") + path;
+                if (path.StartsWith("/")) {
+                    path = application.Settings.Root + (inSource ? application.Settings.TemplateFolder : "") + path;
+                } else {
+                    path = application.Settings.Root + (inSource ? application.Settings.TemplateFolder : "") + path;
+                }
             }
             return path;
         }
 
         public ScriptRecord GetScript(string name, JSApplication application) {
-            var path = GetPath(name, application);
+            var path = GetPath(name, application, true);
             var key = Core.Tool.NormalizePath(path);
 
             if (Files.ContainsKey(key)) {

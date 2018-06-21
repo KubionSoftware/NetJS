@@ -40,7 +40,7 @@ namespace NetJS {
             var obj = Core.Tool.Construct("Object", agent);
 
             foreach(var pair in _dict) {
-                obj.Set(pair.Key, pair.Value);
+                obj.Set(pair.Key, pair.Value, agent);
             }
 
             return obj;

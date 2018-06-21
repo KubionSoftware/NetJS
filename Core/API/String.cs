@@ -11,8 +11,8 @@ namespace NetJS.Core.API {
         public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
             var value = arguments.Length == 1 ? Tool.GetArgument<String>(arguments, 0, "String constructor") : new String("");
             var obj = _this as Object;
-            obj.Set(Primitive, value);
-            obj.Set("length", new Number(value.Value.Length));
+            obj.Set(Primitive, value, agent);
+            obj.Set("length", new Number(value.Value.Length), agent);
             return _this;
         }
 

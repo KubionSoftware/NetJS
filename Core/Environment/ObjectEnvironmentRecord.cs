@@ -85,7 +85,7 @@ namespace NetJS.Core {
         public override Completion SetMutableBinding(Constant name, Constant value, bool isStrict, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-object-environment-records-setmutablebinding-n-v-s
 
-            return new Completion(CompletionType.Normal, Boolean.Create(BindingObject.Set(name, value)));
+            return new Completion(CompletionType.Normal, Boolean.Create(BindingObject.Set(name, value, agent)));
         }
 
         public override string ToDebugString() {

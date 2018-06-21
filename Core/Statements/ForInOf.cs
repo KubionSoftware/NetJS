@@ -25,11 +25,11 @@ namespace NetJS.Core {
 
             if(value is Array a) {
                 for (var i = 0; i < a.List.Count; i++) {
-                    array.Add(new String(i.ToString()));
+                    array.Add(new String(i.ToString()), agent);
                 }
             } else if (value is Object obj) {
                 foreach (var prop in obj.OwnPropertyKeys()) {
-                    if (prop is String) array.Add(prop);
+                    if (prop is String) array.Add(prop, agent);
                 }
             }
 
@@ -43,11 +43,11 @@ namespace NetJS.Core {
 
             if (value is Array a) {
                 foreach (var item in a.List) {
-                    array.Add(item);
+                    array.Add(item, agent);
                 }
             } else if (value is Object obj) {
                 foreach (var prop in obj.OwnPropertyKeys()) {
-                    if (prop is String) array.Add(prop);
+                    if (prop is String) array.Add(prop, agent);
                 }
             } 
 

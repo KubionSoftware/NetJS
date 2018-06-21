@@ -34,7 +34,7 @@ namespace NetJS.Core.API {
                 date = DateTime.Now;
             }
 
-            (_this as Object).Set(Primitive, new Foreign(date));
+            (_this as Object).Set(Primitive, new Foreign(date), agent);
             return _this;
         }
 

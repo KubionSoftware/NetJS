@@ -36,10 +36,10 @@ namespace NetJS.Core {
 
         public override Object ToObject(Agent agent) {
             var obj = Tool.Construct("Object", agent);
-            obj.Set("value", Value);
-            obj.Set("writable", Boolean.Create(IsWritable));
-            obj.Set("enumerable", Boolean.Create(IsEnumerable));
-            obj.Set("configurable", Boolean.Create(IsConfigurable));
+            obj.Set("value", Value, agent);
+            obj.Set("writable", Boolean.Create(IsWritable), agent);
+            obj.Set("enumerable", Boolean.Create(IsEnumerable), agent);
+            obj.Set("configurable", Boolean.Create(IsConfigurable), agent);
             return obj;
         }
     }
@@ -69,10 +69,10 @@ namespace NetJS.Core {
 
         public override Object ToObject(Agent agent) {
             var obj = Tool.Construct("Object", agent);
-            obj.Set("get", Get);
-            obj.Set("set", Set);
-            obj.Set("enumerable", Boolean.Create(IsEnumerable));
-            obj.Set("configurable", Boolean.Create(IsConfigurable));
+            obj.Set("get", Get, agent);
+            obj.Set("set", Set, agent);
+            obj.Set("enumerable", Boolean.Create(IsEnumerable), agent);
+            obj.Set("configurable", Boolean.Create(IsConfigurable), agent);
             return obj;
         }
     }
@@ -316,7 +316,7 @@ namespace NetJS.Core {
             return Get(new String(p), agent);
         }
 
-        public virtual bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null, int depth = 0) {
+        public virtual bool Set(Constant p, Constant v, Agent agent, Constant receiver = null, int depth = 0) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-set-o-p-v-throw
 
             Assert.IsPropertyKey(p);
@@ -366,8 +366,8 @@ namespace NetJS.Core {
             return true;
         }
 
-        public bool Set(string p, Constant v) {
-            return Set(new String(p), v);
+        public bool Set(string p, Constant v, Agent agent) {
+            return Set(new String(p), v, agent);
         }
 
         public bool CreateDataProperty(Constant p, Constant v) {

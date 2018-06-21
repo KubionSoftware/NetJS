@@ -49,7 +49,7 @@ namespace NetJS.Core {
                     }
 
                     var globalObj = agent.Running.GetGlobalObject();
-                    var succeeded = globalObj.Set(r.GetReferencedName(), w);
+                    var succeeded = globalObj.Set(r.GetReferencedName(), w, agent);
                     return new Completion(CompletionType.Normal, Boolean.Create(succeeded));
                 } else if (r.IsPropertyReference()) {
                     if (r.HasPrimitiveBase()) {
@@ -58,7 +58,7 @@ namespace NetJS.Core {
                     }
 
                     // TODO: handle succeeded + this value
-                    var succeeded = ((Object)b).Set(r.GetReferencedName(), w);
+                    var succeeded = ((Object)b).Set(r.GetReferencedName(), w, agent);
                     return new Completion(CompletionType.Normal, Boolean.Create(succeeded));
                 } else if (b is ExoticConstant e) {
                     e.SetProperty(r.GetReferencedName(), w, agent);

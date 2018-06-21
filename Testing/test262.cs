@@ -8,18 +8,18 @@ using System.Text.RegularExpressions;
 using NetJS;
 using YamlDotNet.RepresentationModel;
 
-namespace NetJS.Testing{
-    public class Directory{
+namespace NetJS.Testing {
+    public class Directory {
         private List<Directory> _directories;
         private readonly int _level;
         public List<Test> Tests = new List<Test>();
 
-        public Directory(string s, int level){
+        public Directory(string s, int level) {
             this._level = level;
             _directories = new List<Directory>();
         }
 
-        public Directory Walkthrough(string path, Directory root){
+        public Directory Walkthrough(string path, Directory root) {
             var myRoot = root ?? this;
             var allFiles = System.IO.Directory.GetFiles(path);
             foreach (var file in allFiles) {
@@ -40,7 +40,7 @@ namespace NetJS.Testing{
             return this;
         }
 
-        public void ExecuteTests(JSApplication application, JSService service, JSSession session){
+        public void ExecuteTests(JSApplication application, JSService service, JSSession session) {
             foreach (var test in Tests) {
                 if (test == null) continue;
                 test.Initialize();
@@ -48,7 +48,7 @@ namespace NetJS.Testing{
             }
         }
 
-        public int GetHighestLevel(Directory d){
+        public int GetHighestLevel(Directory d) {
             var level = this._level;
             if (d == null) return level;
             foreach (var directory in d._directories) {
@@ -65,7 +65,7 @@ namespace NetJS.Testing{
             return level;
         }
 
-        public string ToCSV(int level){
+        public string ToCSV(int level) {
             var countSuccesful = 0;
             var countTotal = 0;
             var countUndefined = 0;
@@ -82,27 +82,23 @@ namespace NetJS.Testing{
                         if (test.UseNonStrict) {
                             if (test.NonStrictResult) {
                                 countSuccesful++;
-                            }
-                            else {
+                            } else {
                                 countFailed++;
                             }
                         }
                         if (test.UseStrict) {
                             if (test.StrictResult) {
                                 countSuccesful++;
-                            }
-                            else {
+                            } else {
                                 countFailed++;
                             }
                         }
-                    }
-                    else {
+                    } else {
                         countUndefined++;
                     }
 
                     countTotal += test.TotalTests;
-                }
-                else {
+                } else {
                     answer.Add("");
                 }
             }
@@ -112,9 +108,9 @@ namespace NetJS.Testing{
             answer.Add("not implemented," + countUndefined);
             answer.Add("failed," + countFailed);
             answer.Add("");
-            var pSuccesful = Math.Round((double) countSuccesful * 100 / countTotal, 2);
-            var pUndefined = Math.Round((double) countUndefined * 100 / countTotal, 2);
-            var pFailed = Math.Round((double) countFailed * 100 / countTotal, 2);
+            var pSuccesful = Math.Round((double)countSuccesful * 100 / countTotal, 2);
+            var pUndefined = Math.Round((double)countUndefined * 100 / countTotal, 2);
+            var pFailed = Math.Round((double)countFailed * 100 / countTotal, 2);
             answer.Add("%succesful," + pSuccesful);
             answer.Add("%undefined," + pUndefined);
             answer.Add("%failed," + pFailed);
@@ -123,7 +119,7 @@ namespace NetJS.Testing{
         }
     }
 
-    public class Test{
+    public class Test {
         private readonly string _path;
         private string[] _splittedPath;
         private string _name;
@@ -147,11 +143,11 @@ namespace NetJS.Testing{
         private string _code;
         public int TotalTests = 1;
 
-        public Test(string filePath){
+        public Test(string filePath) {
             _path = filePath.Replace('\\', '/');
         }
 
-        public void Initialize(){
+        public void Initialize() {
             _splittedPath = _path.Split('/');
             _name = _splittedPath[_splittedPath.Length - 1];
             UseNonStrict = true;
@@ -177,7 +173,7 @@ namespace NetJS.Testing{
             yaml.Load(yamlInput);
 
             if (yaml.Documents.Count <= 0) return;
-            var mapping = (YamlMappingNode) yaml.Documents[0].RootNode;
+            var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
 
             mapping.Children.TryGetValue("description", out _description);
             mapping.Children.TryGetValue("es5id", out _es5Id);
@@ -231,9 +227,7 @@ namespace NetJS.Testing{
                             break;
                     }
                 }
-            }
-            else
-            {
+            } else {
                 TotalTests = 2;
                 UseNonStrict = true;
                 UseStrict = true;
@@ -241,7 +235,7 @@ namespace NetJS.Testing{
         }
 
 
-        public void Execute(JSApplication application, JSService service, JSSession session){
+        public void Execute(JSApplication application, JSService service, JSSession session) {
             if (Implemented.Count >= 1) return;
             var watch = new Stopwatch();
             watch.Start();
@@ -254,19 +248,18 @@ namespace NetJS.Testing{
                     preTestOutput += service.RunScript(preTestPath, application, session, true, false);
                 }
             }
-            
+
             var strictTestOutput = "";
             var strictWatch = new Stopwatch();
-            if (UseStrict)
-            {
-                
+            if (UseStrict) {
+
                 strictWatch.Start();
                 strictTestOutput = service.RunCode("\"use strict\"\n" + _code, application, session, false, true);
                 strictWatch.Stop();
-                
+
             }
 
-            
+
             var templateWatch = new Stopwatch();
             templateWatch.Start();
             var testOutput = service.RunCode(_code, application, session, false, true);
@@ -282,10 +275,9 @@ namespace NetJS.Testing{
                     comparewith = splitOutput[0] + splitOutput[1][0].ToString().ToUpper() +
                                   splitOutput[1].Substring(1);
                 }
-                
+
                 var compareStrictWith = "";
-                if (splitStrictOutput.Length > 1)
-                {
+                if (splitStrictOutput.Length > 1) {
                     compareStrictWith = splitStrictOutput[0] + splitStrictOutput[1][0].ToString().ToUpper() +
                                         splitStrictOutput[1].Substring(1);
                 }
@@ -294,21 +286,15 @@ namespace NetJS.Testing{
                     NonStrictResult = true;
                 }
 
-                if (compareStrictWith.Contains(_negativeType.ToString()))
-                {
+                if (compareStrictWith.Contains(_negativeType.ToString())) {
                     StrictResult = true;
                 }
-            }
-
-            else
-            {
-                if (testOutput.Length < 1)
-                {
+            } else {
+                if (testOutput.Length < 1) {
                     NonStrictResult = true;
                 }
 
-                if (strictTestOutput.Length < 1)
-                {
+                if (strictTestOutput.Length < 1) {
                     StrictResult = true;
                 }
             }
@@ -317,13 +303,13 @@ namespace NetJS.Testing{
                 NonStrictResult = false;
                 _nonStrictOutput += "Async timeout fail | ";
             }
-            
+
 
             if (preTestOutput.Length > 0) {
                 _nonStrictOutput += "preTest: " + preTestOutput + " | ";
                 _strictOutput += "preTest: " + strictTestOutput + " | ";
             }
-            
+
 
             _nonStrictOutput += testOutput;
             var stringTime = Math.Round(templateWatch.Elapsed.TotalMilliseconds, 2).ToString().Split('.');
@@ -334,8 +320,7 @@ namespace NetJS.Testing{
             }
 
             var timeStrictDecimal = "00";
-            if (strictStringTime.Length == 2)
-            {
+            if (strictStringTime.Length == 2) {
                 timeStrictDecimal = (int.Parse(strictStringTime[1]) * 6 / 10).ToString();
             }
 
@@ -344,7 +329,7 @@ namespace NetJS.Testing{
         }
 
 
-        public string GetCsv(int level){
+        public string GetCsv(int level) {
             var answer = "";
             if (!UseNonStrict) return answer;
             var fullpath = Program.Test262Root;
@@ -358,49 +343,41 @@ namespace NetJS.Testing{
 
             if (level > _splittedPath.Length - 1) {
                 infoString += new string(',', (level - _splittedPath.Length) + 1);
-            }
-            else {
+            } else {
                 infoString += ",";
             }
 
 
             infoString += _name;
-            if (Implemented.Count < 1)
-            {
+            if (Implemented.Count < 1) {
                 var rgx4 = new Regex(@"([\r\n])+");
-                if (UseNonStrict)
-                {
+                if (UseNonStrict) {
                     var preOutput = "";
-                    if (_negative != null && _negativeType != null)
-                    {
+                    if (_negative != null && _negativeType != null) {
                         preOutput = "[negative:" + _negativeType + "] ";
                     }
 
-                    answer += infoString + "," + NonStrictResult + "," + _nonStrictTime + "," + "\"" +
+                    answer += infoString + ",nonStrict modus," + NonStrictResult + "," + _nonStrictTime + "," + "\"" +
                               rgx4.Replace(preOutput.Replace('"', '\'') + _nonStrictOutput.Replace('"', '\''), " ") +
                               "\"," +
                               _path.Replace('/', '\\');
-                    if (UseStrict)
-                    {
+                    if (UseStrict) {
                         answer += "\n";
                     }
                 }
 
-                if (UseStrict)
-                {
+                if (UseStrict) {
                     var preOutput = "";
-                    if (_negative != null && _negativeType != null)
-                    {
+                    if (_negative != null && _negativeType != null) {
                         preOutput = "[negative:" + _negativeType + "] ";
-                        
+
                     }
 
-                    answer += infoString + " (strict modus)," + StrictResult + "," + _strictTime + ",\"" +
+                    answer += infoString + ",strict modus," + StrictResult + "," + _strictTime + ",\"" +
                               rgx4.Replace(preOutput.Replace('"', '\'') + _strictOutput.Replace('"', '\''), " ") + "\"," + _path.Replace('/', '\\');
                 }
-                
-            }
-            else {
+
+            } else {
                 answer += "," + "undefined" + ",," +
                           "\"the following features are not implemented: " + string.Join(",", Implemented.ToArray()) +
                           "\"," + _path.Replace('/', '\\');

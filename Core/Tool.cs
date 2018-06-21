@@ -15,7 +15,7 @@ namespace NetJS.Core {
 
         public static Array ToArray(IEnumerable<string> strings, Agent agent) {
             var array = new Array(0, agent);
-            foreach (var s in strings) array.Add(new String(s));
+            foreach (var s in strings) array.Add(new String(s), agent);
             return array;
         }
 

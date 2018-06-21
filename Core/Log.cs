@@ -13,7 +13,9 @@ namespace NetJS.Core {
             try {
                 var info = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss:fff");
                 System.IO.File.AppendAllText(file, info + " - " + message + "\n");
-            } catch { }
+            } catch {
+
+            }
         }
     }
 }
