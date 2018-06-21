@@ -72,74 +72,8 @@ namespace NetJS.Testing {
 
         static void Main(string[] args){
             try {
-                NumFailed = 0;
-                NumSuccess = 0;
-
-                var recursiveFindWatch = new Stopwatch();
-                recursiveFindWatch.Start();
-
-                var root = new Directory("test", 1);
-                root = root.Walkthrough(Test262Root, null);
-                Console.WriteLine("Got all files!");
-
-                recursiveFindWatch.Stop();
-
-                _allTests = root.Tests;
-
-                var executeWatch = new Stopwatch();
-                
-
-                var rounds = 0;
-                while (_benchmarkRounds > rounds) {
-                    Console.WriteLine("Round: " + (rounds+1));
-                    executeWatch.Restart();
-
-                    var taskList = new List<Task>();
-                    for (var i = 0; i < Environment.ProcessorCount; i++) {
-                        taskList.Add(Task.Factory.StartNew(ExecuteWorker));
-                    }
-
-                    Task.WaitAll(taskList.ToArray());
-
-                    executeWatch.Stop();
-                    _testCount = 0;
-                    _benchmarkResults.Add(executeWatch.Elapsed.TotalSeconds);
-                    rounds++;
-                    Console.WriteLine(
-                        "Elapsed Creation & executionTime (mm:ss):" + executeWatch.Elapsed.ToString(@"mm\:ss"));
-                }
-                
-                var watch = new Stopwatch();
-                watch.Start();
-
-                var output = root.ToCSV(root.GetHighestLevel(root) + 1);
-
-
-                watch.Stop();
-                output += "\nElapsed Retrieval Time(mm:ss):," + recursiveFindWatch.Elapsed.ToString(@"mm\:ss");
-                output += "\nElapsed Creation & Execution Time (mm:ss):," + executeWatch.Elapsed.ToString(@"mm\:ss");
-                output += "\nElapsed Formatting Time (mm:ss):," + watch.Elapsed.ToString(@"mm\:ss");
-
-                Console.WriteLine("Elapsed Retrieval Time(mm:ss):" + recursiveFindWatch.Elapsed.ToString(@"mm\:ss"));
-                Console.WriteLine("Elapsed Formatting Time (mm:ss):" + watch.Elapsed.ToString(@"mm\:ss"));
-
-                while (true) {
-                    try {
-                        System.IO.File.WriteAllText(@"test.csv", output);
-                        break;
-                    } catch {
-                        Console.Error.WriteLine("Close csv file. Then press enter");
-                        Console.ReadLine();
-                    }
-                }
-
-                var totalExecutionTime = 0.0;
-                foreach (var result in _benchmarkResults) {
-                    totalExecutionTime += result;
-                }
-
-                Console.WriteLine("Avarage Execution time: " + totalExecutionTime / _benchmarkResults.Count);
-                Console.ReadLine();
+                FeatureTest();
+                //Test262();
             }
             catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -148,9 +82,107 @@ namespace NetJS.Testing {
                 System.IO.File.WriteAllText(@"error.txt", e.Message);
                 Console.WriteLine(e);
             }
-
             
             Console.ReadLine();
+        }
+
+        static void FeatureTest() {
+            var service = new JSService();
+            var application = new JSApplication("../../test/");
+
+            application.Realm.RegisterFunctions(typeof(TestFunctions));
+
+            while (true) {
+                NumFailed = 0;
+                NumSuccess = 0;
+
+                var watch = new Stopwatch();
+                watch.Start();
+
+                var session = new JSSession();
+                var output = service.RunTemplate("main.js", "{}", ref application, ref session);
+
+                watch.Stop();
+
+                Console.ForegroundColor = NumFailed == 0 ? ConsoleColor.Green : ConsoleColor.Red;
+                Console.WriteLine($"Completed test with {NumFailed} failures and {NumSuccess} successes");
+
+                Console.ForegroundColor = ConsoleColor.White;
+
+                Console.WriteLine("Output: ");
+                Console.WriteLine(output);
+
+                Console.WriteLine("Time: " + watch.ElapsedMilliseconds + "ms");
+
+                Console.ReadLine();
+            }
+        }
+
+        static void Test262() {
+            var recursiveFindWatch = new Stopwatch();
+            recursiveFindWatch.Start();
+
+            var root = new Directory("test", 1);
+            root = root.Walkthrough(Test262Root, null);
+            Console.WriteLine("Got all files!");
+
+            recursiveFindWatch.Stop();
+
+            _allTests = root.Tests;
+
+            var executeWatch = new Stopwatch();
+
+
+            var rounds = 0;
+            while (_benchmarkRounds > rounds) {
+                Console.WriteLine("Round: " + (rounds + 1));
+                executeWatch.Restart();
+
+                var taskList = new List<Task>();
+                for (var i = 0; i < Environment.ProcessorCount; i++) {
+                    taskList.Add(Task.Factory.StartNew(ExecuteWorker));
+                }
+
+                Task.WaitAll(taskList.ToArray());
+
+                executeWatch.Stop();
+                _testCount = 0;
+                _benchmarkResults.Add(executeWatch.Elapsed.TotalSeconds);
+                rounds++;
+                Console.WriteLine(
+                    "Elapsed Creation & executionTime (mm:ss):" + executeWatch.Elapsed.ToString(@"mm\:ss"));
+            }
+
+            var watch = new Stopwatch();
+            watch.Start();
+
+            var output = root.ToCSV(root.GetHighestLevel(root) + 1);
+
+
+            watch.Stop();
+            output += "\nElapsed Retrieval Time(mm:ss):," + recursiveFindWatch.Elapsed.ToString(@"mm\:ss");
+            output += "\nElapsed Creation & Execution Time (mm:ss):," + executeWatch.Elapsed.ToString(@"mm\:ss");
+            output += "\nElapsed Formatting Time (mm:ss):," + watch.Elapsed.ToString(@"mm\:ss");
+
+            Console.WriteLine("Elapsed Retrieval Time(mm:ss):" + recursiveFindWatch.Elapsed.ToString(@"mm\:ss"));
+            Console.WriteLine("Elapsed Formatting Time (mm:ss):" + watch.Elapsed.ToString(@"mm\:ss"));
+
+            while (true) {
+                try {
+                    System.IO.File.WriteAllText(@"test.csv", output);
+                    break;
+                } catch {
+                    Console.Error.WriteLine("Close csv file. Then press enter");
+                    Console.ReadLine();
+                }
+            }
+
+            var totalExecutionTime = 0.0;
+            foreach (var result in _benchmarkResults) {
+                totalExecutionTime += result;
+            }
+
+            Console.WriteLine("Avarage Execution time: " + totalExecutionTime / _benchmarkResults.Count);
         }
 
         private static void ExecuteWorker(){
