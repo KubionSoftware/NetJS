@@ -14,7 +14,7 @@ namespace NetJS.GUI.API {
             var thisObject = (Core.Object)_this;
 
             var window = Core.Tool.GetArgument<Core.Object>(arguments, 0, "Graphics constructor");
-            var form = (Form)(window.Get("form") as Foreign).Value;
+            var form = (Form)(window.Get("form", agent) as Foreign).Value;
             var graphics = form.CreateGraphics();
 
             thisObject.Set("graphics", new Foreign(graphics));
@@ -54,8 +54,8 @@ namespace NetJS.GUI.API {
             return new Point(x, y);
         }
 
-        private static System.Drawing.Graphics GetGraphics(Constant _this) {
-            var jsGraphics = ((Core.Object)_this).Get("bufferGraphics") as Foreign;
+        private static System.Drawing.Graphics GetGraphics(Constant _this, Agent agent) {
+            var jsGraphics = ((Core.Object)_this).Get("bufferGraphics", agent) as Foreign;
             var graphics = (System.Drawing.Graphics)jsGraphics.Value;
             return graphics;
         }
@@ -63,28 +63,28 @@ namespace NetJS.GUI.API {
         public static Constant fillRect(Constant _this, Constant[] arguments, Agent agent) {
             var rect = GetRectangle(arguments, "Graphics.fillRect");
             var brush = GetBrush(arguments, 4, "Graphics.fillRect");
-            GetGraphics(_this).FillRectangle(brush, rect);
+            GetGraphics(_this, agent).FillRectangle(brush, rect);
             return Static.Undefined;
         }
 
         public static Constant drawRect(Constant _this, Constant[] arguments, Agent agent) {
             var rect = GetRectangle(arguments, "Graphics.drawRect");
             var pen = GetPen(arguments, 4, "Graphics.drawRect");
-            GetGraphics(_this).DrawRectangle(pen, rect);
+            GetGraphics(_this, agent).DrawRectangle(pen, rect);
             return Static.Undefined;
         }
 
         public static Constant fillEllipse(Constant _this, Constant[] arguments, Agent agent) {
             var rect = GetRectangle(arguments, "Graphics.fillEllipse");
             var brush = GetBrush(arguments, 4, "Graphics.fillEllipse");
-            GetGraphics(_this).FillEllipse(brush, rect);
+            GetGraphics(_this, agent).FillEllipse(brush, rect);
             return Static.Undefined;
         }
 
         public static Constant drawEllipse(Constant _this, Constant[] arguments, Agent agent) {
             var rect = GetRectangle(arguments, "Graphics.drawEllipse");
             var pen = GetPen(arguments, 4, "Graphics.drawEllipse");
-            GetGraphics(_this).DrawEllipse(pen, rect);
+            GetGraphics(_this, agent).DrawEllipse(pen, rect);
             return Static.Undefined;
         }
 
@@ -92,7 +92,7 @@ namespace NetJS.GUI.API {
             var from = GetPoint(arguments, "Graphics.drawLine");
             var to = GetPoint(arguments, "Graphics.drawLine", 2);
             var pen = GetPen(arguments, 4, "Graphics.drawLine");
-            GetGraphics(_this).DrawLine(pen, from, to);
+            GetGraphics(_this, agent).DrawLine(pen, from, to);
             return Static.Undefined;
         }
 
@@ -100,15 +100,15 @@ namespace NetJS.GUI.API {
             var point = GetPoint(arguments, "Graphics.drawString");
             var s = Core.Tool.GetArgument<Core.String>(arguments, 2, "Graphics.drawString").Value;
             var brush = GetBrush(arguments, 3, "Graphics.drawString");
-            GetGraphics(_this).DrawString(s, new Font("Arial", 16f), brush, point);
+            GetGraphics(_this, agent).DrawString(s, new Font("Arial", 16f), brush, point);
             return Static.Undefined;
         }
 
         public static Constant update(Constant _this, Constant[] arguments, Agent agent) {
-            var jsGraphics = ((Core.Object)_this).Get("graphics") as Foreign;
+            var jsGraphics = ((Core.Object)_this).Get("graphics", agent) as Foreign;
             var graphics = (System.Drawing.Graphics)jsGraphics.Value;
 
-            var jsBuffer = ((Core.Object)_this).Get("buffer") as Foreign;
+            var jsBuffer = ((Core.Object)_this).Get("buffer", agent) as Foreign;
             var buffer = (Bitmap)jsBuffer.Value;
 
             graphics.DrawImage(buffer, 0, 0);

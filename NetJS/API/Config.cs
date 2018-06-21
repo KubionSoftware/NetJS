@@ -15,9 +15,9 @@ namespace NetJS.API {
                 var content = System.IO.File.ReadAllText(file);
 
                 var config = JSONAPI.parse(Static.Undefined, new[] { new String(content) }, agent);
-                agent.Running.GetGlobalObject().Set("Config", config);
+                agent.Running.GetGlobalObject().Set("Config", config, agent);
             } else {
-                agent.Running.GetGlobalObject().Set("Config", Core.Tool.Construct("Object", agent));
+                agent.Running.GetGlobalObject().Set("Config", Core.Tool.Construct("Object", agent), agent);
             }
         }
     }

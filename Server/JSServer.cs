@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -28,7 +29,14 @@ namespace NetJS.Server {
             application.Realm.RegisterClass(typeof(API.WebSocket), "WebSocket");
 
             var session = new JSSession();
-            _service.RunTemplate(application.Settings.Startup, "", ref application, ref session);
+
+            NetJS.API.Log.Write("Startup: " +
+                _service.RunTemplate(
+                    application.Settings.Startup, 
+                    "", 
+                    ref application, 
+                    ref session
+            ), application);
 
             return application;
         }

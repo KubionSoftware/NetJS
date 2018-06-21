@@ -28,17 +28,17 @@ namespace NetJS.Core {
 
             // Create the prototype and assign it to the constructor
             var prototype = Tool.Construct(Prototype, agent);
-            constructor.Set("prototype", prototype);
-            prototype.Set("constructor", constructor);
+            constructor.Set("prototype", prototype, agent);
+            prototype.Set("constructor", constructor, agent);
 
             // Assign prototype methods to prototype
             foreach(var method in PrototypeMethods) {
-                prototype.Set(method.Name, method.Instantiate(agent));
+                prototype.Set(method.Name, method.Instantiate(agent), agent);
             }
 
             // Assign static methods to constructor function
             foreach (var method in StaticMethods) {
-                constructor.Set(method.Name, method.Instantiate(agent));
+                constructor.Set(method.Name, method.Instantiate(agent), agent);
             }
 
             return constructor;

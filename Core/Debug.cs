@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
@@ -50,7 +51,7 @@ namespace NetJS.Core {
 
         private static Dictionary<string, int> Files = new Dictionary<string, int>();
 
-        private static Dictionary<int, Dictionary<int, List<int>>> Nodes = new Dictionary<int, Dictionary<int, List<int>>>();
+        private static ConcurrentDictionary<int, ConcurrentDictionary<int, List<int>>> Nodes = new ConcurrentDictionary<int, ConcurrentDictionary<int, List<int>>>();
         private static List<WebSocket> Sockets = new List<WebSocket>();
 
         private static List<Breakpoint> Breakpoints = new List<Breakpoint>();
@@ -90,9 +91,8 @@ namespace NetJS.Core {
 
         public static int AddNode(Location location) {
             var id = LastId++;
-
             if (!Nodes.ContainsKey(location.FileId)) {
-                Nodes[location.FileId] = new Dictionary<int, List<int>>();
+                Nodes[location.FileId] = new ConcurrentDictionary<int, List<int>>();
             }
             if (!Nodes[location.FileId].ContainsKey(location.LineNr)) {
                 Nodes[location.FileId][location.LineNr] = new List<int>();
@@ -106,27 +106,31 @@ namespace NetJS.Core {
                 BreakpointNodes.Add(id);
                 breakpoint.Nodes.Add(id);
             }
-
+            
             return id;
         }
 
         public static void RemoveNodes(int fileId) {
             if (Nodes.ContainsKey(fileId)) {
-                Nodes.Remove(fileId);
+                // TODO: make type for this
+                ConcurrentDictionary<int, List<int>> removedValue;
+                Nodes.TryRemove(fileId, out removedValue);
             }
         }
 
         public static Location GetNodeLocation(int id) {
             // can be slow because it only happens on an error, which should be almost never :)
 
+            
             foreach (var fileId in Nodes.Keys) {
                 var fileNodes = Nodes[fileId];
-                foreach(var lineNr in fileNodes.Keys) {
+                foreach (var lineNr in fileNodes.Keys) {
                     if (fileNodes[lineNr].Contains(id)) {
                         return new Location(fileId, lineNr);
                     }
                 }
             }
+           
 
             return new Location(-1, -1);
         }

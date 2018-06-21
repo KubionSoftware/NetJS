@@ -26,15 +26,17 @@ namespace NetJS.Console {
 
             application.Realm.RegisterClass(typeof(API.Console), "Console");
 
+            application.Realm.RegisterForeignNamespace("System");
+
             service.RunTemplate(application.Settings.Startup, data, ref application, ref session);
 
             try {
                 var result = service.RunTemplate(application.Settings.Entry, data, ref application, ref session);
                 System.Console.WriteLine(result);
-                System.Console.Read();
+                System.Console.ReadLine();
             } catch (Exception e) {
                 System.Console.WriteLine(e);
-                System.Console.Read();
+                System.Console.ReadLine();
             }
         }
     }

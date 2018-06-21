@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace NetJS.Core {
 
@@ -124,6 +125,8 @@ namespace NetJS.Core {
                 Tokens.Default
             };
         }
+
+        private class BreakExpressionException : Exception { }
 
 #if debug_enabled
         public Debug.Location GetLocation(int index) {
@@ -345,7 +348,11 @@ namespace NetJS.Core {
             return expression is Identifier || expression is Access || expression is New || expression is FunctionLiteral || expression is ArgumentList;
         }
 
-        public void CombineExpression(ref Expression left, Expression expression) {
+        public void CombineExpression(ref Expression left, Expression expression, System.Type[] operators) {
+            if (operators != null && expression is Operator opr && !operators.Contains(opr.GetType())) {
+                throw new BreakExpressionException();
+            }
+
             if (left == null) {
                 left = expression;
             } else if (expression == null) {
@@ -411,7 +418,7 @@ namespace NetJS.Core {
 #endif
         }
 
-        public Expression ParseExpression() {
+        public Expression ParseExpression(System.Type[] operators = null) {
             var parts = new List<string>();
             Expression left = null;
             var previousNewLine = false;
@@ -434,37 +441,37 @@ namespace NetJS.Core {
                         _index++;
                         continue;
                     } else if (token.Type == Token.Group.String) {
-                        CombineExpression(ref left, new StringLiteral(token.Content));
+                        CombineExpression(ref left, new StringLiteral(token.Content), operators);
                         _index++;
                     } else if (token.Type == Token.Group.Template) {
-                        CombineExpression(ref left, ParseTemplate());
+                        CombineExpression(ref left, ParseTemplate(), operators);
                     } else if (token.Type == Token.Group.Number) {
-                        CombineExpression(ref left, new NumberLiteral(Double.Parse(token.Content, CultureInfo.InvariantCulture)));
+                        CombineExpression(ref left, new NumberLiteral(Double.Parse(token.Content, CultureInfo.InvariantCulture)), operators);
                         _index++;
                     } else if (_expressions.ContainsKey(token.Content)) {
-                        CombineExpression(ref left, _expressions[token.Content](left));
+                        CombineExpression(ref left, _expressions[token.Content](left), operators);
                         _index++;
                     } else if (_parseExpressions.ContainsKey(token.Content)) {
-                        CombineExpression(ref left, _parseExpressions[token.Content](left));
+                        CombineExpression(ref left, _parseExpressions[token.Content](left), operators);
                     } else if (token.Content == Tokens.Divide) {
-                        CombineExpression(ref left, ParseDivide(left));
+                        CombineExpression(ref left, ParseDivide(left), operators);
                     } else if (token.Content == Tokens.Increment) {
-                        CombineExpression(ref left, ParsePreOrPost(left, new PrefixIncrement(), new PostfixIncrement()));
+                        CombineExpression(ref left, ParsePreOrPost(left, new PrefixIncrement(), new PostfixIncrement()), operators);
                         _index++;
                     } else if (token.Content == Tokens.Decrement) {
-                        CombineExpression(ref left, ParsePreOrPost(left, new PrefixDecrement(), new PostfixDecrement()));
+                        CombineExpression(ref left, ParsePreOrPost(left, new PrefixDecrement(), new PostfixDecrement()), operators);
                         _index++;
                     } else if (token.Content == Tokens.GroupOpen) {
-                        CombineExpression(ref left, ParseGroup(left));
+                        CombineExpression(ref left, ParseGroup(left), operators);
                     } else if (_statements.ContainsKey(token.Content)) {
                         break;
                     } else {
-                        CombineExpression(ref left, ParseIdentifier(token.Content));
+                        CombineExpression(ref left, ParseIdentifier(token.Content), operators);
                     }
                     
                     previousNewLine = false;
                 } catch (Exception e) {
-                    if (previousNewLine) {
+                    if (previousNewLine || e is BreakExpressionException) {
                         _index = startIndex;
                         break;
                     } else {
@@ -1057,10 +1064,12 @@ namespace NetJS.Core {
         public New ParseNew() {
             Skip(Tokens.New);
 
-            var identifier = new Identifier(Next("new identifier").Content);
+            var expression = ParseExpression(new [] {
+                typeof(Access)
+            });
             var arguments = ParseArguments();
 
-            return new New() { NewExpression = identifier, Arguments = arguments };
+            return new New() { NewExpression = expression, Arguments = arguments };
         }
 
         public FunctionLiteral ParseArrowFunction(ParameterList parameters) {

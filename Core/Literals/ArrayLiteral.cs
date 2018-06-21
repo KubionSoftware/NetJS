@@ -14,7 +14,7 @@ namespace NetJS.Core {
 
         public override Constant Instantiate(Agent agent) {
             var array = new Array(0, agent);
-            array.AddRange(Values.Select(value => value.Evaluate(agent)));
+            array.AddRange(Values.Select(value => value.Evaluate(agent)), agent);
             return array;
         }
 

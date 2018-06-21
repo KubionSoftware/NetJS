@@ -163,7 +163,7 @@ namespace NetJS.Core {
             return Static.NormalCompletion;
         }
 
-        public Completion CreateGlobalFunctionBinding(Constant name, Constant value, bool canBeDeleted) {
+        public Completion CreateGlobalFunctionBinding(Constant name, Constant value, bool canBeDeleted, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-createglobalfunctionbinding
 
             var globalObject = ObjectRecord.BindingObject;
@@ -185,7 +185,7 @@ namespace NetJS.Core {
 
             // TODO :record that the binding for N in ObjectRecord has been initialized
 
-            globalObject.Set(name, value);
+            globalObject.Set(name, value, agent);
             if (!VarNames.Contains(name)) VarNames.Add(name);
 
             return Static.NormalCompletion;

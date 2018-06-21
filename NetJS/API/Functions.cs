@@ -124,5 +124,25 @@ namespace NetJS.API {
 
             return Static.Undefined;
         }
+        
+        /// <summary>Includes a namespace from the .NET environment</summary>
+        /// <param name="namespace">The namespace to include</param>
+        /// <example><code lang="javascript">includeNamespace("System.Text");</code></example>
+        public static Constant includeNamespace(Constant _this, Constant[] arguments, Agent agent) {
+            var ns = Core.Tool.GetArgument<String>(arguments, 0, "includeNamespace").Value;
+            (agent as NetJSAgent).Application.Realm.RegisterForeignNamespace(ns);
+            return Static.Undefined;
+        }
+
+        /// <summary>Includes a dll</summary>
+        /// <param name="file">The dll file to include</param>
+        /// <example><code lang="javascript">includeDLL("ADFS.dll");</code></example>
+        public static Constant includeDLL(Constant _this, Constant[] arguments, Agent agent) {
+            var dll = Core.Tool.GetArgument<String>(arguments, 0, "includeDLL").Value;
+            var application = (agent as NetJSAgent).Application;
+            dll = application.Cache.GetPath(dll, application, false);
+            application.Realm.RegisterDLL(dll);
+            return Static.Undefined;
+        }
     }
 }

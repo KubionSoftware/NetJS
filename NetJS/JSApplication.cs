@@ -22,8 +22,9 @@ namespace NetJS {
             Settings = new Settings(rootDir);
 
             Cache = new Cache();
-
+            
             Realm = new Realm();
+            Realm.SetAgent(new NetJSAgent(Realm, this, new JSSession()));
 
             Realm.RegisterClass(typeof(API.HTTP), "HTTP");
             Realm.RegisterClass(typeof(API.SQL), "SQL");

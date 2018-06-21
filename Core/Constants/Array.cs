@@ -18,37 +18,37 @@ namespace NetJS.Core {
                 _list.Add(Static.Undefined);
             }
 
-            Set("length", new Number(_list.Count));
+            Set("length", new Number(_list.Count), agent);
         }
 
-        public void Add(Constant item) {
+        public void Add(Constant item, Agent agent) {
             _list.Add(item);
-            Set("length", new Number(_list.Count));
+            Set("length", new Number(_list.Count), agent);
         }
 
-        public void AddRange(IEnumerable<Constant> items) {
+        public void AddRange(IEnumerable<Constant> items, Agent agent) {
             _list.AddRange(items);
-            Set("length", new Number(_list.Count));
+            Set("length", new Number(_list.Count), agent);
         }
 
-        public void Insert(int index, Constant item) {
+        public void Insert(int index, Constant item, Agent agent) {
             _list.Insert(index, item);
-            Set("length", new Number(_list.Count));
+            Set("length", new Number(_list.Count), agent);
         }
 
-        public void InsertRange(int index, IEnumerable<Constant> item) {
+        public void InsertRange(int index, IEnumerable<Constant> item, Agent agent) {
             _list.InsertRange(index, item);
-            Set("length", new Number(_list.Count));
+            Set("length", new Number(_list.Count), agent);
         }
 
-        public void RemoveAt(int index) {
+        public void RemoveAt(int index, Agent agent) {
             _list.RemoveAt(index);
-            Set("length", new Number(_list.Count));
+            Set("length", new Number(_list.Count), agent);
         }
 
-        public void RemoveRange(int index, int count) {
+        public void RemoveRange(int index, int count, Agent agent) {
             _list.RemoveRange(index, count);
-            Set("length", new Number(_list.Count));
+            Set("length", new Number(_list.Count), agent);
         }
 
         public void Reverse() {
@@ -73,7 +73,7 @@ namespace NetJS.Core {
             }
         }
 
-        public override Constant Get(Constant p, Agent agent = null, Constant receiver = null) {
+        public override Constant Get(Constant p, Agent agent = null, Constant receiver = null, int depth = 0) {
             Assert.IsPropertyKey(p);
 
             var keyString = p.ToString();
@@ -83,10 +83,10 @@ namespace NetJS.Core {
                 return Get(index);
             }
 
-            return base.Get(p, agent, receiver);
+            return base.Get(p, agent, receiver, depth);
         }
 
-        public override bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null) {
+        public override bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null, int depth = 0) {
             Assert.IsPropertyKey(p);
 
             var keyString = p.ToString();
@@ -99,7 +99,7 @@ namespace NetJS.Core {
                 }
             }
 
-            return base.Set(p, v, agent, receiver);
+            return base.Set(p, v, agent, receiver, depth);
         }
 
         public override string ToString() {

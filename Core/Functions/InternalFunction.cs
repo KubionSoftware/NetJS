@@ -12,6 +12,8 @@ namespace NetJS.Core {
         public override Constant Call(Constant thisArgument, Agent agent, Constant[] argumentsList = null) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ecmascript-function-objects-call-thisargument-argumentslist
 
+            if (argumentsList == null) argumentsList = new Constant[] { };
+
             if (FunctionKind == "classConstructor") {
                 throw new TypeError("Can't call a class constructor");
             }

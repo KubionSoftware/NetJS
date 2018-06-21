@@ -12,7 +12,7 @@ namespace NetJS.GUI.API {
     class Window {
 
         private static void HandleMouseEvent(MouseEventArgs e, Core.Object thisObject, string eventName, Agent agent) {
-            if (thisObject.Get(eventName) is Function f) {
+            if (thisObject.Get(eventName, agent) is Function f) {
                 var callbackArguments = new Constant[] {
                     new Number(e.X),
                     new Number(e.Y)
@@ -31,7 +31,7 @@ namespace NetJS.GUI.API {
         }
 
         private static void HandleKeyEvent(KeyEventArgs e, Core.Object thisObject, string eventName, Agent agent) {
-            if (thisObject.Get(eventName) is Function f) {
+            if (thisObject.Get(eventName, agent) is Function f) {
                 var callbackArguments = new Constant[] {
                     new Number(e.KeyValue),
                     new Core.String(GetChar(e).ToString())
@@ -46,8 +46,8 @@ namespace NetJS.GUI.API {
             var options = NetJS.Core.Tool.GetArgument<NetJS.Core.Object>(arguments, 0, "Window.create");
 
             int width = 800, height = 600;
-            if (options.HasProperty(new Core.String("width"))) width = (int)(options.Get("width") as Number).Value;
-            if (options.HasProperty(new Core.String("height"))) height = (int)(options.Get("height") as Number).Value;
+            if (options.HasProperty(new Core.String("width"))) width = (int)(options.Get("width", agent) as Number).Value;
+            if (options.HasProperty(new Core.String("height"))) height = (int)(options.Get("height", agent) as Number).Value;
 
             var form = new Form();
             form.ClientSize = new Size(width, height);
@@ -63,7 +63,7 @@ namespace NetJS.GUI.API {
             form.KeyDown += (sender, e) => HandleKeyEvent(e, thisObject, "onkeydown", agent);
 
             form.FormClosed += (sender, e) => {
-                if (thisObject.Get("onclose") is Function f) {
+                if (thisObject.Get("onclose", agent) is Function f) {
                     f.Call(Static.Undefined, agent);
                 }
             };

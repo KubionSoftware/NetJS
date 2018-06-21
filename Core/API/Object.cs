@@ -24,7 +24,7 @@ namespace NetJS.Core.API {
             var keys = o.OwnPropertyKeys();
             var array = new Array(0, agent);
             foreach(var key in keys) {
-                array.Add(o.Get(key, agent));
+                array.Add(o.Get(key, agent), agent);
             }
             return array;
         }
@@ -51,7 +51,7 @@ namespace NetJS.Core.API {
 
             var descriptors = Tool.Construct("Object", agent);
             foreach (var key in obj.OwnPropertyKeys()) {
-                descriptors.Set(key, obj.GetOwnProperty(key).ToObject(agent));
+                descriptors.Set(key, obj.GetOwnProperty(key).ToObject(agent), agent);
             }
 
             return descriptors;

@@ -36,10 +36,10 @@ namespace NetJS.Core {
 
         public override Object ToObject(Agent agent) {
             var obj = Tool.Construct("Object", agent);
-            obj.Set("value", Value);
-            obj.Set("writable", Boolean.Create(IsWritable));
-            obj.Set("enumerable", Boolean.Create(IsEnumerable));
-            obj.Set("configurable", Boolean.Create(IsConfigurable));
+            obj.Set("value", Value, agent);
+            obj.Set("writable", Boolean.Create(IsWritable), agent);
+            obj.Set("enumerable", Boolean.Create(IsEnumerable), agent);
+            obj.Set("configurable", Boolean.Create(IsConfigurable), agent);
             return obj;
         }
     }
@@ -69,10 +69,10 @@ namespace NetJS.Core {
 
         public override Object ToObject(Agent agent) {
             var obj = Tool.Construct("Object", agent);
-            obj.Set("get", Get);
-            obj.Set("set", Set);
-            obj.Set("enumerable", Boolean.Create(IsEnumerable));
-            obj.Set("configurable", Boolean.Create(IsConfigurable));
+            obj.Set("get", Get, agent);
+            obj.Set("set", Set, agent);
+            obj.Set("enumerable", Boolean.Create(IsEnumerable), agent);
+            obj.Set("configurable", Boolean.Create(IsConfigurable), agent);
             return obj;
         }
     }
@@ -87,7 +87,7 @@ namespace NetJS.Core {
         public abstract Property Clone();
         public abstract void SetAttributes(Property prop);
         public abstract Object ToObject(Agent agent);
-
+        
         public static Property FromObject(Object obj, Agent agent) {
             Property prop;
 
@@ -287,7 +287,7 @@ namespace NetJS.Core {
             return false;
         }
 
-        public virtual Constant Get(Constant p, Agent agent, Constant receiver = null) {
+        public virtual Constant Get(Constant p, Agent agent, Constant receiver = null, int depth = 0) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ordinaryget
 
             Assert.IsPropertyKey(p);
@@ -298,7 +298,10 @@ namespace NetJS.Core {
             if (desc == null) {
                 var parent = GetPrototypeOf();
                 if (parent == null) return Static.Undefined;
-                return parent.Get(p, agent, receiver);
+                if (depth > 20) {
+                    throw new Error("Object prototype loop");
+                }
+                return parent.Get(p, agent, receiver, depth + 1);
             }
 
             if (desc is DataProperty dp) return dp.Value;
@@ -313,7 +316,7 @@ namespace NetJS.Core {
             return Get(new String(p), agent);
         }
 
-        public virtual bool Set(Constant p, Constant v, Agent agent = null, Constant receiver = null) {
+        public virtual bool Set(Constant p, Constant v, Agent agent, Constant receiver = null, int depth = 0) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-set-o-p-v-throw
 
             Assert.IsPropertyKey(p);
@@ -324,7 +327,10 @@ namespace NetJS.Core {
             if (ownDesc == null) {
                 var parent = GetPrototypeOf();
                 if (parent != null) {
-                    return parent.Set(p, v, agent, receiver);
+                    if (depth > 20) {
+                        throw new Error("Object prototype loop");
+                    }
+                    return parent.Set(p, v, agent, receiver, depth + 1);
                 } else {
                     ownDesc = new DataProperty() {
                         Value = null,
@@ -360,8 +366,8 @@ namespace NetJS.Core {
             return true;
         }
 
-        public bool Set(string p, Constant v) {
-            return Set(new String(p), v);
+        public bool Set(string p, Constant v, Agent agent) {
+            return Set(new String(p), v, agent);
         }
 
         public bool CreateDataProperty(Constant p, Constant v) {

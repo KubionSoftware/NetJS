@@ -162,7 +162,8 @@ namespace NetJS.Core {
             }
 
             var argumentsArray = new Array(arguments.Length, agent);
-            argumentsArray.AddRange(arguments);
+            argumentsArray.AddRange(arguments, agent);
+
             envRec.CreateImmutableBinding(new String("arguments"), true, agent);
             envRec.InitializeBinding(new String("arguments"), argumentsArray, agent);
 

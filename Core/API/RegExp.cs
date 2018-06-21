@@ -7,16 +7,16 @@ namespace NetJS.Core.API {
         public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
             var thisObject = (Object)_this;
 
-            thisObject.Set("source", (String)arguments[0]);
+            thisObject.Set("source", (String)arguments[0], agent);
 
             var flags = arguments.Length > 1 ? (String)arguments[1] : new String("");
-            thisObject.Set("flags", flags);
+            thisObject.Set("flags", flags, agent);
 
-            thisObject.Set("global", Boolean.Create(flags.Value.IndexOf(Chars.RegexGlobal) != -1));
-            thisObject.Set("ignoreCase", Boolean.Create(flags.Value.IndexOf(Chars.RegexIgnoreCase) != -1));
-            thisObject.Set("multiline", Boolean.Create(flags.Value.IndexOf(Chars.RegexMultiLine) != -1));
-            thisObject.Set("unicode", Boolean.Create(flags.Value.IndexOf(Chars.RegexUnicode) != -1));
-            thisObject.Set("sticky", Boolean.Create(flags.Value.IndexOf(Chars.RegexSticky) != -1));
+            thisObject.Set("global", Boolean.Create(flags.Value.IndexOf(Chars.RegexGlobal) != -1), agent);
+            thisObject.Set("ignoreCase", Boolean.Create(flags.Value.IndexOf(Chars.RegexIgnoreCase) != -1), agent);
+            thisObject.Set("multiline", Boolean.Create(flags.Value.IndexOf(Chars.RegexMultiLine) != -1), agent);
+            thisObject.Set("unicode", Boolean.Create(flags.Value.IndexOf(Chars.RegexUnicode) != -1), agent);
+            thisObject.Set("sticky", Boolean.Create(flags.Value.IndexOf(Chars.RegexSticky) != -1), agent);
 
             return Static.Undefined;
         }

@@ -91,33 +91,33 @@ namespace NetJS.API {
                         foreach (var key in row.Keys) {
                             var value = row[key];
                             if (value is string s) {
-                                rowObject.Set(key, new Core.String(s));
+                                rowObject.Set(key, new Core.String(s), agent);
                             } else if (value is int i) {
-                                rowObject.Set(key, new Core.Number(i));
+                                rowObject.Set(key, new Core.Number(i), agent);
                             } else if (value is double d) {
-                                rowObject.Set(key, new Core.Number(d));
+                                rowObject.Set(key, new Core.Number(d), agent);
                             } else if (value is bool b) {
-                                rowObject.Set(key, Core.Boolean.Create(b));
+                                rowObject.Set(key, Core.Boolean.Create(b), agent);
                             } else if (value is byte bt) {
-                                rowObject.Set(key, new Core.Number(bt));
+                                rowObject.Set(key, new Core.Number(bt), agent);
                             } else if (value is Int16 i16) {
-                                rowObject.Set(key, new Core.Number(i16));
+                                rowObject.Set(key, new Core.Number(i16), agent);
                             } else if (value is Decimal dc) {
-                                rowObject.Set(key, new Core.Number((double)dc));
+                                rowObject.Set(key, new Core.Number((double)dc), agent);
                             } else if (value is DateTime date) {
                                 var dateObj = Tool.Construct("Date", agent);
 
                                 // TODO: don't hardcode this key
-                                dateObj.Set("__date__", new Foreign(date));
-                                rowObject.Set(key, dateObj);
+                                dateObj.Set("__date__", new Foreign(date), agent);
+                                rowObject.Set(key, dateObj, agent);
                             } else if (value is DBNull) {
-                                rowObject.Set(key, Core.Static.Null);
+                                rowObject.Set(key, Core.Static.Null, agent);
                             } else {
-                                rowObject.Set(key, new Core.String("Unkown type - " + value.GetType()));
+                                rowObject.Set(key, new Core.String("Unkown type - " + value.GetType()), agent);
                             }
                         }
 
-                        result.Add(rowObject);
+                        result.Add(rowObject, agent);
                     }
 
                     return result;
