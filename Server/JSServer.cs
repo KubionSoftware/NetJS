@@ -28,14 +28,15 @@ namespace NetJS.Server {
             application.Realm.RegisterClass(typeof(API.Response), "Response");
             application.Realm.RegisterClass(typeof(API.WebSocket), "WebSocket");
 
-            var watch = new Stopwatch();
-            watch.Start();
-            application.Realm.RegisterForeignNamespace("System.Threading.Tasks");
-            var time = watch.ElapsedMilliseconds;
-            Core.Log.Write(time.ToString());
-
             var session = new JSSession();
-            _service.RunTemplate(application.Settings.Startup, "", ref application, ref session);
+
+            NetJS.API.Log.Write("Startup: " +
+                _service.RunTemplate(
+                    application.Settings.Startup, 
+                    "", 
+                    ref application, 
+                    ref session
+            ), application);
 
             return application;
         }

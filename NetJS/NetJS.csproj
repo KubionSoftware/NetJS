@@ -102,11 +102,4 @@
   <PropertyGroup>
     <PostBuildEvent Condition="$(OS) == Unix AND $(ConfigurationName) == Release AND EXISTS($(Another))">$(SolutionDir)Documentation\MarkdownGenLinux -files $(SolutionDir)Documentation\Core.xml $(SolutionDir)Documentation\Server.xml -output $(SolutionDir)..\NetJS.wiki\documentation</PostBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>
-if not exist "$(TargetDir)" md "$(TargetDir)"
-xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.5.1\tools\native\x86\*.*" "$(TargetDir)"
-if not exist "$(TargetDir)" md "$(TargetDir)"
-xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.5.1\tools\native\amd64\*.*" "$(TargetDir)"</PostBuildEvent>
-  </PropertyGroup>
 </Project>

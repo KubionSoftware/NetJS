@@ -13,14 +13,18 @@ namespace NetJS.API {
             var message = Core.Convert.ToString(arguments[0], agent);
 
             var application = (agent as NetJSAgent).Application;
+            Write(message, application);
+
+            return Static.Undefined;
+        }
+
+        public static void Write(string message, JSApplication application) {
             var file = application.Settings.Root + application.Settings.Log;
 
             try {
                 var info = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss:fff");
                 System.IO.File.AppendAllText(file, info + " - " + message + "\n");
             } catch { }
-
-            return Static.Undefined;
         }
     }
 }
