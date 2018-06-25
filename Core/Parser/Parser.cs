@@ -51,7 +51,20 @@ namespace NetJS.Core {
                 { Tokens.This, (l) => new This() },
                 { Tokens.NotANumber, (l) => new NaNLiteral() },
                 { Tokens.Infinity, (l) => new InfinityLiteral() },
-                { Tokens.Add, (l) => new Addition() },
+                { Tokens.Add, (l) => {
+                    if(l == null) {
+                        return new Plus();
+                    }
+
+                    if(l is Operator) {
+                        var op = (Operator)l;
+                        if (!op.HasRight) {
+                            return new Plus();
+                        }
+                    }
+
+                    return new Addition();
+                } },
                 { Tokens.Substract, (l) => {
                     if(l == null) {
                         return new Negation();
@@ -68,6 +81,7 @@ namespace NetJS.Core {
                 } },
                 { Tokens.Multiply, (l) => new Multiplication() },
                 { Tokens.Remainder, (l) => new Remainder() },
+                { Tokens.Exponentiate, (l) => new Exponentiation() },
                 { Tokens.Assign, (l) => new Assignment() },
                 { Tokens.Add + Tokens.Assign, (l) => new AssignmentOperator(new Addition()) },
                 { Tokens.Substract + Tokens.Assign, (l) => new AssignmentOperator(new Substraction()) },
@@ -832,6 +846,7 @@ namespace NetJS.Core {
             
             while (!Peek().Is(Tokens.ArrayClose)) {
                 var value = ParseExpression();
+                if (value == null) throw CreateError("Incorrect array literal");
                 list.Add(value);
 
                 var next = Peek();
@@ -938,7 +953,18 @@ namespace NetJS.Core {
         public Expression ParseFunctionExpression() {
             Skip(Tokens.Function);
 
-            return ParseFunction("");
+            var name = "";
+
+            if (!Peek().Is(Tokens.GroupOpen)) {
+                name = Next("function name").Content;
+            }
+
+            var function = ParseFunction("");
+            if (name.Length > 0) {
+                function.Name = name;
+            }
+
+            return function;
         }
 
         public Statement ParseFunctionDeclaration() {

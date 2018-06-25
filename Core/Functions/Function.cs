@@ -33,7 +33,13 @@ namespace NetJS.Core {
         public bool Strict;
         public Object HomeObject;
 
-        public Function(Object proto) : base(proto) { }
+        public Function(Object proto, Agent agent, Object functionProto = null) : base(proto) {
+            if (functionProto != null) {
+                Set("prototype", functionProto, agent);
+            } else {
+                Set("prototype", Tool.Construct("Object", agent), agent);
+            }
+        }
 
         public static Function FunctionInitialize(Function f, FunctionKind kind, ParameterList parameterList, Statement body, LexicalEnvironment scope, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-functioninitialize
@@ -69,7 +75,7 @@ namespace NetJS.Core {
             var needsConstruct = functionKind == "normal";
             if (functionKind == "non-constructor") functionKind = "normal";
 
-            var f = new InternalFunction(functionPrototype);
+            var f = new InternalFunction(functionPrototype, agent);
             f.Strict = strict;
             f.FunctionKind = functionKind;
             f.Extensible = true;

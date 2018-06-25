@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Web;
 using NetJS.Core;
+using Microsoft.ClearScript.V8;
 
 namespace NetJS {
     public class JSApplication : JSStorage {
@@ -12,12 +13,16 @@ namespace NetJS {
 
         public Realm Realm { get; }
 
+        public V8ScriptEngine V8;
+
         public XDocServices.XDocService XDocService { get; }
 
         public JSApplication(string rootDir = null) {
             if (rootDir == null) {
                 rootDir = AppDomain.CurrentDomain.BaseDirectory;
             }
+
+            V8 = new V8ScriptEngine();
 
             Settings = new Settings(rootDir);
 

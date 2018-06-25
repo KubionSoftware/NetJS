@@ -52,11 +52,11 @@ namespace NetJS.Core {
             var objectPrototype = new Object(null);
             var functionPrototype = new Object(objectPrototype);
 
-            var objectConstructor = GetFunction("Object", GetMethodInfo(API.ObjectAPI.constructor), functionPrototype);
+            var objectConstructor = GetFunction("Object", GetMethodInfo(API.ObjectAPI.constructor), functionPrototype, objectPrototype);
             objectConstructor.Set("prototype", objectPrototype, _agent);
             objectPrototype.Set("constructor", objectConstructor, _agent);
 
-            var functionConstructor = GetFunction("Function", GetMethodInfo(API.FunctionAPI.constructor), functionPrototype);
+            var functionConstructor = GetFunction("Function", GetMethodInfo(API.FunctionAPI.constructor), functionPrototype, functionPrototype);
             functionConstructor.Set("prototype", functionPrototype, _agent);
             functionPrototype.Set("constructor", functionConstructor, _agent);
 
@@ -70,8 +70,8 @@ namespace NetJS.Core {
             DeclareVariable("Function", functionConstructor);
             _prototypes["Function"] = functionConstructor;
 
-            RegisterType(typeof(API.ObjectAPI), "Object");
-            RegisterType(typeof(API.FunctionAPI), "Function");
+            RegisterTypeFunctions(typeof(API.ObjectAPI), "Object", objectConstructor, objectPrototype);
+            RegisterTypeFunctions(typeof(API.FunctionAPI), "Function", functionConstructor, functionPrototype);
             RegisterType(typeof(API.ArrayAPI), "Array");
             RegisterType(typeof(API.Uint8ArrayAPI), "Uint8Array");
             RegisterType(typeof(API.DateAPI), "Date");
@@ -393,7 +393,7 @@ namespace NetJS.Core {
             throw new TypeError($"Can't convert {v.ToString()} to internal type");
         }
 
-        private ExternalFunction GetFunction(string className, MethodInfo info, Object prototype = null) {
+        private ExternalFunction GetFunction(string className, MethodInfo info, Object prototype = null, Object functionProto = null) {
             return new ExternalFunction(className + "." + info.Name,
                 (Func<
                     Constant,
@@ -405,7 +405,7 @@ namespace NetJS.Core {
                     Constant[],
                     Agent,
                     Constant
-                >)), _agent, prototype);
+                >)), _agent, prototype, functionProto);
         }
 
         public void RegisterClass(System.Type type, string name) {
@@ -436,6 +436,13 @@ namespace NetJS.Core {
             constructor.Set("prototype", prototype, _agent);
             prototype.Set("constructor", constructor, _agent);
 
+            RegisterTypeFunctions(type, name, constructor, prototype);
+
+            DeclareVariable(name, constructor);
+            _prototypes[name] = constructor;
+        }
+
+        public void RegisterTypeFunctions(System.Type type, string name, Object constructor, Object prototype) {
             var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
             foreach (var method in methods) {
                 if (method.Name != "constructor") {
@@ -448,9 +455,6 @@ namespace NetJS.Core {
                     } catch { }
                 }
             }
-
-            DeclareVariable(name, constructor);
-            _prototypes[name] = constructor;
         }
 
         public void RegisterFunctions(System.Type type) {

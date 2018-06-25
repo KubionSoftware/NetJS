@@ -8,11 +8,25 @@ namespace NetJS.Core {
     public class Negation : UnaryRightOperator {
         public Negation() : base(14) { }
 
-        public override Constant Evaluate(Constant c, Agent agent) {
+        public override Constant Evaluate(Constant expr, Agent agent) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-unary-minus-operator
 
-            var oldValue = Convert.ToNumber(References.GetValue(c, agent), agent);
+            var oldValue = Convert.ToNumber(References.GetValue(expr, agent), agent);
             return new Number(-oldValue);
+        }
+
+        public override string ToDebugString() {
+            return "negation";
+        }
+    }
+
+    public class Plus : UnaryRightOperator {
+        public Plus() : base(14) { }
+
+        public override Constant Evaluate(Constant expr, Agent agent) {
+            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-unary-plus-operator
+
+            return new Number(Convert.ToNumber(References.GetValue(expr, agent), agent));
         }
 
         public override string ToDebugString() {
@@ -75,6 +89,17 @@ namespace NetJS.Core {
 
         public override string ToDebugString() {
             return "remainder";
+        }
+    }
+
+    public class Exponentiation : MultiplicativeOperator {
+
+        public override double Operation(double left, double right) {
+            return Math.Pow(left, right);
+        }
+
+        public override string ToDebugString() {
+            return "exponentiation";
         }
     }
 

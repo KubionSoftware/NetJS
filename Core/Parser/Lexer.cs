@@ -18,6 +18,9 @@ namespace NetJS.Core {
         private bool InString = false;
         private char StringStart = Chars.Null;
         private bool Escaping = false;
+        private bool InUnicode = false;
+        private string UnicodeHex = "";
+        private bool InUnicodeBrackets = false;
 
         private bool InOperator = false;
         private bool InNumber = false;
@@ -138,7 +141,28 @@ namespace NetJS.Core {
         }
 
         private void HandleString(char c, Func<Token, bool> action) {
-            if (Escaping) {
+            if (InUnicode) {
+                if (Chars.IsHex(c)) {
+                    UnicodeHex += c;
+                } else if (c == '{') {
+                    InUnicodeBrackets = true;
+                } else if (c == '}') {
+                    if (InUnicodeBrackets) {
+                        // Do nothing, let check below handle this
+                    } else {
+                        throw CreateError("Closing unicode escape bracket, without opening");
+                    }
+                } else {
+                    throw CreateError($"Invalid unicode escape character '{c}'");
+                }
+
+                if ((UnicodeHex.Length == 4 && !InUnicodeBrackets) || (InUnicodeBrackets && c == '}')) {
+                    Buffer += Chars.UnicodeHexToString(UnicodeHex);
+                    UnicodeHex = "";
+                    InUnicode = false;
+                    InUnicodeBrackets = false;
+                }
+            } else if (Escaping) {
                 // Escape character
 
                 if (c == Chars.SingleQuote || c == Chars.DoubleQuote || c == Chars.Backslash) {
@@ -155,6 +179,8 @@ namespace NetJS.Core {
                     Buffer += Chars.Tab;
                 } else if (c == 'v') {
                     Buffer += '\v';
+                } else if (c == 'u') {
+                    InUnicode = true;
                 } else {
                     throw CreateError("Invalid escaped character '" + c + "'");
                 }

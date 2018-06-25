@@ -104,6 +104,16 @@
                 while(true){}
             });</code></example>
         </member>
+        <member name="M:NetJS.API.Functions.includeNamespace(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+            <summary>Includes a namespace from the .NET environment</summary>
+            <param name="namespace">The namespace to include</param>
+            <example><code lang="javascript">includeNamespace("System.Text");</code></example>
+        </member>
+        <member name="M:NetJS.API.Functions.includeDLL(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+            <summary>Includes a dll</summary>
+            <param name="file">The dll file to include</param>
+            <example><code lang="javascript">includeDLL("ADFS.dll");</code></example>
+        </member>
         <!-- Badly formed XML comment ignored for member "T:NetJS.API.HTTP" -->
         <member name="M:NetJS.API.HTTP.execute(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
             <summary>Executes a HTTP request.</summary>

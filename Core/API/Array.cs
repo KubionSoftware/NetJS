@@ -11,8 +11,20 @@ namespace NetJS.Core.API {
             return new Array(length, agent);
         }
 
-        private static Array GetArray(Constant _this) {
-            return (Array)_this;
+        private static Array GetArray(Constant _this, Agent agent) {
+            if (_this is Array a) {
+                return a;
+            } else if (_this is Object o) {
+                // TODO: remove hack
+
+                var array = new Array(0, agent);
+                for (var i = 0; o.HasOwnProperty(i.ToString()); i++) {
+                    array.Add(o.Get(i.ToString(), agent), agent);
+                }
+                return array;
+            }
+
+            throw new TypeError($"{_this} is not an array");
         }
 
         [StaticFunction]
@@ -22,7 +34,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant forEach(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             if (arguments.Length != 1) {
                 throw new TypeError("Array.forEach takes one argument");
@@ -43,7 +55,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant push(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             array.AddRange(arguments, agent);
             array.Set("length", new Number(array.List.Count), agent);
@@ -52,7 +64,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant pop(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
             
             if (array.List.Count == 0) return Static.Undefined;
 
@@ -63,7 +75,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant shift(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             if (array.List.Count == 0) return Static.Undefined;
 
@@ -74,7 +86,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant unshift(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             array.InsertRange(0, arguments, agent);
 
@@ -82,7 +94,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant indexOf(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             var start = arguments.Length > 1 ? (int)((Number)arguments[1]).Value : 0;
             
@@ -98,7 +110,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant splice(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
             
             var start = arguments.Length > 0 ? (int)Tool.GetArgument<Number>(arguments, 0, "Array.splice").Value : 0;
             var count = (int)(arguments.Length > 1 ? ((Number)arguments[1]).Value : array.List.Count - start);
@@ -118,7 +130,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant slice(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
             
             var begin = (int)(arguments.Length > 0 ? ((Number)arguments[0]).Value : 0);
             var end = (int)(arguments.Length > 1 ? ((Number)arguments[1]).Value : array.List.Count);
@@ -132,7 +144,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant map(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             if (arguments.Length != 1) {
                 throw new TypeError("Array.map takes one argument");
@@ -155,7 +167,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant filter(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             if (arguments.Length == 0 || arguments.Length > 2) {
                 throw new TypeError("Array.filter takes one or two argument");
@@ -185,7 +197,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant reduce(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             if (arguments.Length < 1) {
                 throw new TypeError("Array.reduce takes at least one argument");
@@ -215,7 +227,7 @@ namespace NetJS.Core.API {
         }
 
         private static Constant checkAll(Constant _this, Constant[] arguments, Agent agent, string name, Func<bool, Constant, int, Constant> resultFunc, Constant final) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             if (arguments.Length == 0 || arguments.Length > 2) {
                 throw new TypeError(name + " takes one or two argument");
@@ -288,7 +300,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant includes(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             if (arguments.Length == 0 || arguments.Length > 2) {
                 throw new TypeError("Array.includes takes one or two argument");
@@ -308,7 +320,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant sort(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             if (arguments.Length != 1) {
                 throw new TypeError("Array.sort takes one argument");
@@ -343,7 +355,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant join(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             var seperator = arguments.Length > 0 ? ((String)arguments[0]).Value : ",";
 
@@ -360,7 +372,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant reverse(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             array.Reverse();
 
@@ -368,7 +380,7 @@ namespace NetJS.Core.API {
         }
 
         public static Constant fill(Constant _this, Constant[] arguments, Agent agent) {
-            var array = GetArray(_this);
+            var array = GetArray(_this, agent);
 
             var value = Tool.GetArgument(arguments, 0, "Array.fill");
             var start = Tool.GetArgument<Number>(arguments, 1, "Array.fill", false) ?? new Number(0);

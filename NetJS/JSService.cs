@@ -9,6 +9,18 @@ namespace NetJS {
     public class JSService {
 
         public string RunCode(string code, JSApplication application, JSSession session, bool global = true, bool newContext = true) {
+
+            try {
+                var result = application.V8.Evaluate(code);
+                if (result is string s) {
+                    return s;
+                }
+                return "";
+            }catch(Exception e) {
+                return e.Message;
+            }
+
+
             try {
                 var agent = new NetJSAgent(application.Realm, application, session) {
                     IsSafe = true
@@ -26,6 +38,21 @@ namespace NetJS {
         }
 
         public string RunScript(string template, JSApplication application, JSSession session, bool global = true, bool newContext = true) {
+
+            var path = application.Cache.GetPath(template, application, false);
+            var code = System.IO.File.ReadAllText(path);
+
+            try {
+                var result = application.V8.Evaluate(code);
+                if (result is string s) {
+                    return s;
+                }
+                return "";
+            } catch (Exception e) {
+                return e.Message;
+            }
+
+
             try {
                 var agent = new NetJSAgent(application.Realm, application, session) {
                     IsSafe = true

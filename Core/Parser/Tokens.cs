@@ -86,6 +86,7 @@ namespace NetJS.Core {
         public const string Substract = "-";
         public const string Multiply = "*";
         public const string Divide = "/";
+        public const string Exponentiate = "**";
         public const string Remainder = "%";
         public const string Assign = "=";
         public const string Exponent = "e";
@@ -131,7 +132,7 @@ namespace NetJS.Core {
 
         public static bool IsValidOperator(string op) {
             var validOperators = new[] {
-                Add, Substract, Multiply, Divide, Remainder,
+                Add, Substract, Multiply, Divide, Remainder, Exponentiate,
                 LogicalNot, LogicalAnd, LogicalOr,
                 BitwiseAnd, BitwiseOr, BitwiseNot, BitwiseXor,
                 Equals, NotEquals, StrictEquals, StrictNotEquals,

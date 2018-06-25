@@ -103,7 +103,7 @@
     <Compile Include="Types\Interface.cs" />
     <Compile Include="Types\Type.cs" />
     <Compile Include="Constants\Uint8Array.cs" />
-    <Compile Include="Exceptions.cs" />
+    <Compile Include="Errors.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="Functions\ExternalFunction.cs" />
     <Compile Include="Functions\Function.cs" />

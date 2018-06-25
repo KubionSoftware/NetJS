@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace NetJS.Core {
     public class InternalFunction : Function {
 
-        public InternalFunction(Object proto) : base(proto) { }
+        public InternalFunction(Object proto, Agent agent) : base(proto, agent) { }
 
         public override Constant Call(Constant thisArgument, Agent agent, Constant[] argumentsList = null) {
             // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-ecmascript-function-objects-call-thisargument-argumentslist

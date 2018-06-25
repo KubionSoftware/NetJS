@@ -13,8 +13,9 @@ namespace NetJS.Core {
             string name, 
             Func<Constant, Constant[], Agent, Constant> function, 
             Agent agent, 
-            Object prototype = null
-        ) : base(prototype != null ? prototype : Tool.Prototype("Function", agent)) {
+            Object prototype = null,
+            Object functionProto = null
+        ) : base(prototype != null ? prototype : Tool.Prototype("Function", agent), agent, functionProto) {
             Name = name;
             Function = function;
             Environment = agent.Running.Lex;

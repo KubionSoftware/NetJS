@@ -10,15 +10,13 @@ namespace NetJS.Server {
     public class JSServer {
 
         private JSService _service;
-        private JSApplication _application;
-
-        public JSApplication Application { get { return _application; } }
+        public readonly JSApplication Application;
 
         public JSServer() : this(new JSService()) { }
 
         public JSServer(JSService service) {
             _service = service;
-            _application = CreateApplication();
+            Application = CreateApplication();
         }
 
         public JSApplication CreateApplication() {
@@ -60,7 +58,7 @@ namespace NetJS.Server {
         }
 
         public void ProcessRequest(HttpContext context) {
-            var application = _application;
+            var application = Application;
             var session = GetSession(context);
 
             ProcessRequest(context, application, session);
@@ -70,7 +68,7 @@ namespace NetJS.Server {
         }
 
         public void Handle(HttpContext context) {
-            var application = _application;
+            var application = Application;
             var mainTemplate = application.Settings.Root + application.Settings.TemplateFolder + application.Settings.Entry;
 
             if (mainTemplate.EndsWith(".js")) {

@@ -34,8 +34,9 @@ namespace NetJS.Core.API {
                 date = DateTime.Now;
             }
 
-            (_this as Object).Set(Primitive, new Foreign(date), agent);
-            return _this;
+            var o = Tool.Construct("Date", agent);
+            o.Set(Primitive, new Foreign(date), agent);
+            return o;
         }
 
         private static DateTime GetDate(Constant _this, Agent agent) {

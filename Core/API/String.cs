@@ -9,11 +9,18 @@ namespace NetJS.Core.API {
         private const string Primitive = "[[PrimitiveValue]]";
         
         public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
-            var value = arguments.Length == 1 ? Tool.GetArgument<String>(arguments, 0, "String constructor") : new String("");
-            var obj = _this as Object;
-            obj.Set(Primitive, value, agent);
-            obj.Set("length", new Number(value.Value.Length), agent);
-            return _this;
+            string s;
+
+            if (arguments.Length == 0) {
+                s = "";
+            } else {
+                s = Convert.ToString(arguments[0], agent);
+            }
+
+            var obj = Tool.Construct("Object", agent);
+            obj.Set(Primitive, new String(s), agent);
+            obj.Set("length", new Number(s.Length), agent);
+            return obj;
         }
 
         private static String GetString(Constant _this, Agent agent) {

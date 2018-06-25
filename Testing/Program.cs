@@ -72,8 +72,8 @@ namespace NetJS.Testing {
 
         static void Main(string[] args){
             try {
-                FeatureTest();
-                //Test262();
+                //FeatureTest();
+                Test262();
             }
             catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -210,9 +210,13 @@ namespace NetJS.Testing {
                 }
 
                 if (myTest == null) continue;
-                myTest.Initialize();
-                myTest.Execute(application, service, session);
-                
+
+                try {
+                    myTest.Initialize();
+                    myTest.Execute(application, service, session);
+                }catch(Exception e) {
+                    Console.Error.WriteLine(e);
+                }
             }
         }
     }

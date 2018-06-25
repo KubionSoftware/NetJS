@@ -43,7 +43,7 @@ namespace NetJS.Core {
 
                 return f.Call(thisValue, agent, arguments);
             } else {
-                throw new TypeError("Can't call a non-function");
+                throw new TypeError($"{Left.ToDebugString()} is not a function");
             }
         }
 

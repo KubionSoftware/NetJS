@@ -7,9 +7,18 @@ namespace NetJS.Core.API {
     class ObjectAPI {
 
         public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
-            var thisObject = (Object)_this;
+            // See: http://ecma-international.org/ecma-262/#sec-object-value
 
-            return Static.Undefined;
+            if (arguments.Length > 0) {
+                var value = arguments[0];
+                if (value is Null || value is Undefined) {
+                    return _this;
+                } else {
+                    return Convert.ToObject(value, agent);
+                }
+            }
+
+            return _this;
         }
 
         [StaticFunction]
@@ -39,7 +48,8 @@ namespace NetJS.Core.API {
             var p = Tool.GetArgument(arguments, 1, "Object.getOwnPropertyDescriptor");
             var key = Convert.ToPropertyKey(p, agent);
 
-            return obj.GetOwnProperty(key).ToObject(agent);
+            var desc = obj.GetOwnProperty(key);
+            return desc == null ? Static.Undefined : (Constant)desc.ToObject(agent);
         }
 
         [StaticFunction]
@@ -51,15 +61,79 @@ namespace NetJS.Core.API {
 
             var descriptors = Tool.Construct("Object", agent);
             foreach (var key in obj.OwnPropertyKeys()) {
-                descriptors.Set(key, obj.GetOwnProperty(key).ToObject(agent), agent);
+                var desc = obj.GetOwnProperty(key);
+                var value = desc == null ? Static.Undefined : (Constant)desc.ToObject(agent);
+                descriptors.Set(key, value, agent);
             }
 
             return descriptors;
         }
 
         [StaticFunction]
+        public static Constant getOwnPropertyNames(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.getownpropertynames
+
+            var o = Tool.GetArgument(arguments, 0, "Object.getOwnPropertyNames");
+            return GetOwnPropertyKeys(o, typeof(String), agent);
+        }
+
+        [StaticFunction]
+        public static Constant getOwnPropertySymbols(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.getownpropertysymbols
+
+            var o = Tool.GetArgument(arguments, 0, "Object.getOwnPropertySymbols");
+            return GetOwnPropertyKeys(o, typeof(Symbol), agent);
+        }
+
+        public static Constant GetOwnPropertyKeys(Constant o, System.Type type, Agent agent) {
+            // http://ecma-international.org/ecma-262/#sec-getownpropertykeys
+
+            var obj = Convert.ToObject(o, agent);
+
+            var keys = obj.OwnPropertyKeys();
+            var nameList = new List<Constant>();
+
+            foreach (var nextKey in keys) {
+                if (nextKey.GetType() == type) {
+                    nameList.Add(nextKey);
+                }
+            }
+
+            return Tool.ToArray(nameList, agent);
+        }
+
+        [StaticFunction]
+        public static Constant assign(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.assign
+
+            var to = Convert.ToObject(Tool.GetArgument(arguments, 0, "Object.assign"), agent);
+
+            if (arguments.Length == 1) return to;
+
+            for (var i = 1; i < arguments.Length; i++) {
+                var nextSource = arguments[i];
+
+                if (nextSource is Undefined || nextSource is Null) {
+                    continue;
+                }
+
+                var from = Convert.ToObject(nextSource, agent);
+                var keys = from.OwnPropertyKeys();
+                foreach (var nextKey in keys) {
+                    var desc = from.GetOwnProperty(nextKey);
+                    if (desc != null && desc.IsEnumerable) {
+                        var propValue = from.Get(nextKey, agent);
+                        to.Set(nextKey, propValue, agent);
+                    }
+                }
+            }
+
+            return to;
+        }
+
+        [StaticFunction]
         public static Constant create(Constant _this, Constant[] arguments, Agent agent) {
-            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-object.create
+            // See: http://ecma-international.org/ecma-262/#sec-object.create
 
             var arg = Tool.GetArgument(arguments, 0, "Object.create");
             Object o;
@@ -81,8 +155,18 @@ namespace NetJS.Core.API {
         }
 
         [StaticFunction]
+        public static Constant @is(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.is
+
+            var value1 = Tool.GetArgument(arguments, 0, "Object.is");
+            var value2 = Tool.GetArgument(arguments, 1, "Object.is");
+
+            return Boolean.Create(Compare.SameValue(value1, value2));
+        }
+
+        [StaticFunction]
         public static Constant defineProperties(Constant _this, Constant[] arguments, Agent agent) {
-            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-objectdefineproperties
+            // See: http://ecma-international.org/ecma-262/#sec-object.defineproperties
 
             var o = Tool.GetArgument<Object>(arguments, 0, "Object.defineProperties");
             var properties = Tool.GetArgument(arguments, 1, "Object.defineProperties");
@@ -91,7 +175,7 @@ namespace NetJS.Core.API {
         }
 
         private static Constant ObjectDefineProperties(Object o, Constant properties, Agent agent) {
-            // See: https://www.ecma-international.org/ecma-262/8.0/index.html#sec-objectdefineproperties
+            // See: http://ecma-international.org/ecma-262/#sec-objectdefineproperties
 
             var props = Convert.ToObject(properties, agent);
 
@@ -112,10 +196,91 @@ namespace NetJS.Core.API {
             return o;
         }
 
+        [StaticFunction]
+        public static Constant defineProperty(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.defineproperty
+
+            var o = Tool.GetArgument<Object>(arguments, 0, "Object.defineProperty");
+            var p = Tool.GetArgument(arguments, 1, "Object.defineProperty");
+            var attributes = Tool.GetArgument<Object>(arguments, 2, "Object.defineProperty");
+
+            var key = Convert.ToPropertyKey(p, agent);
+            var desc = Property.FromObject(attributes, agent);
+
+            o.DefinePropertyOrThrow(key, desc);
+            return o;
+        }
+
+        [StaticFunction]
+        public static Constant getPrototypeOf(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.getprototypeof
+
+            var o = Tool.GetArgument(arguments, 0, "Object.getPrototypeOf");
+            var obj = Convert.ToObject(o, agent);
+
+            return obj.GetPrototypeOf();
+        }
+
+        [StaticFunction]
+        public static Constant setPrototypeOf(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.setprototypeof
+
+            var o = Tool.GetArgument(arguments, 0, "Object.setPrototypeOf");
+            o = References.RequireObjectCoercible(o);
+            Object obj;
+            if (o is Object oo) {
+                obj = oo;
+            } else {
+                throw new TypeError("Can only set prototype of object");
+            }
+
+            var proto = Tool.GetArgument(arguments, 1, "Object.setPrototypeOf");
+            Object protoObj;
+            if (proto is Object po) {
+                protoObj = po;
+            } else { 
+                if (proto is Null) {
+                    protoObj = null;
+                } else {
+                    throw new TypeError("A prototype can only be an object or null");
+                }
+            }
+
+            var status = obj.SetPrototypeOf(protoObj);
+            if (!status) {
+                throw new TypeError($"Can't set prototype of {o.ToDebugString()}");
+            }
+
+            return o;
+        }
+
         public static Constant hasOwnProperty(Constant _this, Constant[] arguments, Agent agent) {
-            var o = _this as Object;
-            var key = Tool.GetArgument(arguments, 0, "Object.hasOwnProperty");
-            return Boolean.Create(o.HasOwnProperty(key));
+            // See: http://ecma-international.org/ecma-262/#sec-object.prototype.hasownproperty
+
+            var v = Tool.GetArgument(arguments, 0, "Object.hasOwnProperty");
+            var p = Convert.ToPropertyKey(v, agent);
+
+            var o = Convert.ToObject(_this, agent);
+
+            return Boolean.Create(o.HasOwnProperty(p));
+        }
+
+        public static Constant isPrototypeOf(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.prototype.isprototypeof
+
+            var v = Tool.GetArgument(arguments, 0, "Object.isPrototypeOf");
+
+            if (v is Object proto) {
+                var o = Convert.ToObject(_this, agent);
+
+                while (true) {
+                    proto = proto.GetPrototypeOf();
+                    if (proto == null) return Boolean.False;
+                    if (Compare.SameValue(o, proto)) return Boolean.True;
+                }
+            } else {
+                return Boolean.False;
+            }
         }
 
         public static Constant toString(Constant _this, Constant[] arguments, Agent agent) {
@@ -124,6 +289,12 @@ namespace NetJS.Core.API {
 
             // According to javascript specification
             // return new String("[object Object]");
+        }
+
+        public static Constant valueOf(Constant _this, Constant[] arguments, Agent agent) {
+            // See: http://ecma-international.org/ecma-262/#sec-object.prototype.valueof
+
+            return Convert.ToObject(_this, agent);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using NetJS.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NetJS.Core {
     public class Tool {
@@ -14,8 +15,12 @@ namespace NetJS.Core {
         }
 
         public static Array ToArray(IEnumerable<string> strings, Agent agent) {
+            return ToArray(strings.Select(s => new String(s)), agent);
+        }
+
+        public static Array ToArray(IEnumerable<Constant> values, Agent agent) {
             var array = new Array(0, agent);
-            foreach (var s in strings) array.Add(new String(s), agent);
+            array.AddRange(values, agent);
             return array;
         }
 
@@ -36,7 +41,7 @@ namespace NetJS.Core {
                 if(References.GetValue(new Identifier(name).Evaluate(agent), agent) is Object ob) {
                     obj = ob;
                 } else {
-                    throw new InternalError($"Could not get prototype of '{name}'");
+                    throw new TypeError($"Could not get prototype of '{name}'");
                 }
             }
             
@@ -45,7 +50,7 @@ namespace NetJS.Core {
                 return o;
             }
 
-            throw new InternalError($"Could not get prototype of '{name}'");
+            throw new TypeError($"Could not get prototype of '{name}'");
         }
 
         public static bool IsType(Constant o, Constant c, Agent agent) {

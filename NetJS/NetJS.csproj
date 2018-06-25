@@ -34,6 +34,9 @@
     </NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ClearScript, Version=5.5.2.0, Culture=neutral, PublicKeyToken=935d0c957da47c73, processorArchitecture=MSIL">
+      <HintPath>..\packages\ClearScript.V8.5.5.2\lib\net45\ClearScript.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -85,6 +88,13 @@
       <Name>Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Licenses\clearscript-license.txt" />
+    <Content Include="Licenses\v8-license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$(ConfigurationName) == Release">
     <Message Text="Moving bin folders to release" Importance="high" />
@@ -101,5 +111,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent Condition="$(OS) == Unix AND $(ConfigurationName) == Release AND EXISTS($(Another))">$(SolutionDir)Documentation\MarkdownGenLinux -files $(SolutionDir)Documentation\Core.xml $(SolutionDir)Documentation\Server.xml -output $(SolutionDir)..\NetJS.wiki\documentation</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+if not exist "$(TargetDir)" md "$(TargetDir)"
+xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.5.2\tools\native\x86\*.*" "$(TargetDir)"
+if not exist "$(TargetDir)" md "$(TargetDir)"
+xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.5.2\tools\native\amd64\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

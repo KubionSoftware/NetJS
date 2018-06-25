@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace NetJS.Core {
     public class StatementList : Statement {
 
-        public List<Statement> List;
+        public IReadOnlyList<Statement> List;
 
         public StatementList(List<Statement> list) {
             List = list;

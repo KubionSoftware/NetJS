@@ -312,6 +312,8 @@ namespace NetJS.Testing {
 
 
             _nonStrictOutput += testOutput;
+            _strictOutput += strictTestOutput;
+
             var stringTime = Math.Round(templateWatch.Elapsed.TotalMilliseconds, 2).ToString().Split('.');
             var strictStringTime = Math.Round(strictWatch.Elapsed.TotalMilliseconds, 2).ToString().Split('.');
             var timeDecimal = "00";

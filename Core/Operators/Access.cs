@@ -42,7 +42,7 @@ namespace NetJS.Core {
         }
 
         public override string ToDebugString() {
-            return "access";
+            return Left.ToDebugString() + (IsKey ? "." : "[") + Right.ToDebugString() + (IsKey ? "" : "]");
         }
     }
 }
