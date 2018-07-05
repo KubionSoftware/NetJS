@@ -32,7 +32,9 @@ namespace NetJS.Util {
                 case 0: break; // No pad chars in this case
                 case 2: output += "=="; break; // Two pad chars
                 case 3: output += "="; break;  // One pad char
-                default: throw new Exception("Illegal base64url string!");
+                default:
+                    State.Application.Error(new Error("Illegal base64url string!"));
+                    break;
             }
             var converted = Convert.FromBase64String(output); // Standard base64 decoder
             return converted;

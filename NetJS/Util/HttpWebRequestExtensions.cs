@@ -22,7 +22,7 @@ namespace NetJS.Util {
                 "Range",
                 "Referer",
                 "Transfer-Encoding",
-                "User-Agent"
+                "User-State"
         };
 
         static Dictionary<string, PropertyInfo> HeaderProperties = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);

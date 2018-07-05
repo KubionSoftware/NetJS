@@ -1,49 +1,69 @@
-// write + read text
-assert(() => IO.writeText("io/a.txt", "testvalue38") == undefined, "IO.writeText");
-assert(() => IO.readText("io/a.txt") == "testvalue38", "IO.readText");
+async function testIO(){
+	// write + read text
+	let writeTextResult = await IO.writeText("io/a.txt", "testvalue38");
+	Test.assert(() => writeTextResult === true, "IO.writeText");
+	let readTextResult = await IO.readText("io/a.txt");
+	Test.assert(() => readTextResult === "testvalue38", "IO.readText");
 
-// write + read bytes
-var bytes = new Uint8Array(1);
-bytes[0] = 42;
-assert(() => IO.writeBytes("io/bytes.txt", bytes) == undefined, "IO.writeBytes");
-assert(() => IO.readBytes("io/bytes.txt")[0] == 42, "IO.readBytes");
+	// write + read bytes
+	let bytes = new Uint8Array(1);
+	bytes[0] = 42;
+	let writeBytesResult = await IO.writeBytes("io/bytes.txt", bytes);
+	Test.assert(() => writeBytesResult === true, "IO.writeBytes");
+	let readBytesResult = await IO.readBytes("io/bytes.txt");
+	Test.assert(() => readBytesResult[0] === 42, "IO.readBytes");
 
-// copy file
-assert(() => IO.copyFile("io/a.txt", "io/b.txt") == undefined, "IO.copy");
-assert(() => IO.readText("io/b.txt") == "testvalue38", "IO.copy new file");
+	// copy file
+	let copyFileResult = await IO.copyFile("io/a.txt", "io/b.txt");
+	Test.assert(() => copyFileResult === true, "IO.copy");
+	let copiedFileText = await IO.readText("io/b.txt");
+	Test.assert(() => copiedFileText === "testvalue38", "IO.copy new file");
 
-// delete file
-assert(() => IO.deleteFile("io/a.txt") == undefined, "IO.delete");
-assert(() => !IO.fileExists("io/a.txt"), "IO.delete gone");
+	// delete file
+	let deleteFileResult = await IO.deleteFile("io/a.txt");
+	Test.assert(() => deleteFileResult === true, "IO.delete");
+	let deletedFileGone = await IO.fileExists("io/a.txt");
+	Test.assert(() => deletedFileGone === false, "IO.delete gone");
 
-// move file
-assert(() => IO.moveFile("io/b.txt", "io/c.txt") == undefined, "IO.move");
-assert(() => !IO.fileExists("io/b.txt"), "IO.move old gone");
-assert(() => IO.readText("io/c.txt") == "testvalue38", "IO.move new file");
+	// move file
+	let moveFileResult = await IO.moveFile("io/b.txt", "io/c.txt");
+	Test.assert(() => moveFileResult === true, "IO.move");
+	let movedFileGone = await IO.fileExists("io/b.txt");
+	Test.assert(() => movedFileGone === false, "IO.move old gone");
+	let movedFileText = await IO.readText("io/c.txt");
+	Test.assert(() => movedFileText === "testvalue38", "IO.move new file");
 
-IO.deleteFile("io/c.txt");
+	await IO.deleteFile("io/c.txt");
 
-// create directory
-assert(() => IO.createDirectory("io/documents") == undefined, "IO.createDirectory");
-assert(() => IO.directoryExists("io/documents"), "IO.createDirectory exists");
+	// create directory
+	let createDirectoryResult = await IO.createDirectory("io/documents");
+	Test.assert(() => createDirectoryResult === true, "IO.createDirectory");
+	let createdDirectoryExists = await IO.directoryExists("io/documents");
+	Test.assert(() => createdDirectoryExists === true, "IO.createDirectory exists");
 
-// move directory
-assert(() => IO.moveDirectory("io/documents", "io/pictures") == undefined, "IO.moveDirectory");
-assert(() => !IO.directoryExists("io/documents"), "IO.moveDirectory old gone");
-assert(() => IO.directoryExists("io/pictures"), "IO.moveDirectory new exists");
+	// move directory
+	let moveDirectoryResult = await IO.moveDirectory("io/documents", "io/pictures");
+	Test.assert(() => moveDirectoryResult === true, "IO.moveDirectory");
+	let movedDirectoryGone = await IO.directoryExists("io/documents");
+	Test.assert(() => movedDirectoryGone === false, "IO.moveDirectory old gone");
+	let movedDirectoryExists = await IO.directoryExists("io/pictures");
+	Test.assert(() => movedDirectoryExists === true, "IO.moveDirectory new exists");
 
-// delete directory
-assert(() => IO.deleteDirectory("io/pictures") == undefined, "IO.deleteDirectory");
-assert(() => !IO.directoryExists("io/pictures"), "IO.deleteDirectory gone");
+	// delete directory
+	let deleteDirectoryResult = await IO.deleteDirectory("io/pictures");
+	Test.assert(() => deleteDirectoryResult === true, "IO.deleteDirectory");
+	let deletedDirectoryExists = await IO.directoryExists("io/pictures");
+	Test.assert(() => deletedDirectoryExists === false, "IO.deleteDirectory gone");
 
-// get files
-var files = IO.getFiles("io/example");
-assert(() => files.length == 2, "IO.getFiles count");
-assert(() => files[0].endsWith("fileA.txt"), "IO.getFiles[0]");
-assert(() => files[1].endsWith("fileB.png"), "IO.getFiles[1]");
+	// get files
+	let files = await IO.getFiles("io/example");
+	Test.assert(() => files.length == 2, "IO.getFiles count");
+	Test.assert(() => files[0].endsWith("fileA.txt"), "IO.getFiles[0]");
+	Test.assert(() => files[1].endsWith("fileB.png"), "IO.getFiles[1]");
 
-// get directories
-var directories = IO.getDirectories("io/example");
-assert(() => directories.length == 2, "IO.getDirectories count");
-assert(() => directories[0].endsWith("folderA"), "IO.getDirectories[0]");
-assert(() => directories[1].endsWith("folderB"), "IO.getDirectories[1]");
+	// get directories
+	let directories = await IO.getDirectories("io/example");
+	Test.assert(() => directories.length == 2, "IO.getDirectories count");
+	Test.assert(() => directories[0].endsWith("folderA"), "IO.getDirectories[0]");
+	Test.assert(() => directories[1].endsWith("folderB"), "IO.getDirectories[1]");
+}

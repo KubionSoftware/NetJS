@@ -50,7 +50,7 @@ namespace NetJS {
                                 sqlConnection.Connection.Close();
                                 sqlConnection.Connection.Dispose();
                             } catch (Exception e) {
-                                Core.Log.Write("Error while closing SQL connection - " + e);
+                                API.Log.write("Error while closing SQL connection - " + e);
                             }
                         }
                     }
@@ -73,7 +73,7 @@ namespace NetJS {
                             }
                         }
                     }catch (Exception e) {
-                        Core.Log.Write("Error while parsing connection JSON - " + e);
+                        API.Log.write("Error while parsing connection JSON - " + e);
                     }
                 } else {
 
@@ -90,7 +90,7 @@ namespace NetJS {
                             try {
                                 sqlConnection.Connection.Open();
                             } catch (Exception e) {
-                                Core.Log.Write("Error while opening SQL connection - " + e);
+                                API.Log.write("Error while opening SQL connection - " + e);
                             }
                         }
                         return sqlConnection.Connection;

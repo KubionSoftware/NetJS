@@ -44,6 +44,7 @@
     <DocumentationFile>..\Documentation\Server.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ClearScript, Version=5.5.2.0, Culture=neutral, PublicKeyToken=935d0c957da47c73" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
@@ -74,12 +75,13 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\HTTPServer.cs" />
     <Compile Include="API\Request.cs" />
     <Compile Include="API\Response.cs" />
     <Compile Include="API\WebSocket.cs" />
-    <Compile Include="DebugSocketHandler.cs" />
     <Compile Include="JSServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerRequest.cs" />
     <Compile Include="SocketHandler.cs" />
     <Compile Include="Tool.cs" />
     <Compile Include="WebHandler.cs" />
@@ -113,10 +115,6 @@
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Project>{641457c2-a76b-47d8-af78-eb9e19df9d03}</Project>
-      <Name>Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NetJS\NetJS.csproj">
       <Project>{4c352ee0-cc0c-419e-ad88-24faf7cee643}</Project>
       <Name>NetJS</Name>

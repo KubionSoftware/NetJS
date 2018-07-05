@@ -1,6 +1,7 @@
-﻿using System.Collections;
+﻿using Microsoft.ClearScript;
+using System.Collections;
+using System.Collections.Generic;
 using System.Web;
-using NetJS.Core;
 
 namespace NetJS.API {
     /// <summary>A Compatibility class for XDoc, to ensure possibility of usage of XDoc with NetJS.</summary>
@@ -11,7 +12,7 @@ namespace NetJS.API {
             public XHTMLMerge.SVCache SVCache;
         }
 
-        public static XDocInfo GetXDocInfo(Agent agent) {
+        public static XDocInfo GetXDocInfo() {
             var context = HttpContext.Current;
 
             XHTMLMerge.AppCache appCache = null;
@@ -21,11 +22,11 @@ namespace NetJS.API {
                 if (context.Application != null) appCache = (XHTMLMerge.AppCache)context.Application["AppCache"];
                 if (context.Session != null) svCache = (XHTMLMerge.SVCache)context.Session["SVCache"];
             } else {
-                var application = (agent as NetJSAgent).Application;
-                var session = (agent as NetJSAgent).Session;
+                var application = State.Application;
+                var session = State.Session;
 
-                if (application.Get("AppCache") is Foreign af) appCache = (XHTMLMerge.AppCache)af.Value;
-                if (session.Get("SVCache") is Foreign sf) svCache = (XHTMLMerge.SVCache)sf.Value;
+                if (application.Get("AppCache") is object af) appCache = (XHTMLMerge.AppCache)af;
+                if (session.Get("SVCache") is object sf) svCache = (XHTMLMerge.SVCache)sf;
             }
 
             if (appCache == null) appCache = new XHTMLMerge.AppCache();
@@ -34,38 +35,35 @@ namespace NetJS.API {
             return new XDocInfo() { AppCache = appCache, SVCache = svCache };
         }
 
-        public static void SetXDocInfo(XDocInfo xdoc, Agent agent) {
+        public static void SetXDocInfo(XDocInfo xdoc) {
             var context = HttpContext.Current;
 
             if (context != null) {
                 if (context.Application != null) context.Application["AppCache"] = xdoc.AppCache;
                 if (context.Session != null) context.Session["SVCache"] = xdoc.SVCache;
             } else {
-                var application = (agent as NetJSAgent).Application;
-                var session = (agent as NetJSAgent).Session;
+                var application = State.Application;
+                var session = State.Session;
 
-                application.Set("AppCache", new Foreign(xdoc.AppCache));
-                session.Set("SVCache", new Foreign(xdoc.SVCache));
+                application.Set("AppCache", xdoc.AppCache);
+                session.Set("SVCache", xdoc.SVCache);
             }
         }
 
-        private static string includeLoad(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "XDoc.include");
-
-            var xdoc = GetXDocInfo(agent);
+        private static string includeLoad(string name, ScriptObject arguments) {
+            var xdoc = GetXDocInfo();
 
             var parameters = new Hashtable();
-            if (arguments.Length > 1) {
-                var param = (Core.Object)arguments[1];
-                foreach (var key in param.OwnPropertyKeys()) {
-                    parameters.Add(key.ToString(), Convert.ToString(param.Get(key, agent), agent));
+            if (arguments != null) {
+                foreach (var key in arguments.GetDynamicMemberNames()) {
+                    parameters.Add(key.ToString(), Tool.GetValue(arguments, key).ToString());
                 }
             }
 
-            var application = (agent as NetJSAgent).Application;
+            var application = State.Application;
 
             var context = HttpContext.Current;
-            var result = application.XDocService.RunTemplate(context, name.Value, parameters, ref xdoc.AppCache, ref xdoc.SVCache);
+            var result = application.XDocService.RunTemplate(context, name, parameters, ref xdoc.AppCache, ref xdoc.SVCache);
 
             return result;
         }
@@ -74,19 +72,16 @@ namespace NetJS.API {
         /// <param name="name">Name of the included file</param>
         /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
         /// <returns>Undefined</returns>
-        /// <exception cref="InternalError">Thrown when no application has been found in the application agent.</exception>
-        public static Constant include(Constant _this, Constant[] arguments, Agent agent) {
-            agent.Running.Buffer.Append(includeLoad(_this, arguments, agent));
-            return Static.Undefined;
+        public static void include(string name, dynamic arguments = null) {
+            State.Buffer.Append(includeLoad(name, arguments));
         }
 
         /// <summary>XDoc.load includes an XDoc template and returns the result.</summary>
         /// <param name="name">Name of the included file</param>
         /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
         /// <returns>The result of executing the file.</returns>
-        /// <exception cref="InternalError">Thrown when no application has been found in the application agent.</exception>
-        public static Constant load(Constant _this, Constant[] arguments, Agent agent) {
-            return new String(includeLoad(_this, arguments, agent));
+        public static string load(string name, dynamic arguments = null) {
+            return includeLoad(name, arguments);
         }
 
         /// <summary>XDoc.get gets a value from the XDoc session</summary>
@@ -94,18 +89,13 @@ namespace NetJS.API {
         /// <param name="context">Context name</param>
         /// <param name="id">ID name</param>
         /// <returns>The session value as a string</returns>
-        /// <exception cref="InternalError">Thrown when no application has been found in application agent.</exception>
-        public static Constant get(Constant _this, Constant[] arguments, Agent agent) {
-            var key = Core.Tool.GetArgument<Core.String>(arguments, 0, "XDoc.get").Value;
-            var context = Core.Tool.GetArgument<Core.String>(arguments, 1, "XDoc.get").Value;
-            var id = Core.Tool.GetArgument<Core.String>(arguments, 2, "XDoc.get").Value;
-
-            var xdoc = GetXDocInfo(agent);
+        public static string get(string key, string context, string id) {
+            var xdoc = GetXDocInfo();
             var value = xdoc.SVCache.GetSV(key, context + "_" + id, "");
-            SetXDocInfo(xdoc, agent);
+            SetXDocInfo(xdoc);
 
-            if (value.Length == 0) return Core.Static.Undefined;
-            return new Core.String(value);
+            if (value.Length == 0) return "";
+            return value;
         }
 
         /// <summary>XDoc.set sets a value in the XDoc session</summary>
@@ -114,18 +104,10 @@ namespace NetJS.API {
         /// <param name="id">ID name</param>
         /// <param name="value">The value to set, is converted to a string</param>
         /// <returns>Undefined</returns>
-        /// <exception cref="InternalError">Thrown when no application has been found in application agent.</exception>
-        public static Constant set(Constant _this, Constant[] arguments, Agent agent) {
-            var key = Core.Tool.GetArgument<Core.String>(arguments, 0, "XDoc.get").Value;
-            var context = Core.Tool.GetArgument<Core.String>(arguments, 1, "XDoc.get").Value;
-            var id = Core.Tool.GetArgument<Core.String>(arguments, 2, "XDoc.get").Value;
-            var value = Core.Tool.GetArgument(arguments, 3, "Session.set");
-
-            var xdoc = GetXDocInfo(agent);
+        public static void set(string key, string context, string id, object value) {
+            var xdoc = GetXDocInfo();
             xdoc.SVCache.SetSV(key, context + "_" + id, value.ToString());
-            SetXDocInfo(xdoc, agent);
-
-            return Static.Undefined;
+            SetXDocInfo(xdoc);
         }
     }
 }

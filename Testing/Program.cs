@@ -1,52 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using NetJS.Core;
 using System.Diagnostics;
 using NetJS;
 using System.Linq;
 
 namespace NetJS.Testing {
     
-    class TestFunctions {
-        public static Constant assert(Constant _this, Constant[] arguments, Agent agent) {
-            Constant value = Static.Undefined;
-            string message = "Could not read message";
+    public class Test {
+        public static void assert(dynamic func, string message) {
+            object value = null;
 
             try {
-                var function = NetJS.Core.Tool.GetArgument<NetJS.Core.InternalFunction>(arguments, 0, "assert");
-                message = NetJS.Core.Tool.GetArgument<NetJS.Core.String>(arguments, 1, "assert").Value;
-
-                value = function.Call(Static.Undefined, agent, new Constant[] { });
+                value = func();
             } catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Error.WriteLine(e);
             }
 
-            if (value is NetJS.Core.Boolean b && b.Value) {
+            if (value is bool b && b) {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Test successful - " + message);
-//                Program.NumSuccess++;
+                Program.NumSuccess++;
             }
             else {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine("Test failed - " + message);
-//                Program.NumFailed++;
+                Program.NumFailed++;
             }
-
-            return NetJS.Core.Static.Undefined;
         }
 
-        public static Constant time(Constant _this, Constant[] arguments, Agent agent) {
-            string message = "Could not read message";
-
+        public static void time(dynamic func, string message) {
             try {
-                var function = NetJS.Core.Tool.GetArgument<NetJS.Core.InternalFunction>(arguments, 0, "assert");
-                message = NetJS.Core.Tool.GetArgument<NetJS.Core.String>(arguments, 1, "assert").Value;
-
                 var watch = new Stopwatch();
                 watch.Start();
-                function.Call(Static.Undefined, agent, new Constant[] { });
+                func();
                 watch.Stop();
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"{message} took {watch.ElapsedMilliseconds}ms");
@@ -55,15 +43,13 @@ namespace NetJS.Testing {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine(e);
             }
-
-            return NetJS.Core.Static.Undefined;
         }
     }
 
     class Program{
         public static int NumFailed = 0;
         public static int NumSuccess = 0;
-        private static List<Test> _allTests;
+        //private static List<TestFile> _allTests;
         private static int _testCount = 0;
         private static int _benchmarkRounds = 1;
         private static List<double> _benchmarkResults = new List<double>();
@@ -72,8 +58,8 @@ namespace NetJS.Testing {
 
         static void Main(string[] args){
             try {
-                //FeatureTest();
-                Test262();
+                FeatureTest();
+                //Test262();
             }
             catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -90,7 +76,7 @@ namespace NetJS.Testing {
             var service = new JSService();
             var application = new JSApplication("../../test/");
 
-            application.Realm.RegisterFunctions(typeof(TestFunctions));
+            application.AddHostType(typeof(Test));
 
             while (true) {
                 NumFailed = 0;
@@ -100,24 +86,25 @@ namespace NetJS.Testing {
                 watch.Start();
 
                 var session = new JSSession();
-                var output = service.RunTemplate("main.js", "{}", ref application, ref session);
+                service.RunScript("main.js", application, session, output => {
+                    watch.Stop();
 
-                watch.Stop();
+                    Console.ForegroundColor = NumFailed == 0 ? ConsoleColor.Green : ConsoleColor.Red;
+                    Console.WriteLine($"Completed test with {NumFailed} failures and {NumSuccess} successes");
 
-                Console.ForegroundColor = NumFailed == 0 ? ConsoleColor.Green : ConsoleColor.Red;
-                Console.WriteLine($"Completed test with {NumFailed} failures and {NumSuccess} successes");
+                    Console.ForegroundColor = ConsoleColor.White;
 
-                Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("Output: ");
+                    Console.WriteLine(output);
 
-                Console.WriteLine("Output: ");
-                Console.WriteLine(output);
-
-                Console.WriteLine("Time: " + watch.ElapsedMilliseconds + "ms");
+                    Console.WriteLine("Time: " + watch.ElapsedMilliseconds + "ms");
+                });
 
                 Console.ReadLine();
             }
         }
 
+        /*
         static void Test262() {
             var recursiveFindWatch = new Stopwatch();
             recursiveFindWatch.Start();
@@ -194,7 +181,7 @@ namespace NetJS.Testing {
             service.RunScript(Test262Root + "/../harness/assert.js", application, session, true, false);
 
             while (true) {
-                Test myTest;
+                TestFile myTest;
 
                 lock (_allTests) {
                     if (_testCount < _allTests.Count) {
@@ -219,5 +206,6 @@ namespace NetJS.Testing {
                 }
             }
         }
+        */
     }
 }

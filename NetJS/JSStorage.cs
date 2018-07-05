@@ -1,5 +1,5 @@
-﻿using NetJS.Core;
-using System;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,27 +8,27 @@ using System.Threading.Tasks;
 namespace NetJS {
     public abstract class JSStorage {
 
-        private Dictionary<string, Constant> _dict;
+        private ConcurrentDictionary<string, object> _dict;
 
         public JSStorage() {
-            _dict = new Dictionary<string, Constant>();
+            _dict = new ConcurrentDictionary<string, object>();
         }
 
-        public void Set(string key, Constant value) {
+        public void Set(string key, object value) {
             _dict[key] = value;
         }
 
-        public Constant Get(string key) {
+        public object Get(string key) {
             if (_dict.ContainsKey(key)) {
                 return _dict[key];
             } else {
-                return Static.Undefined;
+                return null;
             }
         }
 
         public void Remove(string key) {
             if (_dict.ContainsKey(key)) {
-                _dict.Remove(key);
+                _dict.TryRemove(key, out object removed);
             }
         }
 
@@ -36,11 +36,11 @@ namespace NetJS {
             _dict.Clear();
         }
 
-        public Core.Object GetObject(Agent agent) {
-            var obj = Core.Tool.Construct("Object", agent);
+        public dynamic GetObject() {
+            dynamic obj = new NetJSObject();
 
             foreach(var pair in _dict) {
-                obj.Set(pair.Key, pair.Value, agent);
+                obj[pair.Key] = pair.Value;
             }
 
             return obj;

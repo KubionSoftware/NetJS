@@ -1,22 +1,21 @@
-﻿using NetJS.Core;
-
-namespace NetJS.API {
+﻿namespace NetJS.API {
     public class Buffer {
 
-        public static Constant set(Constant _this, Constant[] arguments, Agent agent) {
-            var value = ((Core.String)arguments[0]).Value;
-            agent.Running.Buffer.Clear();
-            agent.Running.Buffer.Append(value);
-            return Static.Undefined;
+        public static void set(string value) {
+            State.Buffer.Clear();
+            State.Buffer.Append(value);
         }
 
-        public static Constant get(Constant _this, Constant[] arguments, Agent agent) {
-            return new Core.String(agent.Running.Buffer.ToString());
+        public static string get() {
+            return State.Buffer.ToString();
         }
 
-        public static Constant clear(Constant _this, Constant[] arguments, Agent agent) {
-            agent.Running.Buffer.Clear();
-            return Static.Undefined;
+        public static void write(string s) {
+            State.Buffer.Append(s);
+        }
+
+        public static void clear() {
+            State.Buffer.Clear();
         }
     }
 }

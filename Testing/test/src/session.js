@@ -1,21 +1,21 @@
 // Session set
-assert(() => Session.set("Hello", "World!") == undefined, "Session.set");
+Test.assert(() => Session.set("Hello", "World!") === true, "Session.set");
 
 // get
-assert(() => Session.get("Hello") == "World!", "Session.get");
+Test.assert(() => Session.get("Hello") == "World!", "Session.get");
 
 // getAll
-assert(() => Session.getAll()["Hello"] == "World!", "Session.getAll");
+Test.assert(() => Session.getAll()["Hello"] == "World!", "Session.getAll");
 
 // remove
-assert(() => Session.remove("Hello") == undefined, "Session.remove");
-assert(() => Session.get("Hello") == undefined, "Session.get for remove check");
+Test.assert(() => Session.remove("Hello") === true, "Session.remove");
+Test.assert(() => Session.get("Hello") === null, "Session.get for remove check");
 
 // clear
 Session.set("Hello", "World!");
-assert(() => Session.clear() == undefined, "Session.clear");
-assert(() => Session.get("Hello") == undefined, "Session.get for clear check");
+Test.assert(() => Session.clear() === true, "Session.clear");
+Test.assert(() => Session.get("Hello") === null, "Session.get for clear check");
 
 // multiple data types
 Session.set("Object", {first:"Hello", second:"World!"});
-assert(() => Session.get("Object").first == "Hello" && Session.get("Object").second == "World!", "Session.get for Objects");
+Test.assert(() => Session.get("Object").first == "Hello" && Session.get("Object").second == "World!", "Session.get for Objects");

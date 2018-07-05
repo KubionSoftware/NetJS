@@ -55,14 +55,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\Async.cs" />
+    <Compile Include="API\Application.cs" />
     <Compile Include="API\DLL.cs" />
     <Compile Include="API\XML.cs" />
     <Compile Include="Cache.cs" />
+    <Compile Include="Callback.cs" />
     <Compile Include="Connections.cs" />
     <Compile Include="API\Base64.cs" />
     <Compile Include="API\Buffer.cs" />
-    <Compile Include="API\Config.cs" />
     <Compile Include="API\Functions.cs" />
     <Compile Include="API\HTTP.cs" />
     <Compile Include="API\IO.cs" />
@@ -71,22 +71,25 @@
     <Compile Include="API\SQL.cs" />
     <Compile Include="API\Windows.cs" />
     <Compile Include="API\XDoc.cs" />
+    <Compile Include="Error.cs" />
     <Compile Include="JSApplication.cs" />
     <Compile Include="JSService.cs" />
     <Compile Include="JSSession.cs" />
     <Compile Include="JSStorage.cs" />
-    <Compile Include="NetJSAgent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Request.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="State.cs" />
+    <Compile Include="TimeOut.cs" />
+    <Compile Include="Tool.cs" />
+    <Compile Include="Transpiler.cs" />
     <Compile Include="Util\Base64.cs" />
+    <Compile Include="Util\Encode.cs" />
+    <Compile Include="Util\Hash.cs" />
     <Compile Include="Util\HttpWebRequestExtensions.cs" />
+    <Compile Include="Util\Json.cs" />
+    <Compile Include="Util\JsonParser.cs" />
     <Compile Include="Util\SQL.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Project>{641457c2-a76b-47d8-af78-eb9e19df9d03}</Project>
-      <Name>Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Licenses\clearscript-license.txt" />

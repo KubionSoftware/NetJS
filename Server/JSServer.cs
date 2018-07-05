@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.ClearScript;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -20,21 +21,24 @@ namespace NetJS.Server {
         }
 
         public JSApplication CreateApplication() {
-            var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory);
+            var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory, (app) => {
+                app.AddHostType(typeof(API.Request));
+                app.AddHostType(typeof(API.Response));
+                app.AddHostType(typeof(API.WebSocket));
+                app.AddHostType(typeof(API.HTTPServer));
 
-            application.Realm.RegisterClass(typeof(API.Request), "Request");
-            application.Realm.RegisterClass(typeof(API.Response), "Response");
-            application.Realm.RegisterClass(typeof(API.WebSocket), "WebSocket");
+                var session = new JSSession();
 
-            var session = new JSSession();
+                _service.RunCodeSync($"require('{app.Settings.Startup}')", app, session, (result) => { });
+            }, (exception) => {
+                API.Response.setHeader("Content-Type", "text/plain");
 
-            NetJS.API.Log.Write("Startup: " +
-                _service.RunTemplate(
-                    application.Settings.Startup, 
-                    "", 
-                    ref application, 
-                    ref session
-            ), application);
+                if (exception is ScriptEngineException se) {
+                    State.Request.ResultCallback(se.ErrorDetails);
+                } else {
+                    State.Request.ResultCallback(exception.ToString());
+                }
+            });
 
             return application;
         }
@@ -48,31 +52,26 @@ namespace NetJS.Server {
             return session;
         }
 
-        public void ProcessRequest(HttpContext context, NetJS.JSApplication application, NetJS.JSSession session) {
-            var responseString = _service.RunTemplate(application.Settings.Entry, "", ref application, ref session);
-
-            var buffer = Encoding.UTF8.GetBytes(responseString);
-            var output = context.Response.OutputStream;
-            output.Write(buffer, 0, buffer.Length);
-            output.Close();
+        public void ProcessRequest(HttpContext context, NetJS.JSApplication application, NetJS.JSSession session, Action after) {
+            API.HTTPServer.OnConnection(application, session, after);
         }
 
-        public void ProcessRequest(HttpContext context) {
+        public void ProcessRequest(HttpContext context, Action after) {
             var application = Application;
             var session = GetSession(context);
 
-            ProcessRequest(context, application, session);
+            ProcessRequest(context, application, session, after);
 
             if (context.Application != null) context.Application["JSApplication"] = application;
             if (context.Session != null) context.Session["JSSession"] = session;
         }
 
-        public void Handle(HttpContext context) {
+        public void Handle(HttpContext context, Action after) {
             var application = Application;
             var mainTemplate = application.Settings.Root + application.Settings.TemplateFolder + application.Settings.Entry;
 
             if (mainTemplate.EndsWith(".js")) {
-                ProcessRequest(context);
+                ProcessRequest(context, after);
             } else if (mainTemplate.EndsWith(".xdoc")) {
                 application.ProcessXDocRequest(context);
             }

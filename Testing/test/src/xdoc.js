@@ -1,16 +1,16 @@
 // XDoc load
-assert(() => XDoc.load("return") == "testvalue65", "XDoc.load");
+Test.assert(() => XDoc.load("return") == "testvalue65", "XDoc.load");
 
 // include
 XDoc.include("return");
-assert(() => Buffer.get() == "testvalue65", "XDoc.include");
+Test.assert(() => Buffer.get() == "testvalue65", "XDoc.include");
 Buffer.clear();
-assert(() => XDoc.load("parameters", {a: "AAA", b: "BBB"}) == "BBBAAA", "XDoc.load parameters");
+Test.assert(() => XDoc.load("parameters", {a: "AAA", b: "BBB"}) == "BBBAAA", "XDoc.load parameters");
 
 // set
-assert(() => XDoc.set("x", "", "", "testvalue32") == undefined, "XDoc.set");
-assert(() => XDoc.load("set") == "testvalue32", "XDoc.set result");
+XDoc.set("x", "", "", "testvalue32")
+Test.assert(() => XDoc.load("set") == "testvalue32", "XDoc.set");
 
 // get
 XDoc.load("get");
-assert(() => XDoc.get("y", "", "") == "testvalue83", "XDoc.get");
+Test.assert(() => XDoc.get("y", "", "") == "testvalue83", "XDoc.get");

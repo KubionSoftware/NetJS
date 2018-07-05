@@ -1,34 +1,34 @@
-﻿using System.Text;
+﻿using Microsoft.ClearScript;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Web;
-using NetJS.Core;
 
 namespace NetJS.API {
     /// <summary>Functions class contain functions that are injected directly into the engine.</summary>
     public class Functions {
 
-        private static Constant includeLoad(Constant[] arguments, bool returnVar, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "include");
-
-            var parts = name.Value.Split('.');
+        private static object includeLoad(string template, dynamic arguments, bool returnVar) {
+            var parts = template.Split('.');
             if (parts.Length == 1) {
-                name.Value += ".js";
+                template += ".js";
             }
 
-            var application = (agent as NetJSAgent).Application;
-            if (application == null) throw new InternalError("No application");
-            var script = application.Cache.GetScript(name.Value, application);
+            var application = State.Application;
+            var resource = application.Cache.GetResource(template, returnVar, application);
 
-            // Execute template
-            var buffer = returnVar ? new StringBuilder() : agent.Running.Buffer;
-            Object parameters = arguments.Length > 1 ? (Object)arguments[1] : null;
-            var result = script.Evaluate(agent, false, true, buffer, parameters).Value;
+            var oldBuffer = State.Buffer;
+            var buffer = new StringBuilder();
+            State.Buffer = buffer;
+            var result = resource(arguments);
+            State.Buffer = oldBuffer;
 
             if (returnVar) {
-                return result == null || result is Undefined ? new String(buffer.ToString()) : result;
-            } else if (!(result is Undefined)) {
-                buffer.Append(Convert.ToString(result, agent));
+                return result;
+            } else {
+                State.Buffer.Append(result.ToString());
+                return null;
             }
-            return Static.Undefined;
         }
         
         /// <summary>include  takes a file, runs the code in the file and writes the result to the output buffer.
@@ -37,8 +37,8 @@ namespace NetJS.API {
         /// <param name="file">The file to include</param>
         /// <param name="variables">An object with variables to setup the file before execution</param>
         /// <example><code lang="javascript">include("renderLayout.js", {loggedIn: true});</code></example>
-        public static Constant include(Constant _this, Constant[] arguments, Agent agent) {
-            return includeLoad(arguments, false, agent);
+        public static void include(string template, dynamic arguments = null) {
+            includeLoad(template, arguments, false);
         }
 
         /// <summary>load takes a file, runs the code in the file and returns the value.
@@ -48,26 +48,39 @@ namespace NetJS.API {
         /// <param name="variables">An object with variables to setup the file before execution</param>
         /// <returns>Returns the output of the template.</returns>
         /// <example><code lang="javascript">var output = load("renderLayout.js", {loggedIn: true});</code></example>
-        public static Constant load(Constant _this, Constant[] arguments, Agent agent) {
-            return includeLoad(arguments, true, agent);
+        public static dynamic load(string template, dynamic arguments = null) {
+            return includeLoad(template, arguments, true);
         }
 
         /// <summary>out writes a string to the output buffer</summary>
         /// <param name="value">The string to write</param>
         /// <example><code lang="javascript">out(JSON.stringify(data));</code></example>
-        public static Constant @out(Constant _this, Constant[] arguments, Agent agent) {
-            var value = Core.Tool.GetArgument(arguments, 0, "out");
-            agent.Running.Buffer.Append(Convert.ToString(value, agent));
-            return Static.Undefined;
+        public static void @out(string value) {
+            State.Buffer.Append(value);
         }
 
         /// <summary>outLine writes a string to the output buffer and appends a newline</summary>
         /// <param name="value">The string to write</param>
         /// <example><code lang="javascript">outLine(JSON.stringify(data));</code></example>
-        public static Constant @outLine(Constant _this, Constant[] arguments, Agent agent) {
-            var value = Core.Tool.GetArgument(arguments, 0, "outLine");
-            agent.Running.Buffer.Append(Convert.ToString(value, agent) + "\n");
-            return Static.Undefined;
+        public static void @outLine(string value) {
+            State.Buffer.Append(value + "\n");
+        }
+
+        /// <summary>end returns the value to the caller</summary>
+        /// <param name="value">The output to return</param>
+        /// <example><code lang="javascript">end("<html></html>");</code></example>
+        public static void end(object value = null) {
+            State.Request.ResultCallback(value);
+        }
+
+        /// <summary>Schedules a function to be called after a certain amount of time</summary>
+        /// <param name="function">The function to call</param>
+        /// <param name="time">The time in milliseconds</param>
+        /// <example><code lang="javascript">setTimeout(() => {
+        ///     Log.write("It's time!");
+        /// }, 1500);</code></example>
+        public static void setTimeout(dynamic function, int time) {
+            State.Application.AddTimeOut(time, function, State.Get());
         }
 
         /// <summary>import takes a file and runs the code in the file with the current agent.
@@ -76,73 +89,25 @@ namespace NetJS.API {
         /// <param name="file">The file to import</param>
         /// <example><code lang="javascript">import("date");
         /// FormatDate(new Date());</code></example>
-        public static Constant import(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "import");
-
-            var parts = name.Value.Split('.');
-            if (parts.Length == 1) {
-                name.Value += ".js";
-            }
-
-            var application = (agent as NetJSAgent).Application;
-            var node = application.Cache.GetScript(name.Value, application);
-
-            var buffer = new StringBuilder();
-
-            // Pop created function environment so import runs in callee environment
-            var oldEnv = agent.Pop();
-            var result = node.Evaluate(agent, false, false, buffer).Value;
-            agent.Push(oldEnv);
-
-            return result == null || result is Undefined ? new String(buffer.ToString()) : result;
-        }
-        
-        /// <summary>redirect takes an url and redirects a HttpResponse to the given url.</summary>
-        /// <param name="url">A url to redirect to</param>
-        /// <example><code lang="javascript">redirect("https://google.com/search?q=hello+world");</code></example>
-        public static Constant redirect(Constant _this, Constant[] arguments, Agent agent) {
-            var url = Core.Tool.GetArgument<Core.String>(arguments, 0, "redirect");
-            var context = HttpContext.Current;
-            if (context != null) {
-                context.Response.Redirect(url.Value);
-            }
-            return Static.Undefined;
-        }
-
-        /// <summary>Runs unsafe code (loops)</summary>
-        /// <param name="function">The function to execute</param>
-        /// <example><code lang="javascript">unsafe(function(){
-        ///     while(true){}
-        /// });</code></example>
-        public static Constant @unsafe(Constant _this, Constant[] arguments, Agent agent) {
-            var function = Core.Tool.GetArgument<Core.Function>(arguments, 0, "unsafe");
-
-            var oldSafe = agent.IsSafe;
-            agent.IsSafe = false;
-            function.Call(Static.Undefined, agent, new Constant[] { });
-            agent.IsSafe = oldSafe;
-
-            return Static.Undefined;
+        public static void require(string template) {
+            var application = State.Application;
+            application.Require(template);
         }
         
         /// <summary>Includes a namespace from the .NET environment</summary>
         /// <param name="namespace">The namespace to include</param>
         /// <example><code lang="javascript">includeNamespace("System.Text");</code></example>
-        public static Constant includeNamespace(Constant _this, Constant[] arguments, Agent agent) {
-            var ns = Core.Tool.GetArgument<String>(arguments, 0, "includeNamespace").Value;
-            (agent as NetJSAgent).Application.Realm.RegisterForeignNamespace(ns);
-            return Static.Undefined;
+        public static void includeNamespace(string ns) {
+            State.Application.AddHostObject("NetJS", new HostTypeCollection(ns));
+            var root = ns.Split('.')[0];
+            State.Application.Evaluate($"var {root} = NetJS.{root};");
         }
 
         /// <summary>Includes a dll</summary>
         /// <param name="file">The dll file to include</param>
         /// <example><code lang="javascript">includeDLL("ADFS.dll");</code></example>
-        public static Constant includeDLL(Constant _this, Constant[] arguments, Agent agent) {
-            var dll = Core.Tool.GetArgument<String>(arguments, 0, "includeDLL").Value;
-            var application = (agent as NetJSAgent).Application;
-            dll = application.Cache.GetPath(dll, application, false);
-            application.Realm.RegisterDLL(dll);
-            return Static.Undefined;
+        public static void includeDLL(string file) {
+            
         }
     }
 }

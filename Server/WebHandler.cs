@@ -5,37 +5,69 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.SessionState;
 using System.Web.WebSockets;
-using NetJS.Core;
 using System.Net.WebSockets;
 
 namespace NetJS.Server {
-    internal class WebHandler : IHttpHandler, IRequiresSessionState {
+    internal class WebHandler : IHttpAsyncHandler, IRequiresSessionState {
 
         public bool IsReusable => false;
+
+        public IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback cb, object extraData) {
+            var handler = new AsyncHandler(cb, context, extraData);
+            handler.Start();
+            return handler;
+        }
+
+        public void EndProcessRequest(IAsyncResult result) { }
+
+        public void ProcessRequest(HttpContext context) {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class AsyncHandler : IAsyncResult {
 
         private static JSServer _server;
         private static bool _initialized;
 
-        public void ProcessRequest(HttpContext context) {
+        private HttpContext _context;
+        private AsyncCallback _callback;
+
+        private bool _completed;
+        private object _state;
+
+        public bool IsCompleted => _completed;
+        public WaitHandle AsyncWaitHandle => null;
+        public object AsyncState => _state;
+        public bool CompletedSynchronously => false;
+
+        public AsyncHandler(AsyncCallback callback, HttpContext context, object state) {
+            _callback = callback;
+            _context = context;
+            _state = state;
+        }
+
+        public void Start() {
             if (!_initialized) {
                 _server = new JSServer();
                 _initialized = true;
             }
 
-            context.Session["init"] = 0;
+            _context.Session["init"] = 0;
 
-            if (context.IsWebSocketRequest) {
-                context.AcceptWebSocketRequest(WebSocketRequestHandler);
+            if (_context.IsWebSocketRequest) {
+                _context.AcceptWebSocketRequest(WebSocketRequestHandler);
+                _callback(this);
                 return;
             }
 
-            var segments = context.Request.Url.Segments;
+            var segments = _context.Request.Url.Segments;
             var lastSegment = segments.Length == 0 ? "" : segments[segments.Length - 1];
             if (lastSegment.ToLower() == "restart") {
                 _server = new JSServer();
             }
 
-            _server.Handle(context);
+            _server.Handle(_context, () => _callback(this));
         }
 
         public async Task WebSocketRequestHandler(AspNetWebSocketContext context) {
@@ -44,13 +76,7 @@ namespace NetJS.Server {
             var segments = context.RequestUri.Segments;
             var lastSegment = segments.Length == 0 ? "" : segments[segments.Length - 1];
 
-            SocketHandler handler;
-
-            if (lastSegment.ToLower() == "debug") {
-                handler = new DebugSocketHandler();
-            } else {
-                handler = new API.WebSocket(_server);
-            }
+            SocketHandler handler = new API.WebSocket(_server);
 
             await handler.Handle(context);
         }

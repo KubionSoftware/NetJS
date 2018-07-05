@@ -1,13 +1,13 @@
 if(false) {
-	assert(() => false, "If false");
+	Test.assert(() => false, "If false");
 }else{
-	assert(() => true, "If false");
+	Test.assert(() => true, "If false");
 }
 
 if(true) {
-	assert(() => true, "If true");
+	Test.assert(() => true, "If true");
 }else{
-	assert(() => false, "If true");
+	Test.assert(() => false, "If true");
 }
 
 var ageToText = function(age){
@@ -29,11 +29,11 @@ var ageToText = function(age){
 		return "bejaard";
 	}
 };
-assert(() => ageToText(0.2) == "baby", "If elseif else");
-assert(() => ageToText(3) == "peuter", "If elseif else");
-assert(() => ageToText(11) == "kind", "If elseif else");
-assert(() => ageToText(50) == "volwassen", "If elseif else");
-assert(() => ageToText(88) == "bejaard", "If elseif else");
+Test.assert(() => ageToText(0.2) == "baby", "If elseif else");
+Test.assert(() => ageToText(3) == "peuter", "If elseif else");
+Test.assert(() => ageToText(11) == "kind", "If elseif else");
+Test.assert(() => ageToText(50) == "volwassen", "If elseif else");
+Test.assert(() => ageToText(88) == "bejaard", "If elseif else");
 
 var logic = function(a, b){
 	if(a){
@@ -50,10 +50,10 @@ var logic = function(a, b){
 		}
 	}
 };
-assert(() => logic(true, true) == "a and b", "If in if");
-assert(() => logic(true, false) == "a not b", "If in if");
-assert(() => logic(false, true) == "not a and b", "If in if");
-assert(() => logic(false, false) == "not a and not b", "If in if");
+Test.assert(() => logic(true, true) == "a and b", "If in if");
+Test.assert(() => logic(true, false) == "a not b", "If in if");
+Test.assert(() => logic(false, true) == "not a and b", "If in if");
+Test.assert(() => logic(false, false) == "not a and not b", "If in if");
 
 var getString = function(value){
 	switch(value){
@@ -67,9 +67,9 @@ var getString = function(value){
 			return "unknown";
 	}
 };
-assert(() => getString(1) == "one", "Switch first");
-assert(() => getString(3) == "three", "Switch last");
-assert(() => getString(4) == "unknown", "Switch default");
+Test.assert(() => getString(1) == "one", "Switch first");
+Test.assert(() => getString(3) == "three", "Switch last");
+Test.assert(() => getString(4) == "unknown", "Switch default");
 
-assert(() => (true ? "yes" : "no") == "yes", "Conditional operator true");
-assert(() => (false ? "yes" : "no") == "no", "Conditional operator false");
+Test.assert(() => (true ? "yes" : "no") == "yes", "Conditional operator true");
+Test.assert(() => (false ? "yes" : "no") == "no", "Conditional operator false");

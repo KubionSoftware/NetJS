@@ -12,7 +12,7 @@ namespace NetJS.Testing {
     public class Directory {
         private List<Directory> _directories;
         private readonly int _level;
-        public List<Test> Tests = new List<Test>();
+        public List<TestFile> Tests = new List<TestFile>();
 
         public Directory(string s, int level) {
             this._level = level;
@@ -23,7 +23,7 @@ namespace NetJS.Testing {
             var myRoot = root ?? this;
             var allFiles = System.IO.Directory.GetFiles(path);
             foreach (var file in allFiles) {
-                var test = new Test(file);
+                var test = new TestFile(file);
                 myRoot.Tests.Add(test);
             }
 
@@ -119,7 +119,7 @@ namespace NetJS.Testing {
         }
     }
 
-    public class Test {
+    public class TestFile {
         private readonly string _path;
         private string[] _splittedPath;
         private string _name;
@@ -143,7 +143,7 @@ namespace NetJS.Testing {
         private string _code;
         public int TotalTests = 1;
 
-        public Test(string filePath) {
+        public TestFile(string filePath) {
             _path = filePath.Replace('\\', '/');
         }
 

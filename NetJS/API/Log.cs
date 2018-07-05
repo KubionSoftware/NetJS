@@ -1,5 +1,4 @@
-﻿using NetJS.Core;
-using System;
+﻿using System;
 
 namespace NetJS.API {
     /// <summary>Log class contains methods for logging to a file.</summary>
@@ -8,18 +7,8 @@ namespace NetJS.API {
         /// <summary>Writes a log to the system configured log.</summary>
         /// <param name="log">The log that needs to be written</param>
         /// <example><code lang="javascript">Log.write("Hello world!");</code></example>
-        /// <exception cref="InternalError">Thrown when there is no application in the application lex.</exception>
-        public static Constant write(Constant _this, Constant[] arguments, Agent agent) {
-            var message = Core.Convert.ToString(arguments[0], agent);
-
-            var application = (agent as NetJSAgent).Application;
-            Write(message, application);
-
-            return Static.Undefined;
-        }
-
-        public static void Write(string message, JSApplication application) {
-            var file = application.Settings.Root + application.Settings.Log;
+        public static void write(string message) {
+            var file = State.Application.Settings.Root + State.Application.Settings.Log;
 
             try {
                 var info = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss:fff");

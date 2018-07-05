@@ -1,4 +1,4 @@
-﻿using NetJS.Core;
+﻿using Microsoft.ClearScript;
 using System.Web;
 
 namespace NetJS.API {
@@ -15,12 +15,8 @@ namespace NetJS.API {
         /// <param name="key">The key to get a value from</param>
         /// <returns>Value linked to key.</returns>
         /// <example><code lang="javascript">var value = Sessions.get("userID");</code></example>
-        public static Constant get(Constant _this, Constant[] arguments, Agent agent) {
-            var key = Core.Tool.GetArgument<Core.String>(arguments, 0, "Session.get").Value;
-
-            var session = (agent as NetJSAgent).Session;
-            var value = session.Get(key);
-            if(value == null) return Static.Undefined;
+        public static object get(string key) {
+            var value = State.Session.Get(key);
             return value;
         }
 
@@ -28,43 +24,31 @@ namespace NetJS.API {
         /// <param name="key">The key to set a value with</param>
         /// <param name="value">The value to link to the key</param>
         /// <example><code lang="javascript">Session.set("userId", user.id);</code></example>
-        public static Constant set(Constant _this, Constant[] arguments, Agent agent) {
-            var key = Core.Tool.GetArgument<Core.String>(arguments, 0, "Session.set").Value;
-            var value = Core.Tool.GetArgument(arguments, 1, "Session.set");
-
-            var session = (agent as NetJSAgent).Session;
-            session.Set(key, value);
-
-            return Static.Undefined;
+        public static bool set(string key, object value) {
+            State.Session.Set(key, value);
+            return true;
         }
 
         /// <summary>Sessions.remove takes a key and removes it from the session.</summary>
         /// <param name="key">The key to get a value from</param>
         /// <example><code lang="javascript">Sessions.remove("userId");</code></example>
-        public static Constant remove(Constant _this, Constant[] arguments, Agent agent) {
-            var key = Core.Tool.GetArgument<Core.String>(arguments, 0, "Session.delete").Value;
-
-            var session = (agent as NetJSAgent).Session;
-            session.Remove(key);
-
-            return Static.Undefined;
+        public static bool remove(string key) {
+            State.Session.Remove(key);
+            return true;
         }
 
         /// <summary>Sessions.clear removes all values from the session.</summary>
         /// <example><code lang="javascript">Sessions.clear();</code></example>
-        public static Constant clear(Constant _this, Constant[] arguments, Agent agent) {
-            var session = (agent as NetJSAgent).Session;
-            session.Clear();
-
-            return Static.Undefined;
+        public static bool clear() {
+            State.Session.Clear();
+            return true;
         }
 
         /// <summary>Sessions.getAll returns the entire session object.</summary>
         /// <returns>Object containing all keys and values.</returns>
         /// <example><code lang="javascript">var session = Sessions.getAll();</code></example>
-        public static Constant getAll(Constant _this, Constant[] arguments, Agent agent) {
-            var session = (agent as NetJSAgent).Session;
-            return session.GetObject(agent);
+        public static dynamic getAll() {
+            return State.Session.GetObject();
         }
     }
 }

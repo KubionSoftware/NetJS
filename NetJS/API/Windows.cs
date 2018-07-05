@@ -1,6 +1,4 @@
-﻿using NetJS.Core;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -9,10 +7,8 @@ using System.Threading.Tasks;
 namespace NetJS.API {
     class Windows {
 
-        public static Constant execute(Constant _this, Constant[] arguments, Agent agent) {
-            var command = Core.Tool.GetArgument<Core.String>(arguments, 0, "Windows.execute");
-
-            var application = (agent as NetJSAgent).Application;
+        public static string execute(string command) {
+            var application = State.Application;
 
             Process cmd = new Process();
             cmd.StartInfo.FileName = "cmd.exe";
@@ -25,9 +21,9 @@ namespace NetJS.API {
             cmd.Start();
 
             if (cmd.WaitForExit(1000)) {
-                return new Core.String(cmd.StandardOutput.ReadToEnd());
+                return cmd.StandardOutput.ReadToEnd();
             } else {
-                throw new InternalError("Executing command took too long");
+                throw new Error("Executing command took too long");
             }
         }
     }

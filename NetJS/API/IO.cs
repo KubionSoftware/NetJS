@@ -1,5 +1,5 @@
 ﻿using System;
-using NetJS.Core;
+using Microsoft.ClearScript.JavaScript;
 
 namespace NetJS.API
 {
@@ -11,257 +11,267 @@ namespace NetJS.API
     /// IO.deleteFile(file);</code></example>
     public class IO {
 
-        private static string GetFile(JSApplication application, Core.String name) {
-            return application.Settings.Root + name.Value;
+        private static string GetFile(string name) {
+            return State.Application.Settings.Root + name;
         }
 
         /// <summary>Writes text into a file.</summary>
         /// <param name = "file">A filename (string)</param>
         /// <param name = "content">The text to be written (string)</param>
         /// <example><code lang="javascript">IO.writeText("data.json", "Hello World!");</code></example>
-        public static Constant writeText(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.writeText");
-            var content = Core.Tool.GetArgument<Core.String>(arguments, 1, "IO.writeText");
+        public static dynamic writeText(string name, string content) {
+            var application = State.Application;
+            var state = State.Get();
+            var file = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var file = GetFile(application, name);
-
-            try {
-                System.IO.File.WriteAllText(file, content.Value);
-            } catch {
-                throw new IOError($"Could not write text to file '{file}'");
-            }
-
-            return Static.Undefined;
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    System.IO.File.WriteAllText(file, content);
+                    application.AddCallback(resolve, true, state);
+                } catch {
+                    application.AddCallback(reject, $"Could not write text to file '{file}'", state);
+                }
+            });
         }
 
         /// <summary>Writes bytes into a file.</summary>
         /// <param name = "file">A filename</param>
         /// <param name = "content">The bytes to be written (Uint8Array)</param>
         /// <example><code lang="javascript">IO.writeBytes("image.png", bytes);</code></example>
-        public static Constant writeBytes(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.writeBytes");
-            var content = Core.Tool.GetArgument<Core.Uint8Array>(arguments, 1, "IO.writeBytes");
+        public static dynamic writeBytes(string name, dynamic bytes) {
+            var application = State.Application;
+            var state = State.Get();
+            var file = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var file = GetFile(application, name);
+            return Tool.CreatePromise((resolve, reject) => {
+                var content = (IArrayBuffer)bytes.buffer;
 
-            try {
-                System.IO.File.WriteAllBytes(file, content.Buffer.Data);
-            } catch {
-                throw new IOError($"Could not write bytes to file '{file}'");
-            }
-
-            return Static.Undefined;
+                try {
+                    System.IO.File.WriteAllBytes(file, content.GetBytes());
+                    application.AddCallback(resolve, true, state);
+                } catch {
+                    application.AddCallback(reject, $"Could not write bytes to file '{file}'", state);
+                }
+            });
         }
 
         /// <summary>Reads and returns text content of a file.</summary>
         /// <param name= "file">A filename to read from (string)</param>
         /// <returns>The content of the file (string)</returns>
         /// <example><code lang="javascript">var text = IO.readText("data.json");</code></example>
-        public static Constant readText(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.readText");
+        public static dynamic readText(string name) {
+            var application = State.Application;
+            var state = State.Get();
+            var file = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var file = GetFile(application, name);
-            
-            try {
-                return new Core.String(System.IO.File.ReadAllText(file));
-            }catch {
-                throw new IOError($"Could not read text from file '{file}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    application.AddCallback(resolve, System.IO.File.ReadAllText(file), state);
+                } catch {
+                    application.AddCallback(reject, $"Could not read text from file '{file}'", state);
+                }
+            });
         }
 
         /// <summary>Reads and returns binary content of a file.</summary>
         /// <param name= "file">A filename to read from (string)</param>
         /// <returns>The binary content of the file (Uint8Array)</returns>
         /// <example><code lang="javascript">var bytes = IO.readBytes("image.png");</code></example>
-        public static Constant readBytes(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.readBytes");
+        public static dynamic readBytes(string name) {
+            var application = State.Application;
+            var state = State.Get();
+            var file = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var file = GetFile(application, name);
-
-            try {
-                return new Core.Uint8Array(new Core.ArrayBuffer(System.IO.File.ReadAllBytes(file)), agent);
-            } catch {
-                throw new IOError($"Could not read bytes from file '{file}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    var bytes = System.IO.File.ReadAllBytes(file);
+                    application.AddCallback(resolve, Tool.ToByteArray(bytes), state);
+                } catch (Exception e) {
+                    application.AddCallback(reject, $"Could not read bytes from file '{file}'", state);
+                }
+            });
         }
 
         /// <summary>Deletes a file.</summary>
         /// <param name= "file">A filename to delete</param>
         /// <example><code lang="javascript">IO.deleteFile("data.json");</code></example>
-        public static Constant deleteFile(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.delete");
+        public static dynamic deleteFile(string name) {
+            var application = State.Application;
+            var state = State.Get();
+            var file = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var file = GetFile(application, name);
-
-            try {
-                System.IO.File.Delete(file);
-                return Static.Undefined;
-            } catch {
-                throw new IOError($"Could not delete file '{file}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    System.IO.File.Delete(file);
+                    application.AddCallback(resolve, true, state);
+                } catch {
+                    application.AddCallback(reject, $"Could not delete file '{file}'", state);
+                }
+            });
         }
 
         /// <summary>Copies a file.</summary>
         /// <param name= "source">The file to copy</param>
         /// <param name= "destination">The file to copy to</param>
         /// <example><code lang="javascript">IO.copyFile("a.txt", "b.txt");</code></example>
-        public static Constant copyFile(Constant _this, Constant[] arguments, Agent agent) {
-            var a = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.copy");
-            var b = Core.Tool.GetArgument<Core.String>(arguments, 1, "IO.copy");
+        public static dynamic copyFile(string source, string destination) {
+            var application = State.Application;
+            var state = State.Get();
+            var fileA = GetFile(source);
+            var fileB = GetFile(destination);
 
-            var application = (agent as NetJSAgent).Application;
-            var fileA = GetFile(application, a);
-            var fileB = GetFile(application, b);
-
-            try {
-                System.IO.File.Copy(fileA, fileB);
-                return Static.Undefined;
-            } catch {
-                throw new IOError($"Could not copy '{fileA}' to '{fileB}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    System.IO.File.Copy(fileA, fileB);
+                    application.AddCallback(resolve, true, state);
+                } catch {
+                    application.AddCallback(reject, $"Could not copy '{fileA}' to '{fileB}'", state);
+                }
+            });
         }
 
         /// <summary>Moves/renames a file.</summary>
         /// <param name= "source">The source location</param>
         /// <param name= "destination">The destination</param>
         /// <example><code lang="javascript">IO.moveFile("a.txt", "files/b.txt");</code></example>
-        public static Constant moveFile(Constant _this, Constant[] arguments, Agent agent) {
-            var a = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.moveFile");
-            var b = Core.Tool.GetArgument<Core.String>(arguments, 1, "IO.moveFile");
+        public static dynamic moveFile(string source, string destination) {
+            var application = State.Application;
+            var state = State.Get();
+            var fileA = GetFile(source);
+            var fileB = GetFile(destination);
 
-            var application = (agent as NetJSAgent).Application;
-            var fileA = GetFile(application, a);
-            var fileB = GetFile(application, b);
-
-            try {
-                System.IO.File.Move(fileA, fileB);
-                return Static.Undefined;
-            } catch {
-                throw new IOError($"Could not move '{fileA}' to '{fileB}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    System.IO.File.Move(fileA, fileB);
+                    application.AddCallback(resolve, true, state);
+                } catch {
+                    application.AddCallback(reject, $"Could not move '{fileA}' to '{fileB}'", state);
+                }
+            });
         }
 
         /// <summary>Moves/renames a directory.</summary>
         /// <param name= "source">The source location</param>
         /// <param name= "destination">The destination</param>
         /// <example><code lang="javascript">IO.moveDirectory("files", "documents/files");</code></example>
-        public static Constant moveDirectory(Constant _this, Constant[] arguments, Agent agent) {
-            var a = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.moveDirectory");
-            var b = Core.Tool.GetArgument<Core.String>(arguments, 1, "IO.moveDirectory");
+        public static dynamic moveDirectory(string source, string destination) {
+            var application = State.Application;
+            var state = State.Get();
+            var dirA = GetFile(source);
+            var dirB = GetFile(destination);
 
-            var application = (agent as NetJSAgent).Application;
-            var dirA = GetFile(application, a);
-            var dirB = GetFile(application, b);
-
-            try {
-                System.IO.Directory.Move(dirA, dirB);
-                return Static.Undefined;
-            } catch {
-                throw new IOError($"Could not move directory '{dirA}' to '{dirB}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    System.IO.Directory.Move(dirA, dirB);
+                    application.AddCallback(resolve, true, state);
+                } catch {
+                    application.AddCallback(reject, $"Could not move directory '{dirA}' to '{dirB}'", state);
+                }
+            });
         }
 
         /// <summary>Get all files in a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var files = IO.getFiles("documents");</code></example>
-        public static Constant getFiles(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.getFiles");
+        public static dynamic getFiles(string directory) {
+            var application = State.Application;
+            var state = State.Get();
+            var dir = GetFile(directory);
 
-            var application = (agent as NetJSAgent).Application;
-            var dir = GetFile(application, name);
-
-            try {
-                return Core.Tool.ToArray(System.IO.Directory.GetFiles(dir), agent);
-            } catch {
-                throw new IOError($"Could not get files from directory '{dir}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    application.AddCallback(resolve, Tool.ToArray(System.IO.Directory.GetFiles(dir)), state);
+                } catch {
+                    application.AddCallback(reject, $"Could not get files from directory '{dir}'", state);
+                }
+            });
         }
 
         /// <summary>Get all directories in a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var directories = IO.getDirectories("documents");</code></example>
-        public static Constant getDirectories(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.getDirectories");
+        public static dynamic getDirectories(string directory) {
+            var application = State.Application;
+            var state = State.Get();
+            var dir = GetFile(directory);
 
-            var application = (agent as NetJSAgent).Application;
-            var dir = GetFile(application, name);
-
-            try {
-                return Core.Tool.ToArray(System.IO.Directory.GetDirectories(dir), agent);
-            } catch {
-                throw new IOError($"Could not get directories from directory '{dir}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    application.AddCallback(resolve, Tool.ToArray(System.IO.Directory.GetDirectories(dir)), state);
+                } catch {
+                    application.AddCallback(reject, $"Could not get directories from directory '{dir}'", state);
+                }
+            });
         }
 
         /// <summary>Checks if the file exists.</summary>
         /// <param name= "file">The file path</param>
         /// <example><code lang="javascript">var exists = IO.fileExists("name.txt");</code></example>
-        public static Constant fileExists(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.getFiles");
+        public static dynamic fileExists(string name) {
+            var application = State.Application;
+            var state = State.Get();
+            var file = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var file = GetFile(application, name);
-
-            try {
-                return Core.Boolean.Create(System.IO.File.Exists(file));
-            } catch {
-                throw new IOError($"Could not check if file '{file}' exists");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    application.AddCallback(resolve, System.IO.File.Exists(file), state);
+                } catch {
+                    application.AddCallback(reject, $"Could not check if file '{file}' exists", state);
+                }
+            });
         }
 
         /// <summary>Checks if the directory exists.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">var exists = IO.directoryExists("documents");</code></example>
-        public static Constant directoryExists(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.getFiles");
+        public static dynamic directoryExists(string name) {
+            var application = State.Application;
+            var state = State.Get();
+            var dir = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var dir = GetFile(application, name);
-
-            try {
-                return Core.Boolean.Create(System.IO.Directory.Exists(dir));
-            } catch {
-                throw new IOError($"Could not check if directory '{dir}' exists");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    application.AddCallback(resolve, System.IO.Directory.Exists(dir), state);
+                } catch {
+                    application.AddCallback(reject, $"Could not check if directory '{dir}' exists", state);
+                }
+            });
         }
 
         /// <summary>Creates a new directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">IO.createDirectory("documents");</code></example>
-        public static Constant createDirectory(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.getFiles");
+        public static dynamic createDirectory(string name) {
+            var application = State.Application;
+            var state = State.Get();
+            var dir = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var dir = GetFile(application, name);
-
-            try {
-                System.IO.Directory.CreateDirectory(dir);
-                return Static.Undefined;
-            } catch {
-                throw new IOError($"Could not create directory '{dir}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    System.IO.Directory.CreateDirectory(dir);
+                    application.AddCallback(resolve, true, state);
+                } catch {
+                    application.AddCallback(reject, $"Could not create directory '{dir}'", state);
+                }
+            });
         }
 
         /// <summary>Deletes a directory.</summary>
         /// <param name= "directory">The directory path</param>
         /// <example><code lang="javascript">IO.deleteDirectory("documents");</code></example>
-        public static Constant deleteDirectory(Constant _this, Constant[] arguments, Agent agent) {
-            var name = Core.Tool.GetArgument<Core.String>(arguments, 0, "IO.getFiles");
+        public static dynamic deleteDirectory(string name) {
+            var application = State.Application;
+            var state = State.Get();
+            var dir = GetFile(name);
 
-            var application = (agent as NetJSAgent).Application;
-            var dir = GetFile(application, name);
-
-            try {
-                System.IO.Directory.Delete(dir);
-                return Static.Undefined;
-            } catch {
-                throw new IOError($"Could not delete directory '{dir}'");
-            }
+            return Tool.CreatePromise((resolve, reject) => {
+                try {
+                    System.IO.Directory.Delete(dir);
+                    application.AddCallback(resolve, true, state);
+                } catch {
+                    application.AddCallback(reject, $"Could not delete directory '{dir}'", state);
+                }
+            });
         }
     }
 }

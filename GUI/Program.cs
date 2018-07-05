@@ -1,4 +1,5 @@
-﻿using NetJS;
+﻿using Microsoft.ClearScript;
+using NetJS;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,23 +15,21 @@ namespace NetJS.GUI {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var application = new JSApplication();
             var service = new JSService();
             var session = new JSSession();
-            
-            application.Realm.RegisterType(typeof(API.Window), "Window");
-            application.Realm.RegisterType(typeof(API.Graphics), "Graphics");
 
-            //service.RunTemplate(application.Settings.Startup, "{}", ref application, ref session);
-            try {
-                var result = service.RunTemplate(application.Settings.Entry, "{}", ref application, ref session);
-
-                if (result.Length > 0) {
-                    Core.Log.Write(result);
+            var application = new JSApplication(null, app => {
+                app.AddHostType(typeof(API.Window));
+                app.AddHostType(typeof(API.Graphics));
+            }, exception => {
+                if (exception is ScriptEngineException se) {
+                    NetJS.API.Log.write(se.ErrorDetails);
+                } else {
+                    NetJS.API.Log.write(exception.ToString());
                 }
-            } catch(Exception e) {
-                Core.Log.Write(e.ToString());
-            }
+            });
+            
+            service.RunScript(application.Settings.Startup, application, session, result => { });
         }
     }
 }

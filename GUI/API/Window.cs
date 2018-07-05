@@ -1,23 +1,13 @@
-﻿using NetJS.Core.API;
-using NetJS.Core;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NetJS.GUI.API {
-    class Window {
+    public class Window {
 
-        private static void HandleMouseEvent(MouseEventArgs e, Core.Object thisObject, string eventName, Agent agent) {
-            if (thisObject.Get(eventName, agent) is Function f) {
-                var callbackArguments = new Constant[] {
-                    new Number(e.X),
-                    new Number(e.Y)
-                };
-                f.Call(Static.Undefined, agent, callbackArguments);
+        private static void HandleMouseEvent(MouseEventArgs e, dynamic f) {
+            if (f != null) {
+                f(e.X, e.Y);
             }
         }
 
@@ -30,62 +20,55 @@ namespace NetJS.GUI.API {
             }
         }
 
-        private static void HandleKeyEvent(KeyEventArgs e, Core.Object thisObject, string eventName, Agent agent) {
-            if (thisObject.Get(eventName, agent) is Function f) {
-                var callbackArguments = new Constant[] {
-                    new Number(e.KeyValue),
-                    new Core.String(GetChar(e).ToString())
-                };
-                f.Call(Static.Undefined, agent, callbackArguments);
+        private static void HandleKeyEvent(KeyEventArgs e, dynamic f) {
+            if (f != null) {
+                f(e.KeyValue, GetChar(e).ToString());
             }
         }
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
-            var thisObject = (Core.Object)_this;
+        public Form Form;
 
-            var options = NetJS.Core.Tool.GetArgument<NetJS.Core.Object>(arguments, 0, "Window.create");
+        public dynamic onmousemove;
+        public dynamic onmouseclick;
+        public dynamic onmouseup;
+        public dynamic onmousedown;
+        public dynamic onkeyup;
+        public dynamic onkeydown;
+        public dynamic onclose;
 
-            int width = 800, height = 600;
-            if (options.HasProperty(new Core.String("width"))) width = (int)(options.Get("width", agent) as Number).Value;
-            if (options.HasProperty(new Core.String("height"))) height = (int)(options.Get("height", agent) as Number).Value;
+        public int width;
+        public int height;
 
-            var form = new Form();
-            form.ClientSize = new Size(width, height);
-            form.Name = "";
-            form.Visible = true;
+        public Window(dynamic options) {
+            width = !Tool.IsUndefined(options.width) ? options.width : 800;
+            height = !Tool.IsUndefined(options.height) ? options.height : 600;
 
-            form.MouseMove += (sender, e) => HandleMouseEvent(e, thisObject, "onmousemove", agent);
-            form.MouseClick += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseclick", agent);
-            form.MouseUp += (sender, e) => HandleMouseEvent(e, thisObject, "onmouseup", agent);
-            form.MouseDown += (sender, e) => HandleMouseEvent(e, thisObject, "onmousedown", agent);
+            Form = new Form();
+            Form.ClientSize = new Size(width, height);
+            Form.Name = "";
+            Form.Visible = true;
+
+            Form.MouseMove += (sender, e) => HandleMouseEvent(e, onmousemove);
+            Form.MouseClick += (sender, e) => HandleMouseEvent(e, onmouseclick);
+            Form.MouseUp += (sender, e) => HandleMouseEvent(e, onmouseup);
+            Form.MouseDown += (sender, e) => HandleMouseEvent(e, onmousedown);
             
-            form.KeyUp += (sender, e) => HandleKeyEvent(e, thisObject, "onkeyup", agent);
-            form.KeyDown += (sender, e) => HandleKeyEvent(e, thisObject, "onkeydown", agent);
+            Form.KeyUp += (sender, e) => HandleKeyEvent(e, onkeyup);
+            Form.KeyDown += (sender, e) => HandleKeyEvent(e, onkeydown);
 
-            form.FormClosed += (sender, e) => {
-                if (thisObject.Get("onclose", agent) is Function f) {
-                    f.Call(Static.Undefined, agent);
+            Form.FormClosed += (sender, e) => {
+                if (onclose != null) {
+                    onclose();
                 }
             };
-
-            thisObject.Set("form", new Foreign(form));
-
-            thisObject.Set("width", new Number(width));
-            thisObject.Set("height", new Number(height));
-
-            return Static.Undefined;
         }
-
-        [StaticFunction]
-        public static Constant doEvents(Constant _this, Constant[] arguments, Agent agent) {
+        
+        public static void doEvents() {
             Application.DoEvents();
-            return Static.Undefined;
         }
-
-        [StaticFunction]
-        public static Constant exit(Constant _this, Constant[] arguments, Agent agent) {
+        
+        public static void exit() {
             Environment.Exit(0);
-            return Static.Undefined;
         }
     }
 }

@@ -10,6 +10,7 @@ class Animal {
 
 class Dog extends Animal {
 	constructor(name){
+		super();
 		this.name = name;
 	}
 
@@ -23,9 +24,9 @@ class Dog extends Animal {
 }
 
 var animal = new Animal();
-assert(() => animal.speak() == "Bleeh", "Class method");
-assert(() => Animal.compute() == "No robot", "Class static method");
+Test.assert(() => animal.speak() == "Bleeh", "Class method");
+Test.assert(() => Animal.compute() == "No robot", "Class static method");
 
 var dog = new Dog("Bello");
-assert(() => dog.greet() == "Hello Bello", "Class constructor + this access");
-assert(() => dog.speak() == "Woef", "Class method override");
+Test.assert(() => dog.greet() == "Hello Bello", "Class constructor + this access");
+Test.assert(() => dog.speak() == "Woef", "Class method override");

@@ -1,118 +1,75 @@
-﻿using NetJS.Core;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NetJS.GUI.API {
-    class Graphics {
+    public class Graphics {
 
-        public static Constant constructor(Constant _this, Constant[] arguments, Agent agent) {
-            var thisObject = (Core.Object)_this;
+        private System.Drawing.Graphics _graphics;
+        private Bitmap _buffer;
+        private System.Drawing.Graphics _bufferGraphics;
 
-            var window = Core.Tool.GetArgument<Core.Object>(arguments, 0, "Graphics constructor");
-            var form = (Form)(window.Get("form", agent) as Foreign).Value;
-            var graphics = form.CreateGraphics();
+        public Graphics(Window window) {
+            var form = window.Form;
+            _graphics = form.CreateGraphics();
 
-            thisObject.Set("graphics", new Foreign(graphics));
-
-            var buffer = new Bitmap(form.ClientSize.Width, form.ClientSize.Height);
-            thisObject.Set("buffer", new Foreign(buffer));
-            thisObject.Set("bufferGraphics", new Foreign(System.Drawing.Graphics.FromImage(buffer)));
-
-            return Static.Undefined;
+            _buffer = new Bitmap(form.ClientSize.Width, form.ClientSize.Height);
+            _bufferGraphics = System.Drawing.Graphics.FromImage(_buffer);
         }
 
-        private static Brush GetBrush(Constant[] arguments, int index, string context) {
-            var hex = Core.Tool.GetArgument<Core.String>(arguments, index, context).Value;
+        private static Brush GetBrush(string hex) {
             var color = ColorTranslator.FromHtml(hex);
             var brush = new SolidBrush(color);
             return brush;
         }
 
-        private static Pen GetPen(Constant[] arguments, int index, string context) {
-            var hex = Core.Tool.GetArgument<Core.String>(arguments, index, context).Value;
+        private static Pen GetPen(string hex) {
             var color = ColorTranslator.FromHtml(hex);
             var pen = new Pen(color);
             return pen;
         }
 
-        private static Rectangle GetRectangle(Constant[] arguments, string context) {
-            var x = (int)Core.Tool.GetArgument<Number>(arguments, 0, context).Value;
-            var y = (int)Core.Tool.GetArgument<Number>(arguments, 1, context).Value;
-            var width = (int)Core.Tool.GetArgument<Number>(arguments, 2, context).Value;
-            var height = (int)Core.Tool.GetArgument<Number>(arguments, 3, context).Value;
-            return new Rectangle(x, y, width, height);
+        public void fillRect(double x, double y, double width, double height, string hex) {
+            var rect = new Rectangle((int)x, (int)y, (int)width, (int)height);
+            var brush = GetBrush(hex);
+            _bufferGraphics.FillRectangle(brush, rect);
         }
 
-        private static Point GetPoint(Constant[] arguments, string context, int start = 0) {
-            var x = (int)Core.Tool.GetArgument<Number>(arguments, start, context).Value;
-            var y = (int)Core.Tool.GetArgument<Number>(arguments, start + 1, context).Value;
-            return new Point(x, y);
+        public void drawRect(double x, double y, double width, double height, string hex) {
+            var rect = new Rectangle((int)x, (int)y, (int)width, (int)height);
+            var pen = GetPen(hex);
+            _bufferGraphics.DrawRectangle(pen, rect);
         }
 
-        private static System.Drawing.Graphics GetGraphics(Constant _this, Agent agent) {
-            var jsGraphics = ((Core.Object)_this).Get("bufferGraphics", agent) as Foreign;
-            var graphics = (System.Drawing.Graphics)jsGraphics.Value;
-            return graphics;
+        public void fillEllipse(double x, double y, double width, double height, string hex) {
+            var rect = new Rectangle((int)x, (int)y, (int)width, (int)height);
+            var brush = GetBrush(hex);
+            _bufferGraphics.FillEllipse(brush, rect);
         }
 
-        public static Constant fillRect(Constant _this, Constant[] arguments, Agent agent) {
-            var rect = GetRectangle(arguments, "Graphics.fillRect");
-            var brush = GetBrush(arguments, 4, "Graphics.fillRect");
-            GetGraphics(_this, agent).FillRectangle(brush, rect);
-            return Static.Undefined;
+        public void drawEllipse(double x, double y, double width, double height, string hex) {
+            var rect = new Rectangle((int)x, (int)y, (int)width, (int)height); ;
+            var pen = GetPen(hex);
+            _bufferGraphics.DrawEllipse(pen, rect);
         }
 
-        public static Constant drawRect(Constant _this, Constant[] arguments, Agent agent) {
-            var rect = GetRectangle(arguments, "Graphics.drawRect");
-            var pen = GetPen(arguments, 4, "Graphics.drawRect");
-            GetGraphics(_this, agent).DrawRectangle(pen, rect);
-            return Static.Undefined;
+        public void drawLine(double xFrom, double yFrom, double xTo, double yTo, string hex) {
+            var from = new Point((int)xFrom, (int)yFrom);
+            var to = new Point((int)xTo, (int)yTo);
+            var pen = GetPen(hex);
+            _bufferGraphics.DrawLine(pen, from, to);
         }
 
-        public static Constant fillEllipse(Constant _this, Constant[] arguments, Agent agent) {
-            var rect = GetRectangle(arguments, "Graphics.fillEllipse");
-            var brush = GetBrush(arguments, 4, "Graphics.fillEllipse");
-            GetGraphics(_this, agent).FillEllipse(brush, rect);
-            return Static.Undefined;
+        public void drawString(double x, double y, string s, string hex) {
+            var point = new Point((int)x, (int)y);
+            var brush = GetBrush(hex);
+            _bufferGraphics.DrawString(s, new Font("Arial", 16f), brush, point);
         }
 
-        public static Constant drawEllipse(Constant _this, Constant[] arguments, Agent agent) {
-            var rect = GetRectangle(arguments, "Graphics.drawEllipse");
-            var pen = GetPen(arguments, 4, "Graphics.drawEllipse");
-            GetGraphics(_this, agent).DrawEllipse(pen, rect);
-            return Static.Undefined;
-        }
-
-        public static Constant drawLine(Constant _this, Constant[] arguments, Agent agent) {
-            var from = GetPoint(arguments, "Graphics.drawLine");
-            var to = GetPoint(arguments, "Graphics.drawLine", 2);
-            var pen = GetPen(arguments, 4, "Graphics.drawLine");
-            GetGraphics(_this, agent).DrawLine(pen, from, to);
-            return Static.Undefined;
-        }
-
-        public static Constant drawString(Constant _this, Constant[] arguments, Agent agent) {
-            var point = GetPoint(arguments, "Graphics.drawString");
-            var s = Core.Tool.GetArgument<Core.String>(arguments, 2, "Graphics.drawString").Value;
-            var brush = GetBrush(arguments, 3, "Graphics.drawString");
-            GetGraphics(_this, agent).DrawString(s, new Font("Arial", 16f), brush, point);
-            return Static.Undefined;
-        }
-
-        public static Constant update(Constant _this, Constant[] arguments, Agent agent) {
-            var jsGraphics = ((Core.Object)_this).Get("graphics", agent) as Foreign;
-            var graphics = (System.Drawing.Graphics)jsGraphics.Value;
-
-            var jsBuffer = ((Core.Object)_this).Get("buffer", agent) as Foreign;
-            var buffer = (Bitmap)jsBuffer.Value;
-
-            graphics.DrawImage(buffer, 0, 0);
-            return Static.Undefined;
+        public void update() {
+            _graphics.DrawImage(_buffer, 0, 0);
         }
     }
 }
