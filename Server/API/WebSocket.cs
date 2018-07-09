@@ -95,7 +95,7 @@ namespace NetJS.Server.API {
             if (_onConnection == null) return;
             
             Action<object> callback = result => { };
-            var request = new NetJS.FunctionRequest(_onConnection, _application, callback, new JSSession(), _id);
+            var request = new ServerRequest(_onConnection, _application, callback, new JSSession(), HttpContext.Current, _id);
             _application.AddRequest(request);
         }
 
@@ -105,7 +105,7 @@ namespace NetJS.Server.API {
             if (_onClose == null) return;
 
             Action<object> callback = result => { };
-            var request = new NetJS.FunctionRequest(_onClose, _application, callback, new JSSession(), _id);
+            var request = new ServerRequest(_onClose, _application, callback, new JSSession(), HttpContext.Current, _id);
             _application.AddRequest(request);
         }
 
@@ -113,7 +113,7 @@ namespace NetJS.Server.API {
             if (_onMessage == null) return;
 
             Action<object> callback = result => { };
-            var request = new NetJS.FunctionRequest(_onMessage, _application, callback, new JSSession(), _id, message);
+            var request = new ServerRequest(_onMessage, _application, callback, new JSSession(), HttpContext.Current, _id, message);
             _application.AddRequest(request);
         }
 

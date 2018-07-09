@@ -14,7 +14,14 @@ namespace NetJS {
 
         private State _state;
 
-        public Callback(dynamic function, State state, object argument0 = null, object argument1 = null, object argument2 = null, object argument3 = null) {
+        public Callback(
+            dynamic function, 
+            State state, 
+            object argument0 = null, 
+            object argument1 = null, 
+            object argument2 = null, 
+            object argument3 = null
+        ) {
             _function = function;
             _state = state;
             _argument0 = argument0;
