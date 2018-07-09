@@ -8,7 +8,7 @@ using System.Web.WebSockets;
 using System.Net.WebSockets;
 
 namespace NetJS.Server {
-    internal class WebHandler : IHttpAsyncHandler, IRequiresSessionState {
+    internal class WebHandler : IHttpAsyncHandler, IReadOnlySessionState {
 
         public bool IsReusable => false;
 
@@ -53,10 +53,9 @@ namespace NetJS.Server {
                 _initialized = true;
             }
 
-            _context.Session["init"] = 0;
-
             if (_context.IsWebSocketRequest) {
                 _context.AcceptWebSocketRequest(WebSocketRequestHandler);
+                _completed = true;
                 _callback(this);
                 return;
             }
@@ -67,7 +66,10 @@ namespace NetJS.Server {
                 _server = new JSServer();
             }
 
-            _server.Handle(_context, () => _callback(this));
+            _server.ProcessRequest(_context, () => {
+                _completed = true;
+                _callback(this);
+            });
         }
 
         public async Task WebSocketRequestHandler(AspNetWebSocketContext context) {

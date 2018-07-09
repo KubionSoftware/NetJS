@@ -10,7 +10,7 @@ namespace NetJS {
         public string Root { get; private set; }
 
         public string TemplateFolder { get; private set; } = "src/";
-        public string Entry { get; private set; } = "main.js";
+        public int DebugPort { get; private set; } = 9222;
         public string Startup { get; private set; } = "startup.js";
         public string Config { get; private set; } = "config.json";
         public string Connections { get; private set; } = "connections.json";
@@ -27,7 +27,11 @@ namespace NetJS {
         public void Set(string key, string value) {
             if (key == "JSFiles") SetRoot(value);
             if (key == "JSTemplates") SetTemplateFolder(value);
-            if (key == "JSEntry") Entry = value;
+            if (key == "JSDebugPort") {
+                if (int.TryParse(value, out int port)) {
+                    DebugPort = port;
+                }
+            }
             if (key == "JSStartup") Startup = value;
             if (key == "JSConfig") Config = value;
             if (key == "JSConnections") Connections = value;

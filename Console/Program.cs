@@ -20,20 +20,19 @@ namespace NetJS.Console {
             }
             data += "}";
 
-            var application = new JSApplication();
+            var application = new JSApplication("", app => {
+                app.AddHostType(typeof(API.Console));
+            }, error => { });
             var service = new JSService();
             var session = new JSSession();
-
-            application.Realm.RegisterClass(typeof(API.Console), "Console");
-
-            application.Realm.RegisterForeignNamespace("System");
 
             service.RunTemplate(application.Settings.Startup, data, ref application, ref session);
 
             try {
-                var result = service.RunTemplate(application.Settings.Entry, data, ref application, ref session);
-                System.Console.WriteLine(result);
-                System.Console.ReadLine();
+                service.RunScriptSync(application.Settings.Startup, application, session, result => {
+                    System.Console.WriteLine(result);
+                    System.Console.ReadLine();
+                });
             } catch (Exception e) {
                 System.Console.WriteLine(e);
                 System.Console.ReadLine();

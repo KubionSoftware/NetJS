@@ -4,51 +4,40 @@
         <name>NetJS</name>
     </assembly>
     <members>
-        <member name="M:NetJS.API.Async.waitAll(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
-            <summary>Runs multiple functions parallel and continues when all are done.</summary>
-            <param name="function1">A function to execute</param>
-            <param name="function2">A function to execute</param>
-            <param name="functionN">A function to execute</param>
-            <example><code lang="javascript">Async.waitAll(
-                () => SQL.execute("query1"),
-                () => SQL.execute("query2"),
-                () => IO.writeText("big file")
-            );</code></example>
+        <!-- Badly formed XML comment ignored for member "T:NetJS.API.Application" -->
+        <member name="M:NetJS.API.Application.get(System.String)">
+            <summary>Application.get takes a key and returns the value.</summary>
+            <param name="key">The key to get a value from</param>
+            <returns>Value linked to key.</returns>
+            <example><code lang="javascript">var value = Application.get("userID");</code></example>
         </member>
-        <member name="M:NetJS.API.Async.waitAny(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
-            <summary>Runs multiple functions parallel and continues when one of them is done.</summary>
-            <param name="function1">A function to execute</param>
-            <param name="function2">A function to execute</param>
-            <param name="functionN">A function to execute</param>
-            <example><code lang="javascript">Async.waitAny(
-                () => task1(),
-                () => task2(),
-                () => task3()
-            );</code></example>
+        <member name="M:NetJS.API.Application.set(System.String,System.Object)">
+            <summary>Application.set stores a value under a key.</summary>
+            <param name="key">The key to set a value with</param>
+            <param name="value">The value to link to the key</param>
+            <example><code lang="javascript">Application.set("userId", user.id);</code></example>
         </member>
-        <member name="M:NetJS.API.Async.run(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
-            <summary>Runs multiple functions parallel and continues immediately. It doesn't wait for them to be done.</summary>
-            <param name="function1">A function to execute</param>
-            <param name="function2">A function to execute</param>
-            <param name="functionN">A function to execute</param>
-            <example><code lang="javascript">Async.run(
-                () => SQL.execute("query1"),
-                () => SQL.execute("query2"),
-                () => IO.writeText("big file")
-            );</code></example>
+        <member name="M:NetJS.API.Application.remove(System.String)">
+            <summary>Application.remove takes a key and removes it.</summary>
+            <param name="key">The key to get a value from</param>
+            <example><code lang="javascript">Application.remove("userId");</code></example>
         </member>
-        <member name="M:NetJS.API.Async.sleep(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
-            <summary>Sleeps for a given number of milliseconds.</summary>
-            <param name="time">Milliseconds to sleep (number)</param>
-            <example><code lang="javascript">Async.sleep(1000);</code></example>
+        <member name="M:NetJS.API.Application.clear">
+            <summary>Application.clear removes all values.</summary>
+            <example><code lang="javascript">Application.clear();</code></example>
         </member>
-        <member name="M:NetJS.API.Base64.decode(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Application.getAll">
+            <summary>Application.getAll returns all global values.</summary>
+            <returns>Object containing all keys and values.</returns>
+            <example><code lang="javascript">var application = Application.getAll();</code></example>
+        </member>
+        <member name="M:NetJS.API.Base64.decode(System.String)">
             <summary>Decodes a base64 string.</summary>
             <param name="base64">The string to decode</param>
             <returns>Returns the decoded string.</returns>
             <example><code lang="javascript">var decoded = Base64.decode("TWFuIGlzIGRpc3Rpbmd1aXNoZWQ=");</code></example>
         </member>
-        <member name="M:NetJS.API.Base64.encode(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Base64.encode(System.String)">
             <summary>Encodes a string as a base64 string.</summary>
             <param name="s">The string to encode</param>
             <returns>Returns the encoded string.</returns>
@@ -57,7 +46,7 @@
         <member name="T:NetJS.API.Functions">
             <summary>Functions class contain functions that are injected directly into the engine.</summary>
         </member>
-        <member name="M:NetJS.API.Functions.include(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Functions.include(System.String,System.Object)">
             <summary>include  takes a file, runs the code in the file and writes the result to the output buffer.
             If an object is given as second parameter, those variables will be set in the code before execution.
             Default filetype is ".js".</summary>
@@ -65,7 +54,7 @@
             <param name="variables">An object with variables to setup the file before execution</param>
             <example><code lang="javascript">include("renderLayout.js", {loggedIn: true});</code></example>
         </member>
-        <member name="M:NetJS.API.Functions.load(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Functions.load(System.String,System.Object)">
             <summary>load takes a file, runs the code in the file and returns the value.
             If an object is given as second parameter, those variables will be set in the code before execution.
             Default filetype is ".js".</summary>
@@ -74,17 +63,30 @@
             <returns>Returns the output of the template.</returns>
             <example><code lang="javascript">var output = load("renderLayout.js", {loggedIn: true});</code></example>
         </member>
-        <member name="M:NetJS.API.Functions.out(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Functions.out(System.String)">
             <summary>out writes a string to the output buffer</summary>
             <param name="value">The string to write</param>
             <example><code lang="javascript">out(JSON.stringify(data));</code></example>
         </member>
-        <member name="M:NetJS.API.Functions.outLine(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Functions.outLine(System.String)">
             <summary>outLine writes a string to the output buffer and appends a newline</summary>
             <param name="value">The string to write</param>
             <example><code lang="javascript">outLine(JSON.stringify(data));</code></example>
         </member>
-        <member name="M:NetJS.API.Functions.import(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Functions.end(System.Object)">
+            <summary>end returns the value to the caller</summary>
+            <param name="value">The output to return</param>
+            <example><code lang="javascript">end("<html></html>");</code></example>
+        </member>
+        <member name="M:NetJS.API.Functions.setTimeout(System.Object,System.Int32)">
+            <summary>Schedules a function to be called after a certain amount of time</summary>
+            <param name="function">The function to call</param>
+            <param name="time">The time in milliseconds</param>
+            <example><code lang="javascript">setTimeout(() => {
+                Log.write("It's time!");
+            }, 1500);</code></example>
+        </member>
+        <member name="M:NetJS.API.Functions.require(System.String)">
             <summary>import takes a file and runs the code in the file with the current agent.
             This way functions and variables can be imported.
             Default filetype is ".js".</summary>
@@ -92,30 +94,18 @@
             <example><code lang="javascript">import("date");
             FormatDate(new Date());</code></example>
         </member>
-        <member name="M:NetJS.API.Functions.redirect(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
-            <summary>redirect takes an url and redirects a HttpResponse to the given url.</summary>
-            <param name="url">A url to redirect to</param>
-            <example><code lang="javascript">redirect("https://google.com/search?q=hello+world");</code></example>
-        </member>
-        <member name="M:NetJS.API.Functions.unsafe(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
-            <summary>Runs unsafe code (loops)</summary>
-            <param name="function">The function to execute</param>
-            <example><code lang="javascript">unsafe(function(){
-                while(true){}
-            });</code></example>
-        </member>
-        <member name="M:NetJS.API.Functions.includeNamespace(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Functions.includeNamespace(System.String)">
             <summary>Includes a namespace from the .NET environment</summary>
             <param name="namespace">The namespace to include</param>
             <example><code lang="javascript">includeNamespace("System.Text");</code></example>
         </member>
-        <member name="M:NetJS.API.Functions.includeDLL(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Functions.includeDLL(System.String)">
             <summary>Includes a dll</summary>
             <param name="file">The dll file to include</param>
             <example><code lang="javascript">includeDLL("ADFS.dll");</code></example>
         </member>
         <!-- Badly formed XML comment ignored for member "T:NetJS.API.HTTP" -->
-        <member name="M:NetJS.API.HTTP.execute(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.HTTP.execute(System.String,System.String,System.Object)">
             <summary>Executes a HTTP request.</summary>
             <param name="connectionName">A connection from the connections.json or an url</param>
             <param name="query">The query to attach to the url (only usable when connectionName is not an url)</param>
@@ -131,7 +121,6 @@
                     ApplicationID: "NetJS"
                 }
             });</code></example>
-            <exception cref="T:NetJS.Core.Error">Thrown if the request failed</exception>
         </member>
         <member name="T:NetJS.API.IO">
             <summary>IO class contains methods for file and directory manipulation.</summary>
@@ -141,79 +130,79 @@
             console.log(IO.read(file); //prints: Hello World!
             IO.deleteFile(file);</code></example>
         </member>
-        <member name="M:NetJS.API.IO.writeText(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.writeText(System.String,System.String)">
             <summary>Writes text into a file.</summary>
             <param name = "file">A filename (string)</param>
             <param name = "content">The text to be written (string)</param>
             <example><code lang="javascript">IO.writeText("data.json", "Hello World!");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.writeBytes(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.writeBytes(System.String,System.Object)">
             <summary>Writes bytes into a file.</summary>
             <param name = "file">A filename</param>
             <param name = "content">The bytes to be written (Uint8Array)</param>
             <example><code lang="javascript">IO.writeBytes("image.png", bytes);</code></example>
         </member>
-        <member name="M:NetJS.API.IO.readText(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.readText(System.String)">
             <summary>Reads and returns text content of a file.</summary>
             <param name= "file">A filename to read from (string)</param>
             <returns>The content of the file (string)</returns>
             <example><code lang="javascript">var text = IO.readText("data.json");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.readBytes(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.readBytes(System.String)">
             <summary>Reads and returns binary content of a file.</summary>
             <param name= "file">A filename to read from (string)</param>
             <returns>The binary content of the file (Uint8Array)</returns>
             <example><code lang="javascript">var bytes = IO.readBytes("image.png");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.deleteFile(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.deleteFile(System.String)">
             <summary>Deletes a file.</summary>
             <param name= "file">A filename to delete</param>
             <example><code lang="javascript">IO.deleteFile("data.json");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.copyFile(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.copyFile(System.String,System.String)">
             <summary>Copies a file.</summary>
             <param name= "source">The file to copy</param>
             <param name= "destination">The file to copy to</param>
             <example><code lang="javascript">IO.copyFile("a.txt", "b.txt");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.moveFile(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.moveFile(System.String,System.String)">
             <summary>Moves/renames a file.</summary>
             <param name= "source">The source location</param>
             <param name= "destination">The destination</param>
             <example><code lang="javascript">IO.moveFile("a.txt", "files/b.txt");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.moveDirectory(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.moveDirectory(System.String,System.String)">
             <summary>Moves/renames a directory.</summary>
             <param name= "source">The source location</param>
             <param name= "destination">The destination</param>
             <example><code lang="javascript">IO.moveDirectory("files", "documents/files");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.getFiles(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.getFiles(System.String)">
             <summary>Get all files in a directory.</summary>
             <param name= "directory">The directory path</param>
             <example><code lang="javascript">var files = IO.getFiles("documents");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.getDirectories(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.getDirectories(System.String)">
             <summary>Get all directories in a directory.</summary>
             <param name= "directory">The directory path</param>
             <example><code lang="javascript">var directories = IO.getDirectories("documents");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.fileExists(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.fileExists(System.String)">
             <summary>Checks if the file exists.</summary>
             <param name= "file">The file path</param>
             <example><code lang="javascript">var exists = IO.fileExists("name.txt");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.directoryExists(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.directoryExists(System.String)">
             <summary>Checks if the directory exists.</summary>
             <param name= "directory">The directory path</param>
             <example><code lang="javascript">var exists = IO.directoryExists("documents");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.createDirectory(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.createDirectory(System.String)">
             <summary>Creates a new directory.</summary>
             <param name= "directory">The directory path</param>
             <example><code lang="javascript">IO.createDirectory("documents");</code></example>
         </member>
-        <member name="M:NetJS.API.IO.deleteDirectory(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.IO.deleteDirectory(System.String)">
             <summary>Deletes a directory.</summary>
             <param name= "directory">The directory path</param>
             <example><code lang="javascript">IO.deleteDirectory("documents");</code></example>
@@ -221,11 +210,10 @@
         <member name="T:NetJS.API.Log">
             <summary>Log class contains methods for logging to a file.</summary>
         </member>
-        <member name="M:NetJS.API.Log.write(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Log.write(System.String)">
             <summary>Writes a log to the system configured log.</summary>
             <param name="log">The log that needs to be written</param>
             <example><code lang="javascript">Log.write("Hello world!");</code></example>
-            <exception cref="T:NetJS.Core.InternalError">Thrown when there is no application in the application lex.</exception>
         </member>
         <member name="T:NetJS.API.Session">
             <summary>Sessions are implemented using ASP.NET. You can use the session to store and retrieve values.</summary>
@@ -236,28 +224,28 @@
             console.log(Sessions.get("key"); //prints: value
             Sessions.delete("key");</code></example>
         </member>
-        <member name="M:NetJS.API.Session.get(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Session.get(System.String)">
             <summary>Sessions.get takes a key, gets the value linked in the session and returns the value.</summary>
             <param name="key">The key to get a value from</param>
             <returns>Value linked to key.</returns>
             <example><code lang="javascript">var value = Sessions.get("userID");</code></example>
         </member>
-        <member name="M:NetJS.API.Session.set(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Session.set(System.String,System.Object)">
             <summary>Sessions.set takes a key and a value and sets the link in the session.</summary>
             <param name="key">The key to set a value with</param>
             <param name="value">The value to link to the key</param>
             <example><code lang="javascript">Session.set("userId", user.id);</code></example>
         </member>
-        <member name="M:NetJS.API.Session.remove(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Session.remove(System.String)">
             <summary>Sessions.remove takes a key and removes it from the session.</summary>
             <param name="key">The key to get a value from</param>
             <example><code lang="javascript">Sessions.remove("userId");</code></example>
         </member>
-        <member name="M:NetJS.API.Session.clear(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Session.clear">
             <summary>Sessions.clear removes all values from the session.</summary>
             <example><code lang="javascript">Sessions.clear();</code></example>
         </member>
-        <member name="M:NetJS.API.Session.getAll(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.Session.getAll">
             <summary>Sessions.getAll returns the entire session object.</summary>
             <returns>Object containing all keys and values.</returns>
             <example><code lang="javascript">var session = Sessions.getAll();</code></example>
@@ -282,13 +270,13 @@
             <code lang="javascript">var query = "DELETE FROM users WHERE id = " + id.toString() + ";";
             SQL.execute(db, query);</code></example>
         </member>
-        <member name="M:NetJS.API.SQL.escape(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.SQL.escape(System.String)">
             <summary>Escapes a string to use in an SQL query.</summary>
             <param name="s">Value to escape (string)</param>
             <returns>The escaped string.</returns>
             <example><code lang="javascript">var escaped = SQL.escape(username);</code></example>
         </member>
-        <member name="M:NetJS.API.SQL.format(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.SQL.format(System.String,Microsoft.ClearScript.ScriptObject)">
             <summary>Creates an escaped SQL query string with parameters.</summary>
             <param name="query">Template query (string)</param>
             <param name="parameters">Parameters (object)</param>
@@ -296,47 +284,42 @@
             <example><code lang="javascript">var query = SQL.format("SELECT * FROM Users WHERE Name = {name};", {name: "Alex Jones"});
             // SELECT * FROM Users Where Name = 'Alex Jones';</code></example>
         </member>
-        <member name="M:NetJS.API.SQL.execute(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.SQL.execute(System.String,System.String)">
             <summary>SQL.execute takes a connectionName and a query, executes the query and returns the result if the query is a SELECT statement.</summary>
             <param name="connectionName">Name of a configured connection</param>
             <param name="query">The query to be executed</param>
             <returns>the result if the query is a SELECT statement.</returns>
             <example><code lang="javascript">var id = SQL.execute("NETDB", "SELECT * FROM users;");</code></example>
-            <exception cref="T:NetJS.Core.Error">Thrown when an error has been found while executing the query.</exception>
         </member>
         <member name="T:NetJS.API.XDoc">
             <summary>A Compatibility class for XDoc, to ensure possibility of usage of XDoc with NetJS.</summary>
         </member>
-        <member name="M:NetJS.API.XDoc.include(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.XDoc.include(System.String,System.Object)">
             <summary>XDoc.include includes an XDoc template and writes the result to the buffer</summary>
             <param name="name">Name of the included file</param>
             <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
             <returns>Undefined</returns>
-            <exception cref="T:NetJS.Core.InternalError">Thrown when no application has been found in the application agent.</exception>
         </member>
-        <member name="M:NetJS.API.XDoc.load(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.XDoc.load(System.String,System.Object)">
             <summary>XDoc.load includes an XDoc template and returns the result.</summary>
             <param name="name">Name of the included file</param>
             <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
             <returns>The result of executing the file.</returns>
-            <exception cref="T:NetJS.Core.InternalError">Thrown when no application has been found in the application agent.</exception>
         </member>
-        <member name="M:NetJS.API.XDoc.get(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.XDoc.get(System.String,System.String,System.String)">
             <summary>XDoc.get gets a value from the XDoc session</summary>
             <param name="key">Value name</param>
             <param name="context">Context name</param>
             <param name="id">ID name</param>
             <returns>The session value as a string</returns>
-            <exception cref="T:NetJS.Core.InternalError">Thrown when no application has been found in application agent.</exception>
         </member>
-        <member name="M:NetJS.API.XDoc.set(NetJS.Core.Constant,NetJS.Core.Constant[],NetJS.Core.Agent)">
+        <member name="M:NetJS.API.XDoc.set(System.String,System.String,System.String,System.Object)">
             <summary>XDoc.set sets a value in the XDoc session</summary>
             <param name="key">Value name</param>
             <param name="context">Context name</param>
             <param name="id">ID name</param>
             <param name="value">The value to set, is converted to a string</param>
             <returns>Undefined</returns>
-            <exception cref="T:NetJS.Core.InternalError">Thrown when no application has been found in application agent.</exception>
         </member>
     </members>
 </doc>

@@ -18,15 +18,14 @@ namespace NetJS.API {
             var resource = application.Cache.GetResource(template, returnVar, application);
 
             var oldBuffer = State.Buffer;
-            var buffer = new StringBuilder();
+            var buffer = returnVar ? new StringBuilder() : oldBuffer;
             State.Buffer = buffer;
-            var result = resource(arguments);
+            resource(arguments);
             State.Buffer = oldBuffer;
 
             if (returnVar) {
-                return result;
+                return buffer.ToString();
             } else {
-                State.Buffer.Append(result.ToString());
                 return null;
             }
         }

@@ -73,12 +73,15 @@ namespace NetJS.Testing {
         }
 
         static void FeatureTest() {
-            var service = new JSService();
-            var application = new JSApplication("../../test/");
-
-            application.AddHostType(typeof(Test));
-
             while (true) {
+                var service = new JSService();
+                var application = new JSApplication("../../test/", app => {
+                    app.AddHostType(typeof(Test));
+                }, error => {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(error.ToString());
+                });
+
                 NumFailed = 0;
                 NumSuccess = 0;
 

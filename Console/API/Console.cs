@@ -1,5 +1,4 @@
-﻿using NetJS.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,20 +7,16 @@ using System.Threading.Tasks;
 namespace NetJS.Console.API {
     class Console {
 
-        public static Constant write(Constant _this, Constant[] arguments, Core.State agent) {
-            var value = Tool.GetArgument(arguments, 0, "Console.write");
-            System.Console.Write(Core.Convert.ToString(value, agent));
-            return Static.Undefined;
+        public static void write(string value) {
+            System.Console.Write(value);
         }
 
-        public static Constant writeLine(Constant _this, Constant[] arguments, Core.State agent) {
-            var value = Tool.GetArgument(arguments, 0, "Console.writeLine");
-            System.Console.WriteLine(Core.Convert.ToString(value, agent));
-            return Static.Undefined;
+        public static void writeLine(string value) {
+            System.Console.WriteLine(value);
         }
 
-        public static Constant readLine(Constant _this, Constant[] arguments, Core.State agent) {
-            return new NetJS.Core.String(System.Console.ReadLine());
+        public static string readLine() {
+            return System.Console.ReadLine();
         }
     }
 }

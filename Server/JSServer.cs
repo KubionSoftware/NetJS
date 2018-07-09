@@ -1,5 +1,6 @@
 ﻿using Microsoft.ClearScript;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -11,16 +12,21 @@ namespace NetJS.Server {
     public class JSServer {
 
         private JSService _service;
-        public readonly JSApplication Application;
+        private JSApplication _application;
+        public JSApplication Application { get { return _application; } }
+
+        private ConcurrentDictionary<string, JSSession> _sessions;
 
         public JSServer() : this(new JSService()) { }
 
         public JSServer(JSService service) {
             _service = service;
-            Application = CreateApplication();
+            _application = CreateApplication();
+
+            _sessions = new ConcurrentDictionary<string, JSSession>();
         }
 
-        public JSApplication CreateApplication() {
+        private JSApplication CreateApplication() {
             var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory, (app) => {
                 app.AddHostType(typeof(API.Request));
                 app.AddHostType(typeof(API.Response));
@@ -44,12 +50,10 @@ namespace NetJS.Server {
         }
 
         public JSSession GetSession(HttpContext context) {
-            NetJS.JSSession session = null;
-
-            if (context.Session != null) session = (NetJS.JSSession)context.Session["JSSession"];
-            if (session == null) session = new NetJS.JSSession();
-
-            return session;
+            var id = context.Session.SessionID;
+            return _sessions.GetOrAdd(id, sessionId => {
+                return new JSSession();
+            });
         }
 
         public void ProcessRequest(HttpContext context, NetJS.JSApplication application, NetJS.JSSession session, Action after) {
@@ -57,26 +61,13 @@ namespace NetJS.Server {
         }
 
         public void ProcessRequest(HttpContext context, Action after) {
-            var application = Application;
+            var application = _application;
             var session = GetSession(context);
 
             ProcessRequest(context, application, session, after);
 
             if (context.Application != null) context.Application["JSApplication"] = application;
             if (context.Session != null) context.Session["JSSession"] = session;
-        }
-
-        public void Handle(HttpContext context, Action after) {
-            var application = Application;
-            var mainTemplate = application.Settings.Root + application.Settings.TemplateFolder + application.Settings.Entry;
-
-            if (mainTemplate.EndsWith(".js")) {
-                ProcessRequest(context, after);
-            } else if (mainTemplate.EndsWith(".xdoc")) {
-                application.ProcessXDocRequest(context);
-            }
-
-            if (context.Application != null) context.Application["JSApplication"] = application;
         }
     }
 }

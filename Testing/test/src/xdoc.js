@@ -2,6 +2,7 @@
 Test.assert(() => XDoc.load("return") == "testvalue65", "XDoc.load");
 
 // include
+Buffer.clear();
 XDoc.include("return");
 Test.assert(() => Buffer.get() == "testvalue65", "XDoc.include");
 Buffer.clear();
