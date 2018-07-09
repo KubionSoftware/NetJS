@@ -63,9 +63,6 @@ namespace NetJS {
             // Create thread for file update checking
             var fileThread = new Thread(FileLoop);
             fileThread.Start();
-
-            // Initialize the tool functions
-            Tool.Init(_engine);
         }
 
         // Handles all events
@@ -121,6 +118,7 @@ namespace NetJS {
 
         public void Restart() {
             // Create a new engine and enable debugging on port "DebugPort"
+            if (_engine != null) _engine.Dispose();
             _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging, Settings.DebugPort);
 
             // Clear the list of required files
@@ -140,6 +138,9 @@ namespace NetJS {
             AddHostType(typeof(API.DLL));
             AddHostType(typeof(API.XML));
             AddHostFunctions(typeof(API.Functions));
+
+            // Initialize the tool functions
+            Tool.Init(_engine);
 
             // Call the after start callback
             _afterStart(this);
