@@ -37,13 +37,22 @@ namespace NetJS.Server {
 
                 _service.RunCodeSync($"require('{app.Settings.Startup}')", app, session, (result) => { });
             }, (exception) => {
-                API.Response.setHeader("Content-Type", "text/plain");
-
+                string error = "";
                 if (exception is ScriptEngineException se) {
-                    State.Request.ResultCallback(se.ErrorDetails);
+                    error = se.ErrorDetails;
                 } else {
-                    State.Request.ResultCallback(exception.ToString());
+                    error = exception.ToString();
                 }
+
+                try {
+                    if (HttpContext.Current.Request.Url.Scheme.StartsWith("http")) {
+                        API.Response.setHeader("Content-Type", "text/plain");
+                        State.Request.ResultCallback(error);
+                        return;
+                    }
+                } catch { }
+
+                NetJS.API.Log.write(error);
             });
 
             return application;
