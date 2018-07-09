@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 
 namespace NetJS {
     public class JSApplication : JSStorage {
@@ -116,10 +117,51 @@ namespace NetJS {
             }
         }
 
+        public bool IsPortAvailable(int port) {
+            // See: https://stackoverflow.com/a/570461/4304127
+
+            bool isAvailable = true;
+
+            // Evaluate current system tcp connections. This is the same information provided
+            // by the netstat command line application, just in .Net strongly-typed object
+            // form.  We will look through the list, and if our port we would like to use
+            // in our TcpClient is occupied, we will set isAvailable to false.
+            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+
+            foreach (TcpConnectionInformation tcpi in tcpConnInfoArray) {
+                if (tcpi.LocalEndPoint.Port == port) {
+                    isAvailable = false;
+                    break;
+                }
+            }
+
+            return isAvailable;
+        }
+
         public void Restart() {
-            // Create a new engine and enable debugging on port "DebugPort"
+            // Create a new engine
             if (_engine != null) _engine.Dispose();
-            _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging, Settings.DebugPort);
+
+            // Wait for debug port to open (max 5 seconds)
+            var tries = 0;
+            var succeeded = false;
+            while (tries < 50) {
+                if (IsPortAvailable(Settings.DebugPort)) {
+                    succeeded = true;
+                    break;
+                }
+                Thread.Sleep(100);
+                tries++;
+            }
+
+            if (succeeded) {
+                // Enable debugging on port "DebugPort"
+                _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging, Settings.DebugPort);
+            } else {
+                // Create engine without debugging because port is not open
+                _engine = new V8ScriptEngine();
+            }
 
             // Clear the list of required files
             _required.Clear();
