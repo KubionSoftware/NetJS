@@ -1,4 +1,5 @@
 ﻿using Microsoft.ClearScript;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -26,57 +27,72 @@ namespace NetJS.API {
         ///         ApplicationID: "NetJS"
         ///     }
         /// });</code></example>
-        public static string execute(string connectionName, string query, object settings = null) {
+        public static dynamic execute(string connectionName, string query, object settings = null) {
             var application = State.Application;
             var url = application.Connections.GetHttpUrl(connectionName);
             return execute(url + query, settings);
         }
 
-        public static string execute(string url, dynamic settings = null) {
-            var request = WebRequest.CreateHttp(url);
+        public static dynamic execute(string url, dynamic settings = null) {
+            var application = State.Application;
+            var state = State.Get();
 
-            if (settings != null) {
-                if (Tool.GetObject(settings.cookies, out ScriptObject cookies)) {
-                    foreach (var key in cookies.GetDynamicMemberNames()) {
-                        request.CookieContainer.Add(new Cookie(key.ToString(), Tool.GetValue(cookies, key).ToString()));
+            return Tool.CreatePromise((resolve, reject) => {
+                var request = WebRequest.CreateHttp(url);
+
+                if (settings != null) {
+                    if (Tool.GetObject(settings.cookies, out ScriptObject cookies)) {
+                        foreach (var key in cookies.GetDynamicMemberNames()) {
+                            request.CookieContainer.Add(new Cookie(key.ToString(), Tool.GetValue(cookies, key).ToString()));
+                        }
+                    }
+
+                    if (Tool.GetObject(settings.headers, out ScriptObject headers)) {
+                        foreach (var key in headers.GetDynamicMemberNames()) {
+                            Util.HttpWebRequestExtensions.SetRawHeader(request, key.ToString(), Tool.GetValue(headers, key).ToString());
+                        }
+                    }
+
+                    if (Tool.Get(settings.method, out string method)) {
+                        request.Method = method;
+                    } else {
+                        request.Method = "GET";
+                    }
+
+                    if (Tool.Get(settings.content, out string content)) {
+                        var writer = new StreamWriter(request.GetRequestStream(), Encoding.Default);
+                        writer.Write(content);
+                        writer.Close();
                     }
                 }
 
-                if (Tool.GetObject(settings.headers, out ScriptObject headers)) {
-                    foreach (var key in headers.GetDynamicMemberNames()) {
-                        Util.HttpWebRequestExtensions.SetRawHeader(request, key.ToString(), Tool.GetValue(headers, key).ToString());
+                try {
+                    var response = request.GetResponse();
+
+                    var reader = new StreamReader(response.GetResponseStream(), Encoding.Default);
+                    var result = reader.ReadToEnd();
+                    reader.Close();
+
+                    if (response.ContentType.ToLower() == "application/json") {
+                        // TODO: parse json
                     }
+
+                    application.AddCallback(resolve, result, state);
+                } catch {
+                    application.AddCallback(reject, $"Failed to get response from '{url}'", state);
                 }
+            });
+        }
 
-                if (Tool.Get(settings.method, out string method)) {
-                    request.Method = method;
-                } else {
-                    request.Method = "GET";
-                }
+        public static dynamic get(string url) {
+            return execute(url);
+        }
 
-                if (Tool.Get(settings.content, out string content)) {
-                    var writer = new StreamWriter(request.GetRequestStream(), Encoding.Default);
-                    writer.Write(content);
-                    writer.Close();
-                }
-            }
-
-            try {
-                var response = request.GetResponse();
-
-                var reader = new StreamReader(response.GetResponseStream(), Encoding.Default);
-                var result = reader.ReadToEnd();
-                reader.Close();
-
-                if (response.ContentType.ToLower() == "application/json") {
-                    // TODO: parse json
-                }
-
-                return result;
-            } catch {
-                State.Application.Error(new HttpError($"Failed to get response from '{url}'"));
-                return "";
-            }
+        public static dynamic post(string url, string content) {
+            return execute(url, Tool.ToObject(new Dictionary<string, object>() {
+                { "method", "POST" },
+                { "content", content }
+            }));
         }
     }
 }

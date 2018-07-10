@@ -33,7 +33,7 @@ namespace NetJS {
             try {
                 _function();
             } catch (Exception e) {
-                State.Application.Error(e);
+                State.Application.Error(e, ErrorStage.Runtime);
             }
         }
     }

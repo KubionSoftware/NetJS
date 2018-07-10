@@ -77,7 +77,7 @@ namespace NetJS.Testing {
                 var service = new JSService();
                 var application = new JSApplication("../../test/", app => {
                     app.AddHostType(typeof(Test));
-                }, error => {
+                }, (error, stage) => {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(error.ToString());
                 });

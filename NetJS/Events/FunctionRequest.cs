@@ -5,44 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS {
-    public abstract class Request {
-        
-        public State State;
-        public DateTime Issued;
-        public Action<object> ResultCallback;
-
-        public Request() {
-            Issued = DateTime.Now;
-        }
-
-        public int ElapsedMilliseconds() {
-            return (DateTime.Now - Issued).Milliseconds;
-        }
-
-        public abstract void Call();
-    }
-
-    public class ScriptRequest : Request {
-
-        public Microsoft.ClearScript.V8.V8Script Script;
-
-        public ScriptRequest(Microsoft.ClearScript.V8.V8Script script, JSApplication application, Action<object> resultCallback, JSSession session = null) {
-            Script = script;
-            State = new State(this, application, session ?? new JSSession(), new StringBuilder());
-            ResultCallback = resultCallback;
-        }
-
-        public override void Call() {
-            State.Set();
-
-            try { 
-                State.Application.Evaluate(Script);
-            }catch (Exception e) {
-                State.Application.Error(e);
-            }
-        }
-    }
-
     public class FunctionRequest : Request {
 
         private dynamic _function;
@@ -76,8 +38,8 @@ namespace NetJS {
                 } else {
                     _function();
                 }
-            }catch (Exception e) {
-                State.Application.Error(e);
+            } catch (Exception e) {
+                State.Application.Error(e, ErrorStage.Runtime);
             }
         }
     }

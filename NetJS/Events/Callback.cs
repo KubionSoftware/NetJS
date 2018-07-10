@@ -46,7 +46,7 @@ namespace NetJS {
                     _function();
                 }
             } catch (Exception e) {
-                State.Application.Error(e);
+                State.Application.Error(e, ErrorStage.Runtime);
             }
 }
     }

@@ -51,7 +51,7 @@ namespace NetJS.API {
                 } else if (value is null) {
                     stringValue = "NULL";
                 } else {
-                    State.Application.Error(new Error("Invalid type in SQL.format, only strings and integers allowed"));
+                    State.Application.Error(new Error("Invalid type in SQL.format, only strings and integers allowed"), ErrorStage.Runtime);
                 }
 
                 query = query.Replace("{" + key + "}", stringValue);
@@ -101,7 +101,7 @@ namespace NetJS.API {
                             } else if (value is DBNull) {
                                 rowObject[key] = null;
                             } else {
-                                State.Application.Error(new Error("Unkown SQL type - " + value.GetType()));
+                                State.Application.Error(new Error("Unkown SQL type - " + value.GetType()), ErrorStage.Runtime);
                             }
                         }
 

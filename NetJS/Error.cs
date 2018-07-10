@@ -18,4 +18,9 @@ namespace NetJS {
     public class IOError : Error {
         public IOError(string message) : base("IOError - " + message) { }
     }
+
+    public enum ErrorStage {
+        Compilation,
+        Runtime
+    }
 }

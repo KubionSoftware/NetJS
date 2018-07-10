@@ -12,7 +12,9 @@ namespace NetJS.Server {
 
         public bool IsReusable => false;
 
+        // Start of application, all requests come in via this method
         public IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback cb, object extraData) {
+            // Create a new handler object to handle the request asynchronously
             var handler = new AsyncHandler(cb, context, extraData);
             handler.Start();
             return handler;
@@ -46,32 +48,42 @@ namespace NetJS.Server {
             _context = context;
             _state = state;
         }
-
+        
         public void Start() {
+            Action after = () => {
+                _completed = true;
+
+                // Try because request could already have been ended
+                try {
+                    _callback(this);
+                } catch { }
+            };
+
+            // If there is no server, create a new one
             if (!_initialized) {
-                _server = new JSServer();
                 _initialized = true;
+                _server = new JSServer(after);
             }
 
+            // If it is a websocket request, handle it asynchronously and complete immediately
             if (_context.IsWebSocketRequest) {
                 _context.AcceptWebSocketRequest(WebSocketRequestHandler);
-                _completed = true;
-                _callback(this);
+                after();
                 return;
             }
 
+            // If the url ends with /restart, force restart the server
             var segments = _context.Request.Url.Segments;
             var lastSegment = segments.Length == 0 ? "" : segments[segments.Length - 1];
             if (lastSegment.ToLower() == "restart") {
-                _server = new JSServer();
+                _server = new JSServer(after);
             }
 
-            _server.ProcessRequest(_context, () => {
-                _completed = true;
-                _callback(this);
-            });
+            // Process a http request
+            _server.ProcessRequest(_context, after);
         }
 
+        // Handle a websocket request
         public async Task WebSocketRequestHandler(AspNetWebSocketContext context) {
             var socket = context.WebSocket;
 

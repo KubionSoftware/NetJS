@@ -44,29 +44,41 @@ namespace NetJS {
 
         public string GetCurrentLocation() {
             if (State.Application == null) return "";
-            return State.Application.GetCurrentLocation().Replace("-", "/");
+            return State.Application.GetCurrentLocation();
         }
 
         public V8Script GetScript(string name, JSApplication application) {
             var path = GetPath(name, application, true);
-            var source = System.IO.File.ReadAllText(path);
-            return application.Compile(path, source);
+
+            try { 
+                var source = System.IO.File.ReadAllText(path);
+                return application.Compile(path, source);
+            } catch (Exception e) {
+                application.Error(e, ErrorStage.Compilation);
+            }
+
+            // Return an empty script to not block rest of execution
+            return application.Compile(path, "");
         }
 
         public dynamic GetResource(string name, bool returnVar, JSApplication application) {
             var path = GetPath(name, application, true);
-            var source = "";
 
             try {
-                source = System.IO.File.ReadAllText(path);
-            }catch(Exception e) {
-                application.Error(e);
+                var source = System.IO.File.ReadAllText(path);
+                var code = Transpiler.TranspileTemplate(source, returnVar);
+                var script = application.Compile(name, code);
+                var function = application.Evaluate(script);
+                return function;
+            } catch(Exception e) {
+                application.Error(e, ErrorStage.Compilation);
             }
 
-            var code = Transpiler.TranspileTemplate(source, returnVar);
-            var script = application.Compile(name.Replace("/", "-"), code);
-            var function = application.Evaluate(script);
-            return function;
+            // Return an empty function to not block rest of execution
+            var c = Transpiler.TranspileTemplate("", returnVar);
+            var s = application.Compile(name, c);
+            var f = application.Evaluate(s);
+            return f;
         }
 
         /*

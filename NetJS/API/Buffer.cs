@@ -10,8 +10,10 @@
             return State.Buffer.ToString();
         }
 
-        public static void write(string s) {
-            State.Buffer.Append(s);
+        public static void write(object o) {
+            if (o is string s) {
+                State.Buffer.Append(s);
+            }
         }
 
         public static void clear() {

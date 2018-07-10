@@ -1,33 +1,31 @@
 ﻿using Microsoft.ClearScript;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Web;
 
 namespace NetJS.Server {
     public class JSServer {
 
         private JSService _service;
-        private JSApplication _application;
+        private readonly JSApplication _application;
         public JSApplication Application { get { return _application; } }
 
         private ConcurrentDictionary<string, JSSession> _sessions;
 
-        public JSServer() : this(new JSService()) { }
+        public JSServer(Action after) : this(new JSService(), after) { }
 
-        public JSServer(JSService service) {
+        public string CompileError = "";
+
+        public JSServer(JSService service, Action after) {
             _service = service;
-            _application = CreateApplication();
+            _application = CreateApplication(after);
 
             _sessions = new ConcurrentDictionary<string, JSSession>();
         }
 
-        private JSApplication CreateApplication() {
+        private JSApplication CreateApplication(Action after) {
             var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory, (app) => {
+                // Define the server API
                 app.AddHostType(typeof(API.Request));
                 app.AddHostType(typeof(API.Response));
                 app.AddHostType(typeof(API.WebSocket));
@@ -35,8 +33,18 @@ namespace NetJS.Server {
 
                 var session = new JSSession();
 
-                _service.RunCodeSync($"require('{app.Settings.Startup}')", app, session, (result) => { });
-            }, (exception) => {
+                // Clear the compile error
+                CompileError = "";
+
+                // Run the startup file
+                var require = app.Evaluate(@"(function(file){
+                    require(file);
+                }).valueOf()");
+                var callback = API.HTTPServer.Callback(after);
+                var request = new ServerRequest(require, app, callback, session, HttpContext.Current, app.Settings.Startup);
+                request.Call();
+            }, (exception, stage) => {
+                // Get the error message
                 string error = "";
                 if (exception is ScriptEngineException se) {
                     error = se.ErrorDetails;
@@ -44,39 +52,49 @@ namespace NetJS.Server {
                     error = exception.ToString();
                 }
 
-                try {
-                    if (HttpContext.Current.Request.Url.Scheme.StartsWith("http")) {
-                        API.Response.setHeader("Content-Type", "text/plain");
-                        State.Request.ResultCallback(error);
-                        return;
-                    }
-                } catch { }
+                // If it is a compilation error, store it in the variable "CompileError"
+                if (stage == ErrorStage.Compilation) {
+                    CompileError = error;
+                }
 
+                // Try to show the error message in the browser
+                try {
+                    API.Response.setHeader("Content-Type", "text/plain");
+                    State.Request.ResultCallback(error);
+                    return;
+                } catch (Exception e) { }
+
+                // If that failed, write it to the log
                 NetJS.API.Log.write(error);
             });
 
             return application;
         }
 
-        public JSSession GetSession(HttpContext context) {
-            var id = context.Session.SessionID;
+        // Creates a new session with the id, or returns an existing session with that id
+        public JSSession GetSession(string id) {
             return _sessions.GetOrAdd(id, sessionId => {
                 return new JSSession();
             });
         }
 
-        public void ProcessRequest(HttpContext context, NetJS.JSApplication application, NetJS.JSSession session, Action after) {
-            API.HTTPServer.OnConnection(application, session, after);
+        public JSSession GetSession(HttpContext context) {
+            var id = context.Session.SessionID;
+            return GetSession(id);
         }
 
         public void ProcessRequest(HttpContext context, Action after) {
-            var application = _application;
+            if (CompileError.Length > 0) {
+                context.Response.ContentType = "text/plain";
+                context.Response.Write(CompileError);
+                context.Response.End();
+                after();
+                return;
+            }
+            
             var session = GetSession(context);
 
-            ProcessRequest(context, application, session, after);
-
-            if (context.Application != null) context.Application["JSApplication"] = application;
-            if (context.Session != null) context.Session["JSSession"] = session;
+            API.HTTPServer.OnConnection(_application, session, after);
         }
     }
 }

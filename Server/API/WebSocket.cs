@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -17,13 +15,15 @@ namespace NetJS.Server.API {
         private static dynamic _onError;
 
         private static ConcurrentDictionary<string, AspNetWebSocketContext> _sockets = new ConcurrentDictionary<string, AspNetWebSocketContext>();
-        
+
+        private JSServer _server;
         private JSApplication _application;
         private JSSession _session;
 
         private string _id;
 
         public WebSocket(JSServer server) {
+            _server = server;
             _application = server.Application;
             _session = new JSSession();
             _id = Guid.NewGuid().ToString();
@@ -59,10 +59,10 @@ namespace NetJS.Server.API {
                     var responseBytes = Encoding.UTF8.GetBytes(message);
                     context.WebSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
                 } catch (Exception) {
-                    State.Application.Error(new Error($"Can't send message to socket with id '{id}'"));
+                    State.Application.Error(new Error($"Can't send message to socket with id '{id}'"), ErrorStage.Runtime);
                 }
             } else {
-                State.Application.Error(new Error("Trying to send to a non-existing websocket id"));
+                State.Application.Error(new Error("Trying to send to a non-existing websocket id"), ErrorStage.Runtime);
             }
         }
 
@@ -95,7 +95,7 @@ namespace NetJS.Server.API {
             if (_onConnection == null) return;
             
             Action<object> callback = result => { };
-            var request = new ServerRequest(_onConnection, _application, callback, new JSSession(), HttpContext.Current, _id);
+            var request = new ServerRequest(_onConnection, _application, callback, _server.GetSession(_id), HttpContext.Current, _id);
             _application.AddRequest(request);
         }
 
@@ -105,7 +105,7 @@ namespace NetJS.Server.API {
             if (_onClose == null) return;
 
             Action<object> callback = result => { };
-            var request = new ServerRequest(_onClose, _application, callback, new JSSession(), HttpContext.Current, _id);
+            var request = new ServerRequest(_onClose, _application, callback, _server.GetSession(_id), HttpContext.Current, _id);
             _application.AddRequest(request);
         }
 
@@ -113,7 +113,7 @@ namespace NetJS.Server.API {
             if (_onMessage == null) return;
 
             Action<object> callback = result => { };
-            var request = new ServerRequest(_onMessage, _application, callback, new JSSession(), HttpContext.Current, _id, message);
+            var request = new ServerRequest(_onMessage, _application, callback, _server.GetSession(_id), HttpContext.Current, _id, message);
             _application.AddRequest(request);
         }
 
@@ -124,7 +124,7 @@ namespace NetJS.Server.API {
             if (_onError == null) return;
 
             Action<object> callback = result => { };
-            var request = new NetJS.FunctionRequest(_onError, _application, callback, new JSSession(), _id, e.ToString());
+            var request = new ServerRequest(_onMessage, _application, callback, _server.GetSession(_id), HttpContext.Current, _id, e.ToString());
             _application.AddRequest(request);
         }
     }

@@ -7,6 +7,20 @@ using System.Web;
 namespace NetJS.Server.API {
     public class HTTPServer {
 
+        public static Action<object> Callback(Action after) {
+            return result => {
+                try {
+                    var responseString = result.ToString();
+                    var buffer = Encoding.UTF8.GetBytes(responseString);
+                    var output = Tool.GetContext().Response.OutputStream;
+                    output.Write(buffer, 0, buffer.Length);
+                    output.Close();
+                } catch { }
+
+                after();
+            };
+        }
+
         private static dynamic _onConnection;
 
         /// <summary>Creates an event listener</summary>
@@ -25,15 +39,7 @@ namespace NetJS.Server.API {
         public static void OnConnection(JSApplication application, JSSession session, Action after) {
             if (_onConnection == null) return;
 
-            Action<object> callback = result => {
-                var responseString = result.ToString();
-                var buffer = Encoding.UTF8.GetBytes(responseString);
-                var output = Tool.GetContext().Response.OutputStream;
-                output.Write(buffer, 0, buffer.Length);
-                output.Close();
-                NetJS.API.Log.write("Http request took " + State.Request.ElapsedMilliseconds() + " ms");
-                after();
-            };
+            Action<object> callback = Callback(after);
             var request = new ServerRequest(_onConnection, application, callback, session, HttpContext.Current);
             application.AddRequest(request);
         }

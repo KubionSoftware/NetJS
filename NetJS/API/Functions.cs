@@ -1,4 +1,5 @@
 ﻿using Microsoft.ClearScript;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,13 @@ namespace NetJS.API {
             var oldBuffer = State.Buffer;
             var buffer = returnVar ? new StringBuilder() : oldBuffer;
             State.Buffer = buffer;
-            resource(arguments);
+
+            try {
+                resource(arguments);
+            } catch (Exception e) {
+                application.Error(e, ErrorStage.Runtime);
+            }
+
             State.Buffer = oldBuffer;
 
             if (returnVar) {
