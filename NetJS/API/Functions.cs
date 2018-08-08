@@ -114,7 +114,20 @@ namespace NetJS.API {
         /// <param name="file">The dll file to include</param>
         /// <example><code lang="javascript">includeDLL("ADFS.dll");</code></example>
         public static void includeDLL(string file) {
-            var dll = Assembly.LoadFrom(getPath(file));
+            var name = System.IO.Path.GetFileNameWithoutExtension(file).ToLower();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            Assembly dll = null;
+
+            foreach (var assembly in assemblies) {
+                if (assembly.FullName.ToLower() == name) {
+                    dll = assembly;
+                    break;
+                }
+            }
+
+            if (dll == null) {
+                dll = Assembly.LoadFrom(getPath(file));
+            }
             
             foreach (var type in dll.GetExportedTypes()) {
                 State.Application.AddHostType(type);
