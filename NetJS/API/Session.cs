@@ -25,8 +25,20 @@ namespace NetJS.API {
         /// <param name="value">The value to link to the key</param>
         /// <example><code lang="javascript">Session.set("userId", user.id);</code></example>
         public static bool set(string key, object value) {
+            if (!(value is string || value is int || value is double || value is bool)) {
+                State.Application.Error(new Error("Can only store string, number or boolean in Session"), ErrorStage.Runtime);
+                return false;
+            }
+
             State.Session.Set(key, value);
             return true;
+        }
+
+        /// <summary>Session.contains checks if the session contains a key.</summary>
+        /// <param name="key">The key to check</param>
+        /// <example><code lang="javascript">if (Session.contains("userId")) { ... }</code></example>
+        public static bool contains(string key) {
+            return State.Session.Contains(key);
         }
 
         /// <summary>Sessions.remove takes a key and removes it from the session.</summary>

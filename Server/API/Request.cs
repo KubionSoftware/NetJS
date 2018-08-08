@@ -89,7 +89,9 @@ namespace NetJS.Server.API {
 
             var context = Tool.GetContext();
             foreach (var key in context.Request.QueryString.AllKeys) {
-                parameters.Add(key, context.Request.QueryString[key]);
+                if (key != null) {
+                    parameters.Add(key, context.Request.QueryString[key]);
+                }
             }
 
             return NetJS.Tool.ToObject(parameters);
@@ -100,9 +102,15 @@ namespace NetJS.Server.API {
         /// <example><code lang="javascript">var content = Request.getContent();</code></example>
         public static string getContent() {
             var context = Tool.GetContext();
-            context.Request.InputStream.Seek(0, System.IO.SeekOrigin.Begin);
-            var content = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding).ReadToEnd();
-            return content;
+
+            try {
+                context.Request.InputStream.Seek(0, System.IO.SeekOrigin.Begin);
+                var content = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding).ReadToEnd();
+                return content;
+            } catch (Exception e) {
+                State.Application.Error(new Error("Could not read content stream: " + e.Message), ErrorStage.Runtime);
+                return "";
+            }
         }
 
         /// <summary>Gets the encoding of the request content</summary>

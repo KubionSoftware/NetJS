@@ -30,6 +30,7 @@ namespace NetJS {
 
         public void Call() {
             _state.Set();
+
             try {
                 _function();
             } catch (Exception e) {

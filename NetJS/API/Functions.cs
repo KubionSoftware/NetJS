@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Web;
 
@@ -85,7 +86,7 @@ namespace NetJS.API {
         /// <example><code lang="javascript">setTimeout(() => {
         ///     Log.write("It's time!");
         /// }, 1500);</code></example>
-        public static void setTimeout(dynamic function, int time) {
+        public static void setTimeout(dynamic function, int time = 0) {
             State.Application.AddTimeOut(time, function, State.Get());
         }
 
@@ -113,7 +114,15 @@ namespace NetJS.API {
         /// <param name="file">The dll file to include</param>
         /// <example><code lang="javascript">includeDLL("ADFS.dll");</code></example>
         public static void includeDLL(string file) {
+            var dll = Assembly.LoadFrom(getPath(file));
             
+            foreach (var type in dll.GetExportedTypes()) {
+                State.Application.AddHostType(type);
+            }
+        }
+
+        public static string getPath(string file) {
+            return State.Application.Cache.GetPath(file, State.Application, false);
         }
     }
 }

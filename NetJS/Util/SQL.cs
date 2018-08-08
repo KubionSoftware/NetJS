@@ -12,7 +12,7 @@ namespace NetJS.Util {
                 var connection = new SqlConnection(connectionString);
                 connection.Open();
                 return connection;
-            } catch {
+            } catch (Exception e) {
                 // TODO: throw exception?
                 return null;
             }

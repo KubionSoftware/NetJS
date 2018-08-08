@@ -32,11 +32,22 @@ namespace NetJS {
     public class Connections {
 
         private Dictionary<string, Connection> _connections = new Dictionary<string, Connection>();
+        private DateTime _lastChange;
+        private string _file;
 
         public Connections(Settings settings) {
-            var file = settings.Root + settings.Connections;
+            _file = settings.Root + settings.Connections;
+            _lastChange = DateTime.Now;
 
-            Load(file);
+            Load(_file);
+        }
+
+        public void CheckForChanges() {
+            var lastWrite = System.IO.File.GetLastWriteTime(_file);
+            if (lastWrite > _lastChange) {
+                Load(_file);
+                _lastChange = lastWrite;
+            }
         }
 
         public void Load(string file) {

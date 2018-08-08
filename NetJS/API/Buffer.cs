@@ -13,6 +13,12 @@
         public static void write(object o) {
             if (o is string s) {
                 State.Buffer.Append(s);
+            } else if (o is int i) {
+                State.Buffer.Append(i.ToString());
+            } else if (o is double d) {
+                State.Buffer.Append(d.ToString());
+            } else if (o is bool b) {
+                State.Buffer.Append(b ? "true" : "false");
             }
         }
 

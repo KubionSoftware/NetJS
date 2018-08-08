@@ -53,6 +53,8 @@ namespace NetJS {
             try { 
                 var source = System.IO.File.ReadAllText(path);
                 return application.Compile(path, source);
+            } catch (System.IO.IOException) {
+                application.Error(new IOError($"Could not load file '{path}'"), ErrorStage.Compilation);
             } catch (Exception e) {
                 application.Error(e, ErrorStage.Compilation);
             }
@@ -67,10 +69,12 @@ namespace NetJS {
             try {
                 var source = System.IO.File.ReadAllText(path);
                 var code = Transpiler.TranspileTemplate(source, returnVar);
-                var script = application.Compile(name, code);
+                var script = application.Compile(path, code);
                 var function = application.Evaluate(script);
                 return function;
-            } catch(Exception e) {
+            } catch (System.IO.IOException) {
+                application.Error(new IOError($"Could not load file '{path}'"), ErrorStage.Compilation);
+            } catch (Exception e) {
                 application.Error(e, ErrorStage.Compilation);
             }
 

@@ -23,8 +23,20 @@ namespace NetJS.API {
         /// <param name="value">The value to link to the key</param>
         /// <example><code lang="javascript">Application.set("userId", user.id);</code></example>
         public static bool set(string key, object value) {
+            if (!(value is string || value is int || value is double || value is bool)) {
+                State.Application.Error(new Error("Can only store string, number or boolean in Application"), ErrorStage.Runtime);
+                return false;
+            }
+
             State.Application.Set(key, value);
             return true;
+        }
+
+        /// <summary>Application.contains checks if the application contains a key.</summary>
+        /// <param name="key">The key to check</param>
+        /// <example><code lang="javascript">if (Application.contains("userId")) { ... }</code></example>
+        public static bool contains(string key) {
+            return State.Application.Contains(key);
         }
 
         /// <summary>Application.remove takes a key and removes it.</summary>

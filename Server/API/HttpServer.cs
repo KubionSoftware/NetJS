@@ -7,16 +7,9 @@ using System.Web;
 namespace NetJS.Server.API {
     public class HTTPServer {
 
-        public static Action<object> Callback(Action after) {
+        public static Action<object> Callback(Action after, HttpContext context) {
             return result => {
-                try {
-                    var responseString = result.ToString();
-                    var buffer = Encoding.UTF8.GetBytes(responseString);
-                    var output = Tool.GetContext().Response.OutputStream;
-                    output.Write(buffer, 0, buffer.Length);
-                    output.Close();
-                } catch { }
-
+                Tool.End(context, result.ToString());
                 after();
             };
         }
@@ -39,7 +32,7 @@ namespace NetJS.Server.API {
         public static void OnConnection(JSApplication application, JSSession session, Action after) {
             if (_onConnection == null) return;
 
-            Action<object> callback = Callback(after);
+            Action<object> callback = Callback(after, HttpContext.Current);
             var request = new ServerRequest(_onConnection, application, callback, session, HttpContext.Current);
             application.AddRequest(request);
         }

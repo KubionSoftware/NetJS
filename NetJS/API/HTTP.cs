@@ -1,4 +1,5 @@
 ﻿using Microsoft.ClearScript;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -30,10 +31,10 @@ namespace NetJS.API {
         public static dynamic execute(string connectionName, string query, object settings = null) {
             var application = State.Application;
             var url = application.Connections.GetHttpUrl(connectionName);
-            return execute(url + query, settings);
+            return executeUrl(url + query, settings);
         }
 
-        public static dynamic execute(string url, dynamic settings = null) {
+        public static dynamic executeUrl(string url, dynamic settings = null) {
             var application = State.Application;
             var state = State.Get();
 
@@ -78,14 +79,14 @@ namespace NetJS.API {
                     }
 
                     application.AddCallback(resolve, result, state);
-                } catch {
-                    application.AddCallback(reject, $"Failed to get response from '{url}'", state);
+                } catch (Exception e) {
+                    application.AddCallback(reject, $"Failed to get response from '{url}' {e.Message}", state);
                 }
             });
         }
 
         public static dynamic get(string url) {
-            return execute(url);
+            return executeUrl(url);
         }
 
         public static dynamic post(string url, string content) {

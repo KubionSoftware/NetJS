@@ -32,6 +32,10 @@ namespace NetJS {
             }
         }
 
+        public bool Contains(string key) {
+            return _dict.ContainsKey(key);
+        }
+
         public void Clear() {
             _dict.Clear();
         }

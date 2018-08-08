@@ -17,6 +17,11 @@
             <param name="value">The value to link to the key</param>
             <example><code lang="javascript">Application.set("userId", user.id);</code></example>
         </member>
+        <member name="M:NetJS.API.Application.contains(System.String)">
+            <summary>Application.contains checks if the application contains a key.</summary>
+            <param name="key">The key to check</param>
+            <example><code lang="javascript">if (Application.contains("userId")) { ... }</code></example>
+        </member>
         <member name="M:NetJS.API.Application.remove(System.String)">
             <summary>Application.remove takes a key and removes it.</summary>
             <param name="key">The key to get a value from</param>
@@ -236,6 +241,11 @@
             <param name="value">The value to link to the key</param>
             <example><code lang="javascript">Session.set("userId", user.id);</code></example>
         </member>
+        <member name="M:NetJS.API.Session.contains(System.String)">
+            <summary>Session.contains checks if the session contains a key.</summary>
+            <param name="key">The key to check</param>
+            <example><code lang="javascript">if (Session.contains("userId")) { ... }</code></example>
+        </member>
         <member name="M:NetJS.API.Session.remove(System.String)">
             <summary>Sessions.remove takes a key and removes it from the session.</summary>
             <param name="key">The key to get a value from</param>
@@ -250,7 +260,7 @@
             <returns>Object containing all keys and values.</returns>
             <example><code lang="javascript">var session = Sessions.getAll();</code></example>
         </member>
-        <member name="T:NetJS.API.SQL">
+        <member name="T:NetJS.API.SQLAPI">
             <summary>SQL class contains basic methods for communicating with SQL databases configured in the config.</summary>
             <remarks>This class can make SELECT, UPDATE, INSERT and custom query's.
             Configuration is needed to make a DB connection.</remarks>
@@ -270,21 +280,7 @@
             <code lang="javascript">var query = "DELETE FROM users WHERE id = " + id.toString() + ";";
             SQL.execute(db, query);</code></example>
         </member>
-        <member name="M:NetJS.API.SQL.escape(System.String)">
-            <summary>Escapes a string to use in an SQL query.</summary>
-            <param name="s">Value to escape (string)</param>
-            <returns>The escaped string.</returns>
-            <example><code lang="javascript">var escaped = SQL.escape(username);</code></example>
-        </member>
-        <member name="M:NetJS.API.SQL.format(System.String,Microsoft.ClearScript.ScriptObject)">
-            <summary>Creates an escaped SQL query string with parameters.</summary>
-            <param name="query">Template query (string)</param>
-            <param name="parameters">Parameters (object)</param>
-            <returns>The generated query (string)</returns>
-            <example><code lang="javascript">var query = SQL.format("SELECT * FROM Users WHERE Name = {name};", {name: "Alex Jones"});
-            // SELECT * FROM Users Where Name = 'Alex Jones';</code></example>
-        </member>
-        <member name="M:NetJS.API.SQL.execute(System.String,System.String)">
+        <member name="M:NetJS.API.SQLAPI.execute(System.String,System.String)">
             <summary>SQL.execute takes a connectionName and a query, executes the query and returns the result if the query is a SELECT statement.</summary>
             <param name="connectionName">Name of a configured connection</param>
             <param name="query">The query to be executed</param>

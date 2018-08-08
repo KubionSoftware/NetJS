@@ -80,6 +80,8 @@ namespace NetJS {
 
         // Handles all events
         public void EventLoop() {
+            var lastGarbageCollect = DateTime.Now;
+
             while (true) {
                 var events = 0;
                 var eventLimitExceeded = false;
@@ -110,6 +112,7 @@ namespace NetJS {
                     }
 
                     callback.Call();
+                    events++;
                 }
 
                 events = 0;
@@ -122,6 +125,15 @@ namespace NetJS {
                     }
 
                     request.Call();
+                    events++;
+                }
+                
+                if ((DateTime.Now - lastGarbageCollect).TotalMilliseconds >= 1000) {
+                    try {
+                        _engine.CollectGarbage(true);
+                    } catch { }
+
+                    lastGarbageCollect = DateTime.Now;
                 }
 
                 if (!eventLimitExceeded) {
@@ -147,6 +159,9 @@ namespace NetJS {
                             break;
                         }
                     }
+
+                    // Check if connections changed
+                    Connections.CheckForChanges();
                 } catch (Exception e) {
                     API.Log.write("Error in FileLoop: " + e.ToString());
                 }
@@ -157,9 +172,6 @@ namespace NetJS {
         }
 
         public void Restart() {
-            // Create a new engine
-            if (_engine != null) _engine.Dispose();
-
             // Find available port
             _engineDebugPort = -1;
             for (var p = DebugPortStart; p <= DebugPortEnd; p++) {
@@ -168,6 +180,9 @@ namespace NetJS {
                     break;
                 }
             }
+
+            // Dispose old engine
+            if (_engine != null) _engine.Dispose();
 
             if (_engineDebugPort != -1) {
                 // Enable debugging on port "port"
@@ -183,7 +198,7 @@ namespace NetJS {
 
             // Define the NetJS API
             AddHostType(typeof(API.HTTP));
-            AddHostType(typeof(API.SQL));
+            AddHostType(typeof(API.SQLAPI));
             AddHostType(typeof(API.IO));
             AddHostType(typeof(API.Log));
             AddHostType(typeof(API.Application));

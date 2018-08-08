@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace NetJS.Server {
@@ -11,6 +12,17 @@ namespace NetJS.Server {
         
         public static HttpContext GetContext() {
             return (State.Request as ServerRequest).Context;
+        }
+
+        public static void End(HttpContext context, string s) {
+            try {
+                if (context.Response.IsClientConnected) {
+                    var buffer = Encoding.UTF8.GetBytes(s);
+                    context.Response.BinaryWrite(buffer);
+                    //context.Response.SuppressContent = true;
+                    //context.ApplicationInstance.CompleteRequest();
+                }
+            } catch { }
         }
     }
 }

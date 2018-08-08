@@ -78,7 +78,8 @@ namespace NetJS {
         private static dynamic _createJsByteArray;
         private static dynamic _createJSPromise;
         private static dynamic _createJSObject;
-        private static dynamic _getMemberNames;
+        private static dynamic _createJSObjectArray;
+        private static dynamic _fillDictionary;
         private static dynamic _getStack;
 
         public static void Init(V8ScriptEngine engine) {
@@ -117,6 +118,20 @@ namespace NetJS {
                         obj[list[i].Key] = list[i].Value;
                     }
                     return obj;
+                }).valueOf()
+            ");
+
+            _createJSObjectArray = engine.Evaluate(@"
+                (function (json) {
+                    return JSON.parse(json);
+                }).valueOf()
+            ");
+
+            _fillDictionary = engine.Evaluate(@"
+                (function (obj, dict) {
+                    for(var key in obj){
+                        dict.Add(key, obj[key]);
+                    }
                 }).valueOf()
             ");
 
@@ -162,6 +177,11 @@ namespace NetJS {
             return array;
         }
 
+        public static dynamic ToObjectArray(string json) {
+            var array = _createJSObjectArray(json);
+            return array;
+        }
+
         public static dynamic CreatePromise(Action<dynamic, dynamic> a) {
             Action<dynamic, dynamic> task = (resolve, reject) => {
                 new Task(() => {
@@ -175,6 +195,12 @@ namespace NetJS {
         public static dynamic GetStack() {
             if (_getStack == null) return null;
             return _getStack();
+        }
+
+        public static Dictionary<string, object> ToDictionary(dynamic obj) {
+            var dict = new Dictionary<string, object>();
+            _fillDictionary(obj, dict);
+            return dict;
         }
     }
 }

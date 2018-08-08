@@ -12,18 +12,18 @@ namespace NetJS.Server {
 
         private ConcurrentDictionary<string, JSSession> _sessions;
 
-        public JSServer(Action after) : this(new JSService(), after) { }
+        public JSServer(HttpContext context, Action after) : this(new JSService(), context, after) { }
 
         public string CompileError = "";
 
-        public JSServer(JSService service, Action after) {
+        public JSServer(JSService service, HttpContext context, Action after) {
             _service = service;
-            _application = CreateApplication(after);
+            _application = CreateApplication(context, after);
 
             _sessions = new ConcurrentDictionary<string, JSSession>();
         }
 
-        private JSApplication CreateApplication(Action after) {
+        private JSApplication CreateApplication(HttpContext context, Action after) {
             var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory, (app) => {
                 // Define the server API
                 app.AddHostType(typeof(API.Request));
@@ -40,7 +40,7 @@ namespace NetJS.Server {
                 var require = app.Evaluate(@"(function(file){
                     require(file);
                 }).valueOf()");
-                var callback = API.HTTPServer.Callback(after);
+                var callback = API.HTTPServer.Callback(after, context);
                 var request = new ServerRequest(require, app, callback, session, HttpContext.Current, app.Settings.Startup);
                 request.Call();
             }, (exception, stage) => {
@@ -57,18 +57,32 @@ namespace NetJS.Server {
                     CompileError = error;
                 }
 
-                // Try to show the error message in the browser
-                try {
-                    API.Response.setHeader("Content-Type", "text/plain");
-                    State.Request.ResultCallback(error);
-                    return;
-                } catch (Exception e) { }
-
-                // If that failed, write it to the log
-                NetJS.API.Log.write(error);
+                WriteError(context, after, error);
             });
 
             return application;
+        }
+
+        private static void WriteError(HttpContext context, Action after, string error) {
+            try {
+                NetJS.API.Log.write(error);
+            } catch (Exception e) { }
+
+            // Try with the context in state
+            try {
+                API.Response.setHeader("Content-Type", "text/plain");
+                NetJS.API.Functions.end(error);
+                return;
+            } catch (Exception e) { }
+
+            // Try with the given context
+            try {
+                Tool.End(context, error);
+                after();
+                return;
+            } catch (Exception e) { }
+            
+            after();
         }
 
         // Creates a new session with the id, or returns an existing session with that id
@@ -79,16 +93,13 @@ namespace NetJS.Server {
         }
 
         public JSSession GetSession(HttpContext context) {
-            var id = context.Session.SessionID;
+            var id = context.Session != null ? context.Session.SessionID : Guid.NewGuid().ToString();
             return GetSession(id);
         }
 
         public void ProcessRequest(HttpContext context, Action after) {
             if (CompileError.Length > 0) {
-                context.Response.ContentType = "text/plain";
-                context.Response.Write(CompileError);
-                context.Response.End();
-                after();
+                WriteError(context, after, CompileError);
                 return;
             }
             
