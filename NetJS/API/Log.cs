@@ -8,7 +8,9 @@ namespace NetJS.API {
         /// <param name="log">The log that needs to be written</param>
         /// <example><code lang="javascript">Log.write("Hello world!");</code></example>
         public static void write(string message) {
-            var file = State.Application.Settings.Root + State.Application.Settings.Log;
+            var file = State.Application != null ?
+                State.Application.Settings.Root + State.Application.Settings.Log :
+                "log.txt";
 
             try {
                 var info = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss:fff");

@@ -28,10 +28,12 @@ namespace NetJS {
                 path = application.Settings.Root + (inSource ? application.Settings.TemplateFolder : "") + path;
             } else if (!System.IO.Path.IsPathRooted(path)) {
                 var currentLocation = GetCurrentLocation();
-                var nameParts = currentLocation.Split('/');
-                path = application.Settings.Root + (inSource ? application.Settings.TemplateFolder : "");
-                for (var i = 0; i < nameParts.Length - 1; i++) path += nameParts[i] + "/";
-                path += name;
+                if (currentLocation.Length == 0) {
+                    path = application.Settings.Root + (inSource ? application.Settings.TemplateFolder : "") + path;
+                } else {
+                    var nameParts = currentLocation.Split(new[] { '/', '\\' });
+                    path = string.Join("/", nameParts.Take(nameParts.Length - 1)) + "/" + name;
+                }
             }
             return path;
         }

@@ -26,7 +26,8 @@ namespace NetJS.API {
         ///     },
         ///     headers: {
         ///         ApplicationID: "NetJS"
-        ///     }
+        ///     },
+        ///     output: "text|json|binary|base64"
         /// });</code></example>
         public static dynamic execute(string connectionName, string query, object settings = null) {
             var application = State.Application;
@@ -38,51 +39,75 @@ namespace NetJS.API {
             var application = State.Application;
             var state = State.Get();
 
+            var output = "text";
+
             return Tool.CreatePromise((resolve, reject) => {
-                var request = WebRequest.CreateHttp(url);
-
-                if (settings != null) {
-                    if (Tool.GetObject(settings.cookies, out ScriptObject cookies)) {
-                        foreach (var key in cookies.GetDynamicMemberNames()) {
-                            request.CookieContainer.Add(new Cookie(key.ToString(), Tool.GetValue(cookies, key).ToString()));
-                        }
-                    }
-
-                    if (Tool.GetObject(settings.headers, out ScriptObject headers)) {
-                        foreach (var key in headers.GetDynamicMemberNames()) {
-                            Util.HttpWebRequestExtensions.SetRawHeader(request, key.ToString(), Tool.GetValue(headers, key).ToString());
-                        }
-                    }
-
-                    if (Tool.Get(settings.method, out string method)) {
-                        request.Method = method;
-                    } else {
-                        request.Method = "GET";
-                    }
-
-                    if (Tool.Get(settings.content, out string content)) {
-                        var writer = new StreamWriter(request.GetRequestStream(), Encoding.Default);
-                        writer.Write(content);
-                        writer.Close();
-                    }
-                }
-
                 try {
-                    var response = request.GetResponse();
+                    var request = WebRequest.CreateHttp(url);
 
-                    var reader = new StreamReader(response.GetResponseStream(), Encoding.Default);
-                    var result = reader.ReadToEnd();
-                    reader.Close();
+                    if (settings != null) {
+                        if (Tool.GetObject(settings.cookies, out ScriptObject cookies)) {
+                            request.CookieContainer = new CookieContainer();
 
-                    if (response.ContentType.ToLower() == "application/json") {
-                        // TODO: parse json
+                            foreach (var key in cookies.GetDynamicMemberNames()) {
+                                // TODO: set path and host
+                                request.CookieContainer.Add(new Cookie(key.ToString(), Tool.GetValue(cookies, key).ToString(), "/"));
+                            }
+                        }
+
+                        if (Tool.GetObject(settings.headers, out ScriptObject headers)) {
+                            foreach (var key in headers.GetDynamicMemberNames()) {
+                                Util.HttpWebRequestExtensions.SetRawHeader(request, key.ToString(), Tool.GetValue(headers, key).ToString());
+                            }
+                        }
+
+                        if (Tool.Get(settings.method, out string method)) {
+                            request.Method = method;
+                        } else {
+                            request.Method = "GET";
+                        }
+
+                        if (Tool.Get(settings.content, out string content)) {
+                            var writer = new StreamWriter(request.GetRequestStream(), Encoding.Default);
+                            writer.Write(content);
+                            writer.Close();
+                        }
+
+                        if (Tool.Get(settings.output, out string outputType)) {
+                            output = outputType;
+                        }
                     }
 
-                    application.AddCallback(resolve, result, state);
+                    var response = request.GetResponse();
+                    var stream = response.GetResponseStream();
+
+                    if (output == "text") {
+                        var reader = new StreamReader(stream, Encoding.Default);
+                        application.AddCallback(resolve, reader.ReadToEnd(), state);
+                        reader.Close();
+                    } else if (output == "base64") {
+                        var bytes = ReadFully(stream);
+                        application.AddCallback(resolve, Convert.ToBase64String(bytes), state);
+                    } else if (output == "bytes") {
+                        var bytes = ReadFully(stream);
+                        application.AddCallback(resolve, Tool.ToByteArray(bytes), state);
+                    }
                 } catch (Exception e) {
                     application.AddCallback(reject, $"Failed to get response from '{url}' {e.Message}", state);
                 }
             });
+        }
+
+        // See: https://stackoverflow.com/a/221941
+        private static byte[] ReadFully(Stream input) {
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream()) {
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0) {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
         }
 
         public static dynamic get(string url) {

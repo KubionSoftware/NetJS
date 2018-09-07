@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.ClearScript;
 
 namespace NetJS {
     public class JSApplication : JSStorage {
@@ -26,9 +27,9 @@ namespace NetJS {
         private const int DebugPortEnd = 9323;
 
         // Event queues
-        private ConcurrentQueue<Request> _requests = new ConcurrentQueue<Request>();
-        private ConcurrentQueue<Callback> _callbacks = new ConcurrentQueue<Callback>();
-        private List<TimeOut> _timeouts = new List<TimeOut>();
+        private ConcurrentQueue<Request> _requests;
+        private ConcurrentQueue<Callback> _callbacks;
+        private List<TimeOut> _timeouts;
         private const int EventLimit = 10;
 
         // Callbacks
@@ -95,8 +96,13 @@ namespace NetJS {
 
                     var timeout = _timeouts[i];
                     if (timeout.ShouldTrigger(DateTime.Now)) {
-                        _timeouts.RemoveAt(i);
-                        i--;
+                        if (!timeout.IsRepeating()) {
+                            _timeouts.RemoveAt(i);
+                            i--;
+                        } else {
+                            timeout.Reset();
+                        }
+
                         timeout.Call();
                         events++;
                     }
@@ -184,6 +190,11 @@ namespace NetJS {
             // Dispose old engine
             if (_engine != null) _engine.Dispose();
 
+            // Clear queues
+            _callbacks = new ConcurrentQueue<Callback>();
+            _timeouts = new List<TimeOut>();
+            _requests = new ConcurrentQueue<Request>();
+
             if (_engineDebugPort != -1) {
                 // Enable debugging on port "port"
                 _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging, _engineDebugPort);
@@ -209,6 +220,7 @@ namespace NetJS {
             AddHostType(typeof(API.Windows));
             AddHostType(typeof(API.DLL));
             AddHostType(typeof(API.XML));
+            AddHostType(typeof(API.MongoDBAPI));
             AddHostFunctions(typeof(API.Functions));
 
             // Initialize the tool functions
@@ -261,7 +273,7 @@ namespace NetJS {
         // Load the source from the template in the V8 engine
         public void Require(string template) {
             // Get the relative path for this project
-            var path = Cache.GetPath(template, this, true);
+            var path = Cache.NormalizePath(Cache.GetPath(template, this, true));
 
             // If is already loaded, return
             if (_required.Any(file => file.Path == path)) return;
@@ -284,7 +296,7 @@ namespace NetJS {
         }
 
         // Simple engine functions
-        public V8Script Compile(string file, string code)   => _engine.Compile(file, code);
+        public V8Script Compile(string file, string code)   => _engine.Compile(new DocumentInfo(new Uri(file, UriKind.RelativeOrAbsolute)), code);
         public V8Script Compile(string code)                => Compile("", code);
         public dynamic Evaluate(string code)                => _engine.Evaluate("", code);
         public dynamic Evaluate(V8Script script)            => _engine.Evaluate(script);
@@ -300,8 +312,8 @@ namespace NetJS {
         }
 
         // Adds the timeout to the timeout queue
-        public void AddTimeOut(int time, dynamic function, State state) {
-            _timeouts.Add(new TimeOut(time, function, state));
+        public void AddTimeOut(int time, dynamic function, State state, bool repeating) {
+            _timeouts.Add(new TimeOut(time, function, state, repeating));
         }
 
         // Gets the current source file path from the stack trace
@@ -310,7 +322,9 @@ namespace NetJS {
             if (stack == null) return "";
             var top = stack[0];
             if (Tool.IsUndefined(top)) return "";
-            return top.getScriptNameOrSourceURL();
+            var url = top.getScriptNameOrSourceURL();
+            if (url.StartsWith("Script Document")) return "";
+            return url;
         }
 
         // Returns the global object

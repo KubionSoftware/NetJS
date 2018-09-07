@@ -87,7 +87,17 @@ namespace NetJS.API {
         ///     Log.write("It's time!");
         /// }, 1500);</code></example>
         public static void setTimeout(dynamic function, int time = 0) {
-            State.Application.AddTimeOut(time, function, State.Get());
+            State.Application.AddTimeOut(time, function, State.Get(), false);
+        }
+
+        /// <summary>Schedules a function to be called every N milliseconds</summary>
+        /// <param name="function">The function to call</param>
+        /// <param name="time">The time in milliseconds</param>
+        /// <example><code lang="javascript">setInterval(() => {
+        ///     Log.write("Tick");
+        /// }, 1000);</code></example>
+        public static void setInterval(dynamic function, int time = 0) {
+            State.Application.AddTimeOut(time, function, State.Get(), true);
         }
 
         /// <summary>import takes a file and runs the code in the file with the current agent.

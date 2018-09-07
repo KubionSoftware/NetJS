@@ -25,6 +25,10 @@ namespace NetJS.Server {
 
         private JSApplication CreateApplication(HttpContext context, Action after) {
             var application = new JSApplication(AppDomain.CurrentDomain.BaseDirectory, (app) => {
+                // Reset the websocket and http hooks
+                API.WebSocket.ResetHooks();
+                API.HTTPServer.ResetHooks();
+
                 // Define the server API
                 app.AddHostType(typeof(API.Request));
                 app.AddHostType(typeof(API.Response));

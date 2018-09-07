@@ -44,7 +44,10 @@
     <DocumentationFile>..\Documentation\Server.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ClearScript, Version=5.5.2.0, Culture=neutral, PublicKeyToken=935d0c957da47c73" />
+    <Reference Include="ClearScript, Version=5.5.2.0, Culture=neutral, PublicKeyToken=935d0c957da47c73, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Users\BoukeStam\Documents\ClearScript\bin\Release\ClearScript.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
@@ -72,6 +75,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ClearScriptV8-32.dll" />
+    <Content Include="ClearScriptV8-64.dll" />
+    <Content Include="v8-base-ia32.dll" />
+    <Content Include="v8-base-x64.dll" />
+    <Content Include="v8-ia32.dll" />
+    <Content Include="v8-x64.dll" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

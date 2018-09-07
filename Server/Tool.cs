@@ -14,11 +14,14 @@ namespace NetJS.Server {
             return (State.Request as ServerRequest).Context;
         }
 
-        public static void End(HttpContext context, string s) {
+        public static void End (HttpContext context, string s) {
+            End(context, Encoding.UTF8.GetBytes(s));
+        }
+
+        public static void End (HttpContext context, byte[] bytes) {
             try {
                 if (context.Response.IsClientConnected) {
-                    var buffer = Encoding.UTF8.GetBytes(s);
-                    context.Response.BinaryWrite(buffer);
+                    context.Response.BinaryWrite(bytes);
                     //context.Response.SuppressContent = true;
                     //context.ApplicationInstance.CompleteRequest();
                 }

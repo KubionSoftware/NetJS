@@ -127,5 +127,12 @@ namespace NetJS.Server.API {
             var request = new ServerRequest(_onMessage, _application, callback, _server.GetSession(_id), HttpContext.Current, _id, e.ToString());
             _application.AddRequest(request);
         }
+
+        public static void ResetHooks() {
+            _onClose = null;
+            _onConnection = null;
+            _onError = null;
+            _onMessage = null;
+        }
     }
 }

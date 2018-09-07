@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using Util;
@@ -7,6 +9,16 @@ namespace NetJS {
 
     public abstract class Connection {
 
+    }
+
+    public class MongoDBConnection : Connection {
+        public MongoClient Client;
+        public IMongoDatabase Database;
+
+        public MongoDBConnection (string connectionString, string database) {
+            Client = new MongoClient(connectionString);
+            Database = Client.GetDatabase(database);
+        }
     }
 
     public class SQLConnection : Connection {
@@ -81,6 +93,8 @@ namespace NetJS {
                                 _connections[key] = new SQLConnection(connectionJson.String("connectionString"));
                             } else if (type == "http") {
                                 _connections[key] = new HTTPConnection(connectionJson.String("url"));
+                            } else if (type == "mongodb") {
+                                _connections[key] = new MongoDBConnection(connectionJson.String("connectionString"), connectionJson.String("database"));
                             }
                         }
                     }catch (Exception e) {
@@ -90,6 +104,20 @@ namespace NetJS {
 
                 }
             }
+        }
+
+        public IMongoDatabase GetMongoDBConnection(string name) {
+            lock (_connections) {
+                if (_connections.ContainsKey(name)) {
+                    var connection = _connections[name];
+                    if (connection is MongoDBConnection mongoConnection) {
+                        return mongoConnection.Database;
+                    }
+                }
+            }
+
+            // TODO: throw exception?
+            return null;
         }
 
         public SqlConnection GetSqlConnection(string name) {

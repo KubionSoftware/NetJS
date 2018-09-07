@@ -91,6 +91,14 @@
                 Log.write("It's time!");
             }, 1500);</code></example>
         </member>
+        <member name="M:NetJS.API.Functions.setInterval(System.Object,System.Int32)">
+            <summary>Schedules a function to be called every N milliseconds</summary>
+            <param name="function">The function to call</param>
+            <param name="time">The time in milliseconds</param>
+            <example><code lang="javascript">setInterval(() => {
+                Log.write("Tick");
+            }, 1000);</code></example>
+        </member>
         <member name="M:NetJS.API.Functions.require(System.String)">
             <summary>import takes a file and runs the code in the file with the current agent.
             This way functions and variables can be imported.
@@ -124,7 +132,8 @@
                 },
                 headers: {
                     ApplicationID: "NetJS"
-                }
+                },
+                output: "text|json|binary|base64"
             });</code></example>
         </member>
         <member name="T:NetJS.API.IO">

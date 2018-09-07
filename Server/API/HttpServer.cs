@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.ClearScript.JavaScript;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,9 +8,17 @@ using System.Web;
 namespace NetJS.Server.API {
     public class HTTPServer {
 
-        public static Action<object> Callback(Action after, HttpContext context) {
+        public static Action<dynamic> Callback(Action after, HttpContext context) {
             return result => {
-                Tool.End(context, result.ToString());
+                try {
+                    if (result.buffer is IArrayBuffer array) {
+                        var bytes = array.GetBytes();
+                        Tool.End(context, bytes);
+                    }
+                } catch {
+                    Tool.End(context, result.ToString());
+                }
+
                 after();
             };
         }
@@ -35,6 +44,10 @@ namespace NetJS.Server.API {
             Action<object> callback = Callback(after, HttpContext.Current);
             var request = new ServerRequest(_onConnection, application, callback, session, HttpContext.Current);
             application.AddRequest(request);
+        }
+
+        public static void ResetHooks () {
+            _onConnection = null;
         }
     }
 }

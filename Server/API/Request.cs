@@ -104,9 +104,13 @@ namespace NetJS.Server.API {
             var context = Tool.GetContext();
 
             try {
-                context.Request.InputStream.Seek(0, System.IO.SeekOrigin.Begin);
-                var content = new System.IO.StreamReader(context.Request.InputStream, context.Request.ContentEncoding).ReadToEnd();
-                return content;
+                using (Stream stream = context.Request.InputStream) {
+                    stream.Seek(0, System.IO.SeekOrigin.Begin);
+                    using (StreamReader reader = new System.IO.StreamReader(stream, context.Request.ContentEncoding)) {
+                        var content = reader.ReadToEnd();
+                        return content;
+                    }
+                }
             } catch (Exception e) {
                 State.Application.Error(new Error("Could not read content stream: " + e.Message), ErrorStage.Runtime);
                 return "";

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Dynamic;
 using Microsoft.ClearScript.V8;
+using Microsoft.ClearScript.JavaScript;
 
 namespace NetJS {
 
@@ -94,11 +95,8 @@ namespace NetJS {
             ");
 
             _createJsByteArray = engine.Evaluate(@"
-                (function (list) {
-                    var array = new Uint8Array(list.Length);
-                    for (var i = 0; i < list.Length; i++){
-                        array[i] = list[i];
-                    }
+                (function (length) {
+                    var array = new Uint8Array(length);
                     return array;
                 }).valueOf()
             ");
@@ -168,7 +166,9 @@ namespace NetJS {
         }
 
         public static dynamic ToByteArray(byte[] list) {
-            var array = _createJsByteArray(list.Select(b => (object)b).ToArray());
+            var array = _createJsByteArray(list.Length);
+            var buffer = (IArrayBuffer)array.buffer;
+            buffer.WriteBytes(list, 0, (ulong)list.Length, 0);
             return array;
         }
 
