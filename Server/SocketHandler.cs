@@ -20,18 +20,26 @@ namespace NetJS.Server {
                 OnConnection(context);
 
                 var receiveBuffer = new ArraySegment<Byte>(new Byte[BufferSize]);
+                var textBuffer = new StringBuilder();
                 var cancellationToken = new CancellationToken();
 
                 while (true) {
                     try {
-                        var content = await socket.ReceiveAsync(receiveBuffer, cancellationToken);
 
-                        if (content.MessageType == WebSocketMessageType.Close) {
-                            OnClose(context);
-                            break;
-                        } else {
-                            var text = Encoding.UTF8.GetString(receiveBuffer.Array, 0, content.Count);
-                            OnMessage(context, text);
+                        while (true) {
+                            var content = await socket.ReceiveAsync(receiveBuffer, cancellationToken);
+                            if (content.MessageType == WebSocketMessageType.Close) {
+                                OnClose(context);
+                                return;
+                            }
+
+                            textBuffer.Append(Encoding.UTF8.GetString(receiveBuffer.Array, 0, content.Count));
+
+                            if (content.EndOfMessage) {
+                                OnMessage(context, textBuffer.ToString());
+                                textBuffer.Clear();
+                                break;
+                            }
                         }
                     } catch(Exception e) {
                         OnError(context, e);

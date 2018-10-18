@@ -215,7 +215,7 @@ namespace NetJS.Server.API {
                 result.Add("content", NetJS.Tool.ToByteArray(ms.ToArray()));
             }
 
-            return result;
+            return NetJS.Tool.ToObject(result);
         }
 
         /// <summary>Saves a file to disk</summary>

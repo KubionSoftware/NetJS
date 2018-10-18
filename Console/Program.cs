@@ -7,26 +7,13 @@ using System.Threading.Tasks;
 namespace NetJS.Console {
     class Program {
         static void Main(string[] args) {
-            var data = "{";
-            for (var i = 1; i < args.Length - 1; i++) {
-                if (i > 1) data += ",";
-
-                if (!args[i].StartsWith("-")) {
-                    System.Console.WriteLine("The parameter name should start with -");
-                    System.Console.ReadLine();
-                    return;
-                }
-                data += $"\"{args[i].Replace("-", "")}\": \"{args[i + 1]}\"";
-            }
-            data += "}";
-
             var application = new JSApplication("", app => {
                 app.AddHostType(typeof(API.Console));
-            }, error => { });
+            }, (error, stage) => {
+                System.Console.WriteLine(error);
+            });
             var service = new JSService();
             var session = new JSSession();
-
-            service.RunTemplate(application.Settings.Startup, data, ref application, ref session);
 
             try {
                 service.RunScriptSync(application.Settings.Startup, application, session, result => {

@@ -7,7 +7,7 @@ namespace NetJS.GUI.API {
 
         private static void HandleMouseEvent(MouseEventArgs e, dynamic f) {
             if (f != null) {
-                f(e.X, e.Y);
+                State.Application.AddCallback(f, e.X, State.Get(), e.Y);
             }
         }
 
@@ -22,7 +22,7 @@ namespace NetJS.GUI.API {
 
         private static void HandleKeyEvent(KeyEventArgs e, dynamic f) {
             if (f != null) {
-                f(e.KeyValue, GetChar(e).ToString());
+                State.Application.AddCallback(f, e.KeyValue, State.Get(), GetChar(e).ToString());
             }
         }
 
@@ -58,7 +58,7 @@ namespace NetJS.GUI.API {
 
             Form.FormClosed += (sender, e) => {
                 if (onclose != null) {
-                    onclose();
+                    State.Application.AddCallback(onclose, null, State.Get());
                 }
             };
         }

@@ -27,7 +27,7 @@ namespace NetJS.API {
         ///     headers: {
         ///         ApplicationID: "NetJS"
         ///     },
-        ///     output: "text|json|binary|base64"
+        ///     output: "text|binary|base64"
         /// });</code></example>
         public static dynamic execute(string connectionName, string query, object settings = null) {
             var application = State.Application;
@@ -68,9 +68,11 @@ namespace NetJS.API {
                         }
 
                         if (Tool.Get(settings.content, out string content)) {
-                            var writer = new StreamWriter(request.GetRequestStream(), Encoding.Default);
-                            writer.Write(content);
-                            writer.Close();
+                            var bytes = Encoding.Default.GetBytes(content);
+                            request.ContentLength = bytes.Length;
+                            using (var s = request.GetRequestStream()) {
+                                s.Write(bytes, 0, bytes.Length);
+                            }
                         }
 
                         if (Tool.Get(settings.output, out string outputType)) {
@@ -78,13 +80,11 @@ namespace NetJS.API {
                         }
                     }
 
-                    var response = request.GetResponse();
+                    var response = (HttpWebResponse)request.GetResponse();
                     var stream = response.GetResponseStream();
 
                     if (output == "text") {
-                        var reader = new StreamReader(stream, Encoding.Default);
-                        application.AddCallback(resolve, reader.ReadToEnd(), state);
-                        reader.Close();
+                        application.AddCallback(resolve, ReadString(response), state);
                     } else if (output == "base64") {
                         var bytes = ReadFully(stream);
                         application.AddCallback(resolve, Convert.ToBase64String(bytes), state);
@@ -93,9 +93,61 @@ namespace NetJS.API {
                         application.AddCallback(resolve, Tool.ToByteArray(bytes), state);
                     }
                 } catch (Exception e) {
-                    application.AddCallback(reject, $"Failed to get response from '{url}' {e.Message}", state);
+                    application.AddCallback(reject, $"Failed to get response from '{url}' {e.ToString()}", state);
                 }
             });
+        }
+
+        // See: https://stackoverflow.com/a/9841920
+        private static string ReadString (HttpWebResponse response) {
+            string strWebPage = "";
+
+            string Charset = response.CharacterSet ?? "utf-8";
+            Encoding encoding = Encoding.GetEncoding(Charset);
+
+            // read response into memory stream
+            MemoryStream memoryStream;
+            using (Stream responseStream = response.GetResponseStream()) {
+                memoryStream = new MemoryStream();
+                responseStream.CopyTo(memoryStream);
+            }
+
+            // set stream position to beginning
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            StreamReader sr = new StreamReader(memoryStream, encoding);
+            strWebPage = sr.ReadToEnd();
+
+            // Check real charset meta-tag in HTML
+            int CharsetStart = strWebPage.IndexOf("charset=");
+            if (CharsetStart > 0) {
+                CharsetStart += 8;
+                int CharsetEnd = strWebPage.IndexOfAny(new[] { ' ', '\"', ';' }, CharsetStart);
+                string RealCharset =
+                       strWebPage.Substring(CharsetStart, CharsetEnd - CharsetStart) ?? "utf-8";
+
+                // real charset meta-tag in HTML differs from supplied server header???
+                if (RealCharset != Charset) {
+                    // get correct encoding
+                    Encoding CorrectEncoding = Encoding.GetEncoding(RealCharset);
+
+                    // reset stream position to beginning
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+
+                    // reread response stream with the correct encoding
+                    StreamReader sr2 = new StreamReader(memoryStream, CorrectEncoding);
+
+                    strWebPage = sr2.ReadToEnd();
+
+                    // Close and clean up the StreamReader
+                    sr2.Close();
+                }
+            }
+
+            // dispose the first stream reader object
+            sr.Close();
+
+            return strWebPage;
         }
 
         // See: https://stackoverflow.com/a/221941

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ClearScript;
+using XHTMLMerge;
 
 namespace NetJS {
     public class JSApplication : JSStorage {
@@ -195,6 +196,9 @@ namespace NetJS {
             _timeouts = new List<TimeOut>();
             _requests = new ConcurrentQueue<Request>();
 
+            // Clear XDoc callback
+            API.XDoc.ResetHooks();
+
             if (_engineDebugPort != -1) {
                 // Enable debugging on port "port"
                 _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging, _engineDebugPort);
@@ -329,5 +333,10 @@ namespace NetJS {
 
         // Returns the global object
         public dynamic GetGlobal() => _engine.Script;
+
+        public void SendXDocMessage(JSSession session, Action<object> callback, string data, SVCache xdocSession = null) {
+            if (xdocSession != null) session.Set("SVCache", xdocSession);
+            API.XDoc.Send(this, session, callback, data);
+        }
     }
 }

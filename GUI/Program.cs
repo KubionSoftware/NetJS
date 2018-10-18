@@ -21,7 +21,7 @@ namespace NetJS.GUI {
             var application = new JSApplication(null, app => {
                 app.AddHostType(typeof(API.Window));
                 app.AddHostType(typeof(API.Graphics));
-            }, exception => {
+            }, (exception, stage) => {
                 if (exception is ScriptEngineException se) {
                     NetJS.API.Log.write(se.ErrorDetails);
                 } else {

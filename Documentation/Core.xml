@@ -44,9 +44,16 @@
         </member>
         <member name="M:NetJS.API.Base64.encode(System.String)">
             <summary>Encodes a string as a base64 string.</summary>
-            <param name="s">The string to encode</param>
+            <param name="value">The string to encode</param>
             <returns>Returns the encoded string.</returns>
             <example><code lang="javascript">var encoded = Base64.encode("Man is distinguished");</code></example>
+        </member>
+        <member name="M:NetJS.API.Base64.encodeBytes(System.Object)">
+            <summary>Encodes a byte array as a base64 string.</summary>
+            <param name="bytes">The bytes to encode</param>
+            <returns>Returns the encoded string.</returns>
+            <example><code lang="javascript">var bytes = IO.readBytes("image.png");
+            var encoded = Base64.encodeBytes(bytes);</code></example>
         </member>
         <member name="T:NetJS.API.Functions">
             <summary>Functions class contain functions that are injected directly into the engine.</summary>
@@ -83,7 +90,7 @@
             <param name="value">The output to return</param>
             <example><code lang="javascript">end("<html></html>");</code></example>
         </member>
-        <member name="M:NetJS.API.Functions.setTimeout(System.Object,System.Int32)">
+        <member name="M:NetJS.API.Functions.setTimeout(System.Object,System.Double)">
             <summary>Schedules a function to be called after a certain amount of time</summary>
             <param name="function">The function to call</param>
             <param name="time">The time in milliseconds</param>
@@ -133,7 +140,7 @@
                 headers: {
                     ApplicationID: "NetJS"
                 },
-                output: "text|json|binary|base64"
+                output: "text|binary|base64"
             });</code></example>
         </member>
         <member name="T:NetJS.API.IO">
@@ -299,17 +306,14 @@
         <member name="T:NetJS.API.XDoc">
             <summary>A Compatibility class for XDoc, to ensure possibility of usage of XDoc with NetJS.</summary>
         </member>
-        <member name="M:NetJS.API.XDoc.include(System.String,System.Object)">
-            <summary>XDoc.include includes an XDoc template and writes the result to the buffer</summary>
-            <param name="name">Name of the included file</param>
-            <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
-            <returns>Undefined</returns>
-        </member>
-        <member name="M:NetJS.API.XDoc.load(System.String,System.Object)">
-            <summary>XDoc.load includes an XDoc template and returns the result.</summary>
-            <param name="name">Name of the included file</param>
-            <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
-            <returns>The result of executing the file.</returns>
+        <member name="M:NetJS.API.XDoc.on(System.String,System.Object)">
+            <summary>Creates an event listener</summary>
+            <param name="event">The name of the event (connection)</param>
+            <param name="func">The function to call</param>
+            <returns>undefined</returns>
+            <example><code lang="javascript">XDoc.on("message", function(data){
+                Log.write(data);
+            });</code></example>
         </member>
         <member name="M:NetJS.API.XDoc.get(System.String,System.String,System.String)">
             <summary>XDoc.get gets a value from the XDoc session</summary>
@@ -325,6 +329,18 @@
             <param name="id">ID name</param>
             <param name="value">The value to set, is converted to a string</param>
             <returns>Undefined</returns>
+        </member>
+        <member name="M:NetJS.API.XDoc.include(System.String,System.Object)">
+            <summary>XDoc.include includes an XDoc template and writes the result to the buffer</summary>
+            <param name="name">Name of the included file</param>
+            <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
+            <returns>Undefined</returns>
+        </member>
+        <member name="M:NetJS.API.XDoc.load(System.String,System.Object)">
+            <summary>XDoc.load includes an XDoc template and returns the result.</summary>
+            <param name="name">Name of the included file</param>
+            <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
+            <returns>The result of executing the file.</returns>
         </member>
     </members>
 </doc>

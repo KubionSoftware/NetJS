@@ -49,11 +49,23 @@ namespace NetJS {
             return State.Application.GetCurrentLocation();
         }
 
+        public string ReadFile(string path) {
+            var start = DateTime.Now;
+
+            while ((DateTime.Now - start).Milliseconds < 1000) {
+                try {
+                    return System.IO.File.ReadAllText(path);
+                } catch (Exception e) { }
+            }
+
+            throw new System.IO.IOException();
+        }
+
         public V8Script GetScript(string name, JSApplication application) {
             var path = GetPath(name, application, true);
 
             try { 
-                var source = System.IO.File.ReadAllText(path);
+                var source = ReadFile(path);
                 return application.Compile(path, source);
             } catch (System.IO.IOException) {
                 application.Error(new IOError($"Could not load file '{path}'"), ErrorStage.Compilation);
@@ -69,7 +81,7 @@ namespace NetJS {
             var path = GetPath(name, application, true);
 
             try {
-                var source = System.IO.File.ReadAllText(path);
+                var source = ReadFile(path);
                 var code = Transpiler.TranspileTemplate(source, returnVar);
                 var script = application.Compile(path, code);
                 var function = application.Evaluate(script);

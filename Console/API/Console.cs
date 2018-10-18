@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace NetJS.Console.API {
-    class Console {
+    public class Console {
 
         public static void write(string value) {
             System.Console.Write(value);

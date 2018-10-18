@@ -1,4 +1,5 @@
 ﻿using Microsoft.ClearScript;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Web;
@@ -6,6 +7,8 @@ using System.Web;
 namespace NetJS.API {
     /// <summary>A Compatibility class for XDoc, to ensure possibility of usage of XDoc with NetJS.</summary>
     public class XDoc {
+
+        private static dynamic _onMessage;
 
         public class XDocInfo {
             public XHTMLMerge.AppCache AppCache;
@@ -50,38 +53,28 @@ namespace NetJS.API {
             }
         }
 
-        private static string includeLoad(string name, ScriptObject arguments) {
-            var xdoc = GetXDocInfo();
-
-            var parameters = new Hashtable();
-            if (arguments != null) {
-                foreach (var key in arguments.GetDynamicMemberNames()) {
-                    parameters.Add(key.ToString(), Tool.GetValue(arguments, key).ToString());
-                }
+        /// <summary>Creates an event listener</summary>
+        /// <param name="event">The name of the event (connection)</param>
+        /// <param name="func">The function to call</param>
+        /// <returns>undefined</returns>
+        /// <example><code lang="javascript">XDoc.on("message", function(data){
+        ///     Log.write(data);
+        /// });</code></example>
+        public static void on(string e, dynamic f) {
+            if (e == "message") {
+                _onMessage = f;
             }
-
-            var application = State.Application;
-
-            var context = HttpContext.Current;
-            var result = application.XDocService.RunTemplate(context, name, parameters, ref xdoc.AppCache, ref xdoc.SVCache);
-
-            return result;
         }
 
-        /// <summary>XDoc.include includes an XDoc template and writes the result to the buffer</summary>
-        /// <param name="name">Name of the included file</param>
-        /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
-        /// <returns>Undefined</returns>
-        public static void include(string name, dynamic arguments = null) {
-            State.Buffer.Append(includeLoad(name, arguments));
+        public static void Send(JSApplication application, JSSession session, Action<object> callback, string data) {
+            if (_onMessage == null) return;
+            
+            var request = new FunctionRequest(_onMessage, application, callback, session, data);
+            application.AddRequest(request);
         }
 
-        /// <summary>XDoc.load includes an XDoc template and returns the result.</summary>
-        /// <param name="name">Name of the included file</param>
-        /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
-        /// <returns>The result of executing the file.</returns>
-        public static string load(string name, dynamic arguments = null) {
-            return includeLoad(name, arguments);
+        public static void ResetHooks() {
+            _onMessage = null;
         }
 
         /// <summary>XDoc.get gets a value from the XDoc session</summary>
@@ -108,6 +101,42 @@ namespace NetJS.API {
             var xdoc = GetXDocInfo();
             xdoc.SVCache.SetSV(key, context + "_" + id, value.ToString());
             SetXDocInfo(xdoc);
+        }
+
+        private static string includeLoad(string name, ScriptObject arguments) {
+            var xdoc = GetXDocInfo();
+
+            var parameters = new Hashtable();
+            if (arguments != null) {
+                foreach (var key in arguments.GetDynamicMemberNames()) {
+                    parameters.Add(key.ToString(), Tool.GetValue(arguments, key).ToString());
+                }
+            }
+
+            var application = State.Application;
+
+            var context = HttpContext.Current;
+            var result = application.XDocService.RunTemplate(context, name, parameters, ref xdoc.AppCache, ref xdoc.SVCache);
+
+            SetXDocInfo(xdoc);
+
+            return result;
+        }
+
+        /// <summary>XDoc.include includes an XDoc template and writes the result to the buffer</summary>
+        /// <param name="name">Name of the included file</param>
+        /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
+        /// <returns>Undefined</returns>
+        public static void include(string name, dynamic arguments = null) {
+            State.Buffer.Append(includeLoad(name, arguments));
+        }
+
+        /// <summary>XDoc.load includes an XDoc template and returns the result.</summary>
+        /// <param name="name">Name of the included file</param>
+        /// <param name="parameters">optional, 0 or more parameters to be set before executing the template</param>
+        /// <returns>The result of executing the file.</returns>
+        public static string load(string name, dynamic arguments = null) {
+            return includeLoad(name, arguments);
         }
     }
 }

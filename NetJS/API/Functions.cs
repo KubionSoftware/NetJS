@@ -11,11 +11,6 @@ namespace NetJS.API {
     public class Functions {
 
         private static object includeLoad(string template, dynamic arguments, bool returnVar) {
-            var parts = template.Split('.');
-            if (parts.Length == 1) {
-                template += ".js";
-            }
-
             var application = State.Application;
             var resource = application.Cache.GetResource(template, returnVar, application);
 
@@ -86,8 +81,8 @@ namespace NetJS.API {
         /// <example><code lang="javascript">setTimeout(() => {
         ///     Log.write("It's time!");
         /// }, 1500);</code></example>
-        public static void setTimeout(dynamic function, int time = 0) {
-            State.Application.AddTimeOut(time, function, State.Get(), false);
+        public static void setTimeout(dynamic function, double time = 0) {
+            State.Application.AddTimeOut((int)time, function, State.Get(), false);
         }
 
         /// <summary>Schedules a function to be called every N milliseconds</summary>

@@ -184,7 +184,7 @@ namespace NetJS.API {
                         }
                     }
                     result.Write("]");
-                    application.AddCallback(resolve, result, state);
+                    application.AddCallback(resolve, result.ToString(), state);
                 } catch (Exception e) {
                     application.AddCallback(reject, $"{e.Message}", state);
                 }

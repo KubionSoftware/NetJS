@@ -106,7 +106,6 @@
     <Compile Include="Events\TimeOut.cs" />
     <Compile Include="Tool.cs" />
     <Compile Include="Transpiler.cs" />
-    <Compile Include="Util\Base64.cs" />
     <Compile Include="Util\Encode.cs" />
     <Compile Include="Util\Hash.cs" />
     <Compile Include="Util\HttpWebRequestExtensions.cs" />
