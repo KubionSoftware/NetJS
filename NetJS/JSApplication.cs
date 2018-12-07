@@ -225,6 +225,7 @@ namespace NetJS {
             AddHostType(typeof(API.DLL));
             AddHostType(typeof(API.XML));
             AddHostType(typeof(API.MongoDBAPI));
+            AddHostType(typeof(API.OLAP));
             AddHostFunctions(typeof(API.Functions));
 
             // Initialize the tool functions

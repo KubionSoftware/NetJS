@@ -4,11 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using Util;
+using Microsoft.AnalysisServices.AdomdClient;
 
 namespace NetJS {
 
     public abstract class Connection {
 
+    }
+
+    public class OLAPConnection : Connection {
+        public String Connection;
+
+        public OLAPConnection(string connectionString) {
+            Connection = connectionString;
+        }
     }
 
     public class MongoDBConnection : Connection {
@@ -89,12 +98,21 @@ namespace NetJS {
                             var connectionJson = json.Object(key);
                             var type = connectionJson.String("type").ToLower();
 
-                            if (type == "sql") {
+                            if (type == "sql")
+                            {
                                 _connections[key] = new SQLConnection(connectionJson.String("connectionString"));
-                            } else if (type == "http") {
+                            }
+                            else if (type == "http")
+                            {
                                 _connections[key] = new HTTPConnection(connectionJson.String("url"));
-                            } else if (type == "mongodb") {
+                            }
+                            else if (type == "mongodb")
+                            {
                                 _connections[key] = new MongoDBConnection(connectionJson.String("connectionString"), connectionJson.String("database"));
+                            }
+                            else if (type == "olap")
+                            {
+                                _connections[key] = new OLAPConnection(connectionJson.String("connectionString"));
                             }
                         }
                     }catch (Exception e) {
@@ -104,6 +122,19 @@ namespace NetJS {
 
                 }
             }
+        }
+
+        public string GetOLAPConnection(string name) {
+            API.Log.write(_connections[name].ToString());
+            lock(_connections) {
+                if(_connections.ContainsKey(name)) {
+                    var connection = _connections[name];
+                    if (connection is OLAPConnection olapConnection) {
+                        return olapConnection.Connection;
+                    }
+                }
+            }
+            return null;
         }
 
         public IMongoDatabase GetMongoDBConnection(string name) {
