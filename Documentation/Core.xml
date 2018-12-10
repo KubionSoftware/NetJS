@@ -352,6 +352,12 @@
 			<returns>the list in JSON format of all available members of the selected dimension.hierarchy on the cubes that are visible.</returns>
 			<example><code lang="javascript">var list = OLAP.getMembers("olap", "StartDate", "Month");</code></example>
 		</member>
+		<member name="getDimensions(System.String)">
+			<summary>OLAP.getDimensions takes a connectionName and returns a list of all available dimensions of the cubes that are visible.</summary>
+			<param name="connectionName">Name of a configured connection</param>
+			<returns>the list in JSON format of all available dimensions of the cubes that are visible.</returns>
+			<example><code lang="javascript">var list = OLAP.getDimensions("olap");</code></example>
+		</member>
 		<member name="T:NetJS.API.XDoc">
             <summary>A Compatibility class for XDoc, to ensure possibility of usage of XDoc with NetJS.</summary>
         </member>

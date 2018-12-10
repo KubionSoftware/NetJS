@@ -159,7 +159,7 @@ namespace NetJS.API {
                         }
                     }
 
-                    bool succes = LogonUser("SSASDev", "DEVWOA01", "Ch3ssM@ster", 2, 0, out userToken);
+                    bool succes = LogonUser(username, domain, password, 2, 0, out userToken);
 
                     if (!succes) {
                         throw new SecurityException("Logon user failed");
@@ -268,7 +268,7 @@ namespace NetJS.API {
                         }
                     }
 
-                    bool succes = LogonUser("SSASDev", "DEVWOA01", "Ch3ssM@ster", 2, 0, out userToken);
+                    bool succes = LogonUser(username, domain, password, 2, 0, out userToken);
 
                     if (!succes) {
                         throw new SecurityException("Logon user failed");
@@ -350,7 +350,7 @@ namespace NetJS.API {
                         }
                     }
 
-                    bool succes = LogonUser("SSASDev", "DEVWOA01", "Ch3ssM@ster", 2, 0, out userToken);
+                    bool succes = LogonUser(username, domain, password, 2, 0, out userToken);
 
                     if (!succes) {
                         throw new SecurityException("Logon user failed");
@@ -384,6 +384,85 @@ namespace NetJS.API {
 
                         if (!result.Any()) {
                             throw new ArgumentException("Could not find any facts on the cube");
+                        }
+
+                        var json = JsonConvert.SerializeObject(result);
+                        application.AddCallback(resolve, json, state);
+                    }
+                }
+                catch (Exception e) {
+                    application.AddCallback(reject, $"{e.Message}", state);
+                }
+            });
+        }
+
+        /// <summary>OLAP.getDimensions takes a connectionName and returns a list of all available dimensions of the cubes that are visible.</summary>
+        /// <param name="connectionName">Name of a configured connection</param>
+        /// <returns>the list in JSON format of all available dimensions of the cubes that are visible.</returns>
+        /// <example><code lang="javascript">var list = OLAP.getDimensions("olap");</code></example>
+        public static dynamic getDimensions(string connectionName) {
+            var application = State.Application;
+            var state = State.Get();
+
+            var dimensions = new List<string>();
+
+            return Tool.CreatePromise((resolve, reject) => {
+                IntPtr userToken = IntPtr.Zero;
+
+                try {
+                    string connectionString = application.Connections.GetOLAPConnection(connectionName);
+                    var connectionStringSplit = connectionString.Split(';');
+                    string password = null;
+                    string domain = null;
+                    string username = null;
+                    foreach (string s in connectionStringSplit) {
+                        var splitCheck = s.Split('=');
+                        if (splitCheck[0].Equals("Password")) {
+                            password = splitCheck[1];
+                        }
+                        else if (splitCheck[0].Equals("User ID")) {
+                            var usernameSplit = splitCheck[1].Split('\\');
+                            if (usernameSplit.Length > 1) {
+                                domain = usernameSplit[0];
+                                username = usernameSplit[1];
+                            }
+                            else if (usernameSplit.Length == 1) {
+                                username = usernameSplit[0];
+                            }
+                        }
+                    }
+
+                    bool succes = LogonUser(username, domain, password, 2, 0, out userToken);
+
+                    if (!succes) {
+                        throw new SecurityException("Logon user failed");
+                    }
+
+                    using (WindowsIdentity.Impersonate(userToken)) {
+                        using (AdomdConnection connection = new AdomdConnection(connectionString)) {
+                            connection.Open();
+                            foreach (CubeDef cube in connection.Cubes) {
+
+                                if (cube.Name.StartsWith("$")) {
+                                    continue;
+                                }
+
+                                foreach (Dimension dimension in cube.Dimensions) {
+                                    dimensions.Add(dimension.Name);
+                                }
+                            }
+                            connection.Close();
+                        }
+
+                        var result = new List<Dictionary<string, string>>();
+                        foreach (string s in dimensions) {
+                            var row = new Dictionary<string, string>();
+                            row.Add("name", s);
+                            result.Add(row);
+                        }
+
+                        if (!result.Any()) {
+                            throw new ArgumentException("Could not find any dimensions on the cube");
                         }
 
                         var json = JsonConvert.SerializeObject(result);
@@ -431,7 +510,7 @@ namespace NetJS.API {
                         }
                     }
 
-                    bool succes = LogonUser("SSASDev", "DEVWOA01", "Ch3ssM@ster", 2, 0, out userToken);
+                    bool succes = LogonUser(username, domain, password, 2, 0, out userToken);
 
                     if (!succes) {
                         throw new SecurityException("Logon user failed");
@@ -543,7 +622,7 @@ namespace NetJS.API {
                         }
                     }
 
-                    bool succes = LogonUser("SSASDev", "DEVWOA01", "Ch3ssM@ster", 2, 0, out userToken);
+                    bool succes = LogonUser(username, domain, password, 2, 0, out userToken);
 
                     if (!succes) {
                         throw new SecurityException("Logon user failed");
