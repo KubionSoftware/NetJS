@@ -303,7 +303,62 @@
             <returns>the result if the query is a SELECT statement.</returns>
             <example><code lang="javascript">var id = SQL.execute("NETDB", "SELECT * FROM users;");</code></example>
         </member>
-        <member name="T:NetJS.API.XDoc">
+		<member name="T:NetJS.API.OLAP">
+            <summary>OLAP class contains methods for communicating with SQL Server Analysis Services configured in the config.</summary>
+            <remarks>This class can execute MDX SELECT query's and get all the information needed to create such a query.
+            Configuration is needed to make a Adomd.net connection.</remarks>
+            <configuration>To enable acces to an SQL database, the connection must be defined in a file in the root of the project named 'connections.json'.
+            <example>Configuration structure:<code lang="json">{"SSAS": {"type": "olap", "connectionString": "Initial Catalog=exampleCatalog;Data Source=ssasLocation;User ID=Domain\\exampleUserName;Password=examplePassword"}}</code></example></configuration>
+        </member>
+		<member name="M:NetJS.API.OLAP.execute(System.String)">
+			<summary>OLAP.execute takes a connectionName and a query, executes the query and returns the result of the MDX query in JSON format.</summary>
+			<param name="connectionName">Name of a configured connection</param>
+			<param name="query">The query to be executed</param>
+			<returns>the result of the MDX query in JSON format.</returns>
+			<example><code lang="javascript">var graph = OLAP.execute("olap", "SELECT [Measures].[Page View Count] on columns, [Page].[Page].Children on rows FROM [Model];");</code></example>
+		</member>
+		<member name="M:NetJS.API.OLAP.getDimensionsByFact(System.String,System.String)">
+			<summary>OLAP.getDimensionsByFact takes a connectionName and a fact, returns a list of all available dimensions for a selected fact on the cubes that are visible.</summary>
+			<param name="connectionName">Name of a configured connection</param>
+			<param name="fact">The selected fact</param>
+			<returns>the list in JSON format of all available dimensions for the selected fact on the cubes that are visible.</returns>
+			<example><code lang="javascript">var list = OLAP.getDimensionsByFact("olap", "PageView");</code></example>
+        </member>
+		<member name="M:NetJS.API.OLAP.getMeasuresByFact(System.String, System.String)">
+			<summary>OLAP.getMeasuresByFact takes a connectionName and a fact, returns a list of all available measures of a selected fact on the cubes that are visible.</summary>
+			<param name="connectionName">Name of a configured connection</param>
+			<param name="fact">The selected fact</param>
+			<returns>the list in JSON format of all available measures of the selected fact on the cubes that are visible.</returns>
+			<example><code lang="javascript">var list = OLAP.getMeasuresByFact("olap", "PageView");</code></example>
+		</member>
+		<member name="M:NetJS.API.OLAP.getFacts(System.String)">
+			<summary>OLAP.getFacts takes a connectionName and returns a list of all available facts/measure_groups of the cubes that are visible.</summary>
+			<param name="connectionName">Name of a configured connection</param>
+			<returns>the list in JSON format of all available facts/measure_groups of the cubes that are visible.</returns>
+			<example><code lang="javascript">var list = OLAP.getFacts("olap");</code></example>
+		</member>
+		<member name="M:NetJS.API.OLAP.getHierarchiesByDimension(System.String, System.String)">
+			<summary>OLAP.getHierarchiesByDimension takes a connectionName and a dimension, returns a list of all available hierarchies of a selected dimension on the cubes that are visible.</summary>
+			<param name="connectionName">Name of a configured connection</param>
+			<param name="dimension">The selected dimension</param>
+			<returns>the list in JSON format of all available hierarchies of the selected dimension on the cubes that are visible.</returns>
+			<example><code lang="javascript">var list = OLAP.getHierarchiesByDimension("olap", "StartDate");</code></example>
+		</member>
+		<member name="getMembers(System.String, System.String, System.String)">
+			<summary>OLAP.getMembers takes a connectionName, a dimension and an hierarchy, returns a list of all available members of a selected dimension.hierarchy on the cubes that are visible.</summary>
+			<param name="connectionName">Name of a configured connection</param>
+			<param name="dimension">The selected dimension</param>
+			<param name="hierarchy">The selected hierarchy</param>
+			<returns>the list in JSON format of all available members of the selected dimension.hierarchy on the cubes that are visible.</returns>
+			<example><code lang="javascript">var list = OLAP.getMembers("olap", "StartDate", "Month");</code></example>
+		</member>
+		<member name="getDimensions(System.String)">
+			<summary>OLAP.getDimensions takes a connectionName and returns a list of all available dimensions of the cubes that are visible.</summary>
+			<param name="connectionName">Name of a configured connection</param>
+			<returns>the list in JSON format of all available dimensions of the cubes that are visible.</returns>
+			<example><code lang="javascript">var list = OLAP.getDimensions("olap");</code></example>
+		</member>
+		<member name="T:NetJS.API.XDoc">
             <summary>A Compatibility class for XDoc, to ensure possibility of usage of XDoc with NetJS.</summary>
         </member>
         <member name="M:NetJS.API.XDoc.on(System.String,System.Object)">
